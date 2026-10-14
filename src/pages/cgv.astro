@@ -1,0 +1,83 @@
+---
+/*
+ * Conditions générales de vente (brief §9) : structure complète, faits vérifiés
+ * (vendeur, prix TTC, TVA, livraison, délai de rétractation), clauses juridiques
+ * à rédiger ou faire valider signalées « À compléter ».
+ */
+import PageLegale from '../components/legal/PageLegale.astro';
+import AFaire from '../components/legal/AFaire.astro';
+import { SOCIETE, estPlaceholder } from '../config/societe';
+import { BOUTIQUE } from '../config/boutique';
+import { lien } from '../lib/routes';
+const s = SOCIETE;
+---
+
+<PageLegale
+  titre="Conditions générales de vente"
+  description="Conditions générales de vente de la boutique Lumipix : commande, prix, paiement, livraison, rétractation et garanties."
+  chemin="/cgv"
+  miseAJour="2026-10-14"
+>
+  <h2>1. Vendeur</h2>
+  <p>
+    Les présentes conditions s'appliquent aux ventes conclues sur le site {s.domaine} entre le client et {s.raisonSociale},
+    {s.formeJuridique} au capital de {s.capital}, dont le siège est situé {s.adresseSiege}, immatriculée sous le numéro
+    {s.rcs}, TVA intracommunautaire {s.tvaIntracom}. Contact : <a href={`mailto:${s.emailContact}`}>{s.emailContact}</a>.
+  </p>
+
+  <h2>2. Champ d'application</h2>
+  <AFaire bloc quoi="clientèle visée (consommateurs, France métropolitaine), acceptation des CGV lors de la commande, version applicable." />
+
+  <h2>3. Produits</h2>
+  <p>
+    Les caractéristiques essentielles de chaque produit sont présentées sur sa page. Les visuels des écrans sont des
+    illustrations du contenu qu'il est possible d'afficher.
+  </p>
+
+  <h2>4. Prix</h2>
+  <p>
+    Les prix sont indiqués en euros, toutes taxes comprises (TVA française au taux de {Math.round(s.tauxTva * 100)} %). Les frais
+    de livraison éventuels sont indiqués avant la validation de la commande. La facture détaille les montants hors taxes, la
+    TVA et le total TTC.
+  </p>
+
+  <h2>5. Commande</h2>
+  <AFaire bloc quoi="étapes de la commande, récapitulatif avant paiement, confirmation par email, conditions de refus ou d'annulation par le vendeur." />
+
+  <h2>6. Paiement</h2>
+  <p>
+    Le paiement s'effectue en ligne par carte bancaire via la plateforme sécurisée Stripe. {s.marque} n'a jamais accès aux
+    données bancaires du client.
+  </p>
+  <p><AFaire quoi="moment du débit et moyens de paiement acceptés, à confirmer à l'activation de Stripe" /></p>
+
+  <h2>7. Livraison</h2>
+  <p>
+    Livraison en France métropolitaine. Les délais et frais applicables à chaque produit figurent sur sa page, dans le
+    récapitulatif de commande et sur la page <a href={lien('/livraison')}>Livraison</a>.
+  </p>
+  <p><AFaire quoi="transfert des risques, retard de livraison et recours du client" /></p>
+
+  <h2>8. Droit de rétractation</h2>
+  <p>
+    Le client dispose d'un délai de {BOUTIQUE.delaiRetractationJours} jours à compter de la réception du produit pour exercer son
+    droit de rétractation. Les modalités et le formulaire type figurent sur la page
+    <a href={lien('/retours')}>Retours et rétractation</a>.
+  </p>
+  <p><AFaire quoi="frais de retour, délai et modalités de remboursement" /></p>
+
+  <h2>9. Garanties légales</h2>
+  <AFaire bloc quoi="garantie légale de conformité (articles L217-3 et suivants du Code de la consommation) et garantie des vices cachés (articles 1641 et suivants du Code civil) : reproduction des mentions obligatoires, à faire valider." />
+
+  <h2>10. Médiation</h2>
+  <p>
+    En cas de litige, le client peut recourir gratuitement à un médiateur de la consommation :
+    {estPlaceholder(s.mediateurConso) ? <AFaire quoi="nom, adresse et site du médiateur" /> : s.mediateurConso}.
+  </p>
+
+  <h2>11. Données personnelles</h2>
+  <p>Voir la <a href={lien('/confidentialite')}>politique de confidentialité</a>.</p>
+
+  <h2>12. Droit applicable</h2>
+  <AFaire bloc quoi="droit applicable et juridiction compétente, à faire valider." />
+</PageLegale>

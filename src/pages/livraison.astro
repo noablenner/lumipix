@@ -1,0 +1,47 @@
+---
+import PageLegale from '../components/legal/PageLegale.astro';
+import AFaire from '../components/legal/AFaire.astro';
+import { BOUTIQUE } from '../config/boutique';
+import { getProduitsPublies } from '../lib/catalogue';
+import { formatDelai, formatPrix } from '../lib/format';
+import { lien, routeExiste } from '../lib/routes';
+
+const produits = await getProduitsPublies();
+---
+
+<PageLegale
+  titre="Livraison"
+  description="Livraison Lumipix : France métropolitaine, délais et frais de port par produit, suivi de commande."
+  chemin="/livraison"
+  miseAJour="2026-10-14"
+>
+  <h2>Zone de livraison</h2>
+  <p>Nous livrons en <strong>France métropolitaine</strong> uniquement pour le moment.</p>
+
+  <h2>Délais et frais de port</h2>
+  <p>Le délai et les frais de port de chaque produit sont affichés sur sa page et récapitulés avant le paiement. Les délais sont donnés en jours ouvrés à compter de la confirmation de la commande.</p>
+  {
+    produits.length > 0 && (
+      <ul>
+        {produits.map((p) => (
+          <li>
+            <strong>{p.nom}</strong> : livraison en {formatDelai(p.delai_livraison.min_jours_ouvres, p.delai_livraison.max_jours_ouvres)},{' '}
+            {p.frais_de_port === 0 ? 'offerte' : formatPrix(p.frais_de_port)}.
+          </li>
+        ))}
+      </ul>
+    )
+  }
+  {BOUTIQUE.seuilLivraisonGratuite !== null && <p>Livraison offerte dès {formatPrix(BOUTIQUE.seuilLivraisonGratuite)} d'achat.</p>}
+
+  <h2>Transporteur et suivi</h2>
+  <p><AFaire quoi="transporteur(s) utilisé(s), à confirmer après la commande test" /></p>
+  <p>
+    Un email avec le numéro de suivi est envoyé dès l'expédition. Une commande contenant plusieurs produits peut arriver en
+    plusieurs colis, chacun avec son propre suivi.
+    {routeExiste('/suivi') && <> Le statut est aussi consultable sur la page <a href={lien('/suivi')}>suivi de commande</a>.</>}
+  </p>
+
+  <h2>Colis endommagé ou perdu</h2>
+  <AFaire bloc quoi="procédure en cas de colis abîmé, incomplet ou non reçu (délai pour nous prévenir, justificatifs demandés)." />
+</PageLegale>

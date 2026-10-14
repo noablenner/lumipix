@@ -1,0 +1,55 @@
+---
+/*
+ * Mentions légales (brief §9 et §10). Seul endroit du site où figure le nom
+ * du directeur de la publication. Toutes les données viennent de src/config/societe.ts.
+ */
+import PageLegale from '../components/legal/PageLegale.astro';
+import AFaire from '../components/legal/AFaire.astro';
+import { SOCIETE, estPlaceholder } from '../config/societe';
+import { lien } from '../lib/routes';
+const s = SOCIETE;
+---
+
+<PageLegale
+  titre="Mentions légales"
+  description="Mentions légales du site Lumipix : éditeur, directeur de la publication, hébergeur et contact."
+  chemin="/mentions-legales"
+  miseAJour="2026-10-14"
+>
+  <h2>Éditeur du site</h2>
+  <dl>
+    <dt>Raison sociale</dt>
+    <dd>{s.raisonSociale}</dd>
+    <dt>Forme juridique</dt>
+    <dd>{s.formeJuridique}, au capital de {s.capital}</dd>
+    <dt>Siège social</dt>
+    <dd>{s.adresseSiege}</dd>
+    <dt>SIREN</dt>
+    <dd>{s.siren}</dd>
+    <dt>RCS</dt>
+    <dd>{s.rcs}</dd>
+    <dt>TVA intracommunautaire</dt>
+    <dd>{s.tvaIntracom}</dd>
+    <dt>Code APE</dt>
+    <dd>{s.codeApe}</dd>
+    <dt>Contact</dt>
+    <dd><a href={`mailto:${s.emailContact}`}>{s.emailContact}</a></dd>
+    <dt>Directeur de la publication</dt>
+    <dd>{estPlaceholder(s.directeurPublication) ? <AFaire quoi="nom et prénom du président" /> : s.directeurPublication}</dd>
+  </dl>
+
+  <h2>Hébergement</h2>
+  <dl>
+    <dt>Hébergeur</dt>
+    <dd>{s.hebergeur.nom}</dd>
+    <dt>Adresse</dt>
+    <dd>{s.hebergeur.adresse}</dd>
+  </dl>
+  <p class="texte-doux"><AFaire quoi="vérifier l'adresse et le contact de l'hébergeur au moment de la mise en ligne" /></p>
+
+  <h2>Propriété intellectuelle</h2>
+  <AFaire bloc quoi="clause sur la propriété des contenus du site (textes, visuels, scènes pixel art, logo Lumipix) et conditions de réutilisation, à rédiger ou faire valider." />
+
+  <h2>Données personnelles</h2>
+  <p>Le traitement des données personnelles est décrit dans la <a href={lien('/confidentialite')}>politique de confidentialité</a>.</p>
+</PageLegale>

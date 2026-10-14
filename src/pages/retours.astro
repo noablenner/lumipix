@@ -1,0 +1,73 @@
+---
+/*
+ * Retours et droit de rétractation (brief §9). L'adresse de retour n'est jamais
+ * publiée : elle est communiquée au client après validation de sa demande (brief §10).
+ */
+import PageLegale from '../components/legal/PageLegale.astro';
+import AFaire from '../components/legal/AFaire.astro';
+import { SOCIETE } from '../config/societe';
+import { BOUTIQUE } from '../config/boutique';
+const j = BOUTIQUE.delaiRetractationJours;
+---
+
+<PageLegale
+  titre="Retours et rétractation"
+  description="Droit de rétractation de 14 jours chez Lumipix : comment retourner un produit, frais de retour et formulaire type."
+  chemin="/retours"
+  miseAJour="2026-10-14"
+>
+  <h2>Droit de rétractation de {j} jours</h2>
+  <p>
+    Tu disposes de <strong>{j} jours</strong> à compter de la réception de ta commande pour changer d'avis, sans avoir à te
+    justifier.
+  </p>
+
+  <h2>Comment faire</h2>
+  <ol>
+    <li>
+      Préviens-nous dans ce délai par email à <a href={`mailto:${SOCIETE.emailContact}`}>{SOCIETE.emailContact}</a>, avec ton
+      numéro de commande. Tu peux utiliser le formulaire type ci-dessous ou nous écrire librement.
+    </li>
+    <li>Nous te confirmons la prise en compte de ta demande et t'indiquons l'adresse de retour.</li>
+    <li>Renvoie le produit dans son emballage d'origine, avec tous ses accessoires.</li>
+  </ol>
+
+  <h2>Frais de retour</h2>
+  <p><AFaire quoi="indiquer qui paie les frais de retour en cas de rétractation (client ou boutique)" /></p>
+
+  <h2>Remboursement</h2>
+  <AFaire bloc quoi="délai et modalités de remboursement (moyen de paiement utilisé, conditions de report jusqu'à réception du produit), à rédiger conformément au Code de la consommation et à faire valider." />
+
+  <h2>Produit défectueux ou non conforme</h2>
+  <AFaire bloc quoi="procédure en cas de produit défectueux et rappel des garanties légales de conformité et des vices cachés (voir CGV)." />
+
+  <h2 id="formulaire">Formulaire type de rétractation</h2>
+  <p class="texte-doux">À compléter et nous renvoyer par email si tu souhaites te rétracter.</p>
+  <div class="formulaire-type">
+    <p>
+      À l'attention de {SOCIETE.raisonSociale} ({SOCIETE.marque}), {SOCIETE.emailContact} :
+    </p>
+    <p>
+      Je/Nous (*) vous notifie/notifions (*) par la présente ma/notre (*) rétractation du contrat portant sur la vente du bien
+      (*)/pour la prestation de services (*) ci-dessous :
+    </p>
+    <p>Commandé le (*)/reçu le (*) :</p>
+    <p>Numéro de commande :</p>
+    <p>Nom du (des) consommateur(s) :</p>
+    <p>Adresse du (des) consommateur(s) :</p>
+    <p>Signature du (des) consommateur(s) (uniquement en cas de notification du présent formulaire sur papier) :</p>
+    <p>Date :</p>
+    <p class="texte-doux">(*) Rayez la mention inutile.</p>
+  </div>
+</PageLegale>
+
+<style>
+  .formulaire-type {
+    padding: var(--e-5);
+    background: var(--c-surface);
+    border: var(--b-pixel) dashed var(--c-bordure-ui);
+  }
+  .formulaire-type p {
+    margin-bottom: var(--e-3);
+  }
+</style>

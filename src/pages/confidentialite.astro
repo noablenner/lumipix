@@ -1,0 +1,61 @@
+---
+/*
+ * Politique de confidentialité (brief §9). Les faits techniques (prestataires,
+ * absence de cookies) viennent de l'architecture réelle du site ; les durées de
+ * conservation et bases légales sont à valider.
+ */
+import PageLegale from '../components/legal/PageLegale.astro';
+import AFaire from '../components/legal/AFaire.astro';
+import { SOCIETE } from '../config/societe';
+---
+
+<PageLegale
+  titre="Politique de confidentialité"
+  description="Comment Lumipix collecte et protège tes données personnelles : finalités, durées de conservation, prestataires et droits RGPD."
+  chemin="/confidentialite"
+  miseAJour="2026-10-14"
+>
+  <h2>Responsable du traitement</h2>
+  <p>
+    {SOCIETE.raisonSociale}, {SOCIETE.formeJuridique}, éditeur de la boutique {SOCIETE.marque}. Contact :
+    <a href={`mailto:${SOCIETE.emailContact}`}>{SOCIETE.emailContact}</a>.
+  </p>
+
+  <h2>Données collectées et finalités</h2>
+  <ul>
+    <li><strong>Commande</strong> : nom, adresse de livraison, email, téléphone, contenu de la commande. Pour traiter, livrer et facturer la commande, et assurer le service après-vente.</li>
+    <li><strong>Paiement</strong> : traité directement par Stripe. Nous n'avons jamais accès à tes données bancaires.</li>
+    <li><strong>Lettre d'information</strong> (si tu t'inscris) : email, avec double confirmation.</li>
+    <li><strong>Avis clients</strong> (si tu en laisses un) : prénom affiché, note, commentaire, lien avec la commande pour vérifier l'achat.</li>
+    <li><strong>Contact</strong> : les informations que tu nous envoies par email ou par le formulaire.</li>
+    <li><strong>Origine de la visite</strong> : source de la première visite (paramètres de campagne et site d'origine), conservée dans ton navigateur et jointe à la commande pour savoir quel contenu t'a fait découvrir la boutique.</li>
+  </ul>
+  <p><AFaire quoi="base légale de chaque traitement (exécution du contrat, obligation légale, consentement, intérêt légitime)" /></p>
+
+  <h2>Durées de conservation</h2>
+  <AFaire bloc quoi="durée de conservation pour chaque catégorie (commandes et factures, prospects / lettre d'information, avis, messages de contact)." />
+
+  <h2>Destinataires et prestataires</h2>
+  <ul>
+    <li><strong>Cloudflare</strong> : hébergement du site et de la base de données, statistiques de fréquentation anonymes sans cookie.</li>
+    <li><strong>Stripe</strong> : paiement et facturation.</li>
+    <li><strong>Resend</strong> : envoi des emails liés à ta commande.</li>
+    <li><strong>Fournisseur et transporteur</strong> : nom, adresse et téléphone de livraison, uniquement pour expédier ta commande.</li>
+  </ul>
+  <p><AFaire quoi="transferts hors Union européenne éventuels et garanties associées, pour chaque prestataire" /></p>
+
+  <h2>Cookies et stockage dans ton navigateur</h2>
+  <p>
+    Le site n'utilise <strong>aucun cookie publicitaire ni traceur</strong>. Les statistiques de fréquentation fonctionnent
+    sans cookie. Ton navigateur conserve localement ton panier, ton brouillon de dessin, ta préférence de son et l'origine de
+    ta visite : ces informations restent sur ton appareil tant qu'aucune commande n'est passée.
+  </p>
+
+  <h2>Tes droits</h2>
+  <p>
+    Tu disposes d'un droit d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité de tes
+    données, ainsi que du droit de définir des directives sur leur sort après ton décès. Pour les exercer, écris-nous à
+    <a href={`mailto:${SOCIETE.emailContact}`}>{SOCIETE.emailContact}</a>. Tu peux aussi introduire une réclamation auprès de la
+    CNIL (cnil.fr).
+  </p>
+</PageLegale>

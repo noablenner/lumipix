@@ -1,0 +1,28 @@
+---
+/*
+ * Placeholder visible d'une information ou d'une clause à fournir / faire valider.
+ * Aucun contenu juridique n'est inventé (brief §9) : tout ce qui n'est pas un fait
+ * vérifié est signalé ainsi, et listé dans TODO.md.
+ */
+interface Props {
+  /** Ce qui manque, en clair. */
+  quoi: string;
+  bloc?: boolean;
+}
+const { quoi, bloc = false } = Astro.props;
+---
+
+{bloc ? <p class="a-faire a-faire--bloc">À compléter : {quoi}</p> : <mark class="a-faire">[À compléter : {quoi}]</mark>}
+
+<style>
+  .a-faire {
+    background: rgb(255 210 63 / 0.14);
+    color: var(--c-jaune);
+    padding: 0 0.25em;
+    font-weight: 600;
+  }
+  .a-faire--bloc {
+    padding: var(--e-3) var(--e-4);
+    border-left: 4px solid var(--c-jaune);
+  }
+</style>

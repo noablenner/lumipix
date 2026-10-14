@@ -1,0 +1,88 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Notice from '../Notice.astro';
+import FilAriane from '../FilAriane.astro';
+import { jsonLdFilAriane } from '../../lib/seo';
+
+interface Props {
+  titre: string;
+  description: string;
+  chemin: string;
+  /** Date de dernière mise à jour du texte (AAAA-MM-JJ). */
+  miseAJour: string;
+  /** Page encore à faire valider juridiquement. */
+  projet?: boolean;
+}
+const { titre, description, chemin, miseAJour, projet = true } = Astro.props;
+const ariane = [
+  { nom: 'Accueil', chemin: '/' },
+  { nom: titre, chemin },
+];
+const date = new Date(miseAJour).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+---
+
+<BaseLayout title={`${titre} | Lumipix`} description={description} jsonLd={jsonLdFilAriane(ariane)}>
+  <article class="conteneur legal">
+    <FilAriane elements={ariane} />
+    <h1>{titre}</h1>
+    <p class="texte-doux">Dernière mise à jour : {date}</p>
+    {
+      projet && (
+        <Notice ton="alerte" titre="Document en cours de rédaction">
+          <p>Les passages signalés « À compléter » doivent être fournis ou validés avant la mise en vente.</p>
+        </Notice>
+      )
+    }
+    <div class="legal-texte">
+      <slot />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .legal {
+    max-width: calc(var(--largeur-texte) + 4rem);
+    padding-block: var(--e-5) var(--e-8);
+  }
+  .legal h1 {
+    font-size: var(--t-2xl);
+    margin-top: var(--e-4);
+  }
+  .legal-texte {
+    margin-top: var(--e-6);
+  }
+  .legal-texte :global(h2) {
+    font-size: var(--t-xl);
+    margin-top: var(--e-7);
+  }
+  .legal-texte :global(h3) {
+    font-size: var(--t-l);
+    margin-top: var(--e-5);
+  }
+  .legal-texte :global(ul) {
+    padding-left: 1.2em;
+  }
+  .legal-texte :global(li) {
+    margin-bottom: var(--e-2);
+  }
+  .legal-texte :global(dl) {
+    display: grid;
+    grid-template-columns: minmax(9rem, 1fr) 2fr;
+    gap: var(--e-2) var(--e-4);
+  }
+  .legal-texte :global(dt) {
+    color: var(--c-texte-doux);
+  }
+  .legal-texte :global(dd) {
+    margin: 0;
+  }
+  @media (max-width: 30rem) {
+    .legal-texte :global(dl) {
+      grid-template-columns: 1fr;
+      gap: 0;
+    }
+    .legal-texte :global(dd) {
+      margin-bottom: var(--e-3);
+    }
+  }
+</style>
