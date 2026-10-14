@@ -4,6 +4,7 @@ slug: cadre-pixel-art-led
 statut: brouillon
 nom: "Cadre Pixel Art LED"
 sous_titre: "Ton pixel art, en vrai, sur ton bureau"
+description_courte: "Un cadre LED connecté en Bluetooth qui affiche ton pixel art, tes animations et l'heure. En 32x32 ou 64x64, livraison offerte."
 collections: ["setup-gaming"]
 type: simple
 
@@ -44,6 +45,20 @@ contenu_boite:
   - "Notice"
   # A VERIFIER SUR ECHANTILLON : adaptateur secteur 5 V / 2 A fourni ou non. S'il n'est pas fourni, l'indiquer clairement sur la fiche.
 
+faq:
+  - question: "Quelle taille choisir, 32x32 ou 64x64 ?"
+    reponse: "Le 32x32 convient à un bureau et à du pixel art simple. Le 64x64 affiche des images plus détaillées et fait un vrai effet tableau au mur, avec ses 26 x 26 cm."
+  - question: "Faut-il garder le téléphone connecté en permanence ?"
+    reponse: "Non. Les images et les animations sont chargées dans le cadre, qui les affiche ensuite sans connexion."
+  - question: "Peut-on afficher ses propres créations ?"
+    reponse: "Oui. Tu peux dessiner directement dans l'application iDotMatrix, importer une image, ou exporter ton dessin depuis l'éditeur pixel art du site."
+  - question: "Pourquoi les pixels noirs ne s'affichent pas ?"
+    reponse: "Un écran LED n'affiche pas le noir : un pixel noir correspond à une LED éteinte."
+  - question: "Les couleurs sont-elles fidèles à l'aperçu de l'application ?"
+    reponse: "Sur la version 32x32, l'orange et le jaune peuvent légèrement différer de l'aperçu dans l'application, comme le précise le fabricant."
+  - question: "Quel adaptateur secteur utiliser ?"
+    reponse: "Un adaptateur USB 5 V / 2 A minimum. Avec un adaptateur moins puissant, le cadre peut mal fonctionner."
+
 seo:
   mot_cle_principal: "cadre pixel art LED"
   mots_cles_secondaires: ["écran pixel art", "cadre LED pixel", "écran LED 32x32", "cadre pixel art connecté", "écran LED 64x64"]
@@ -69,12 +84,26 @@ fournisseur:
     usage: "références de travail uniquement, jamais publiées telles quelles"
 ---
 
-Description longue à rédiger par Claude Code selon le brief (section 8 SEO), en français, sans aucune référence à un univers protégé.
+## Le cadre pixel art LED qui affiche tes créations
 
-Points à intégrer dans la FAQ produit :
-1. Quelle taille choisir : le 32x32 pour un bureau et du pixel art simple, le 64x64 pour des images détaillées et un effet tableau mural.
-2. Faut-il le téléphone en permanence : non, les images et animations se chargent dans le cadre, qui les affiche ensuite sans connexion.
-3. Peut-on afficher ses propres créations : oui, dessin dans l'appli ou import d'image, et export direct depuis l'éditeur du site.
-4. Le noir : un écran LED n'affiche pas le noir, un pixel noir est un pixel éteint.
-5. Rendu des couleurs : sur la version 32x32, l'orange et le jaune peuvent légèrement différer de l'aperçu dans l'appli (précisé par le fabricant).
-6. Alimentation : utiliser un adaptateur USB 5 V / 2 A minimum, sinon le cadre peut mal fonctionner.
+Le cadre pixel art LED Lumipix transforme ton bureau en petit écran rétro : un carré noir mat, une grille de LED RGB, et ce que tu veux dessus. Tes dessins, des animations, l'heure, une image importée depuis ton téléphone. Il se pilote en Bluetooth depuis l'application iDotMatrix, sur iOS comme sur Android.
+
+## Deux tailles d'écran : 32x32 ou 64x64
+
+La version 32x32 aligne 1 024 LED. C'est l'écran LED 32x32 qu'il faut pour du pixel art simple et bien lisible, posé à côté de l'écran ou du clavier.
+
+La version 64x64 en compte 4 096, sur un format de 26 x 26 cm pour 1,7 cm d'épaisseur. Avec quatre fois plus de pixels, l'écran pixel art affiche des images plus fines, et il est assez grand pour faire office de tableau au mur.
+
+## Un cadre pixel art connecté, mais autonome
+
+Tu prépares tes images et tes animations dans l'application, tu les envoies au cadre en Bluetooth, et c'est tout. Elles sont enregistrées dans le cadre, qui continue de les afficher sans téléphone à proximité. Deux boutons sur le côté servent à l'allumer, à l'éteindre et à accéder au menu.
+
+## Sur le bureau ou au mur
+
+Le pied support permet de le poser sur le bureau, l'accroche murale de l'installer au mur. Le boîtier en PC et ABS noir mat se fait discret : éteint, c'est un simple cadre noir ; allumé, ton cadre LED pixel prend toute la place.
+
+## Bon à savoir
+
+- Un écran LED n'affiche pas le noir : un pixel noir est une LED éteinte. Pour que toute la surface s'allume, choisis des fonds colorés.
+- Sur la version 32x32, l'orange et le jaune peuvent légèrement différer de l'aperçu de l'application (précision du fabricant).
+- Le cadre s'alimente en USB 5 V / 2 A : branche-le sur un adaptateur secteur de 2 A minimum, sinon il peut mal fonctionner.

@@ -1,0 +1,81 @@
+---
+import PixelIcone from './PixelIcone.astro';
+import { BOUTIQUE } from '../config/boutique';
+import { formatDelai } from '../lib/format';
+
+interface Props {
+  /** Délai du produit concerné, affiché dans le bloc livraison. */
+  delai?: { min_jours_ouvres: number; max_jours_ouvres: number };
+  livraisonOfferte?: boolean;
+  compact?: boolean;
+}
+const { delai, livraisonOfferte = true, compact = false } = Astro.props;
+
+const elements = [
+  { icone: 'cadenas', titre: 'Paiement sécurisé', texte: 'Carte bancaire via Stripe. Tes données bancaires ne passent jamais par nos serveurs.' },
+  {
+    icone: 'camion',
+    titre: livraisonOfferte ? 'Livraison offerte' : 'Livraison en France',
+    texte: `${delai ? `En ${formatDelai(delai.min_jours_ouvres, delai.max_jours_ouvres)}, ` : ''}en France métropolitaine.`,
+  },
+  {
+    icone: 'retour',
+    titre: `${BOUTIQUE.delaiRetractationJours} jours pour changer d’avis`,
+    texte: 'Droit de rétractation de 14 jours après la réception.',
+  },
+] as const;
+---
+
+<ul class:list={['reassurance', compact && 'reassurance--compact']}>
+  {
+    elements.map((e) => (
+      <li>
+        <PixelIcone nom={e.icone} taille={compact ? 20 : 28} />
+        <div>
+          <p class="reassurance-titre">{e.titre}</p>
+          {!compact && <p class="texte-doux">{e.texte}</p>}
+        </div>
+      </li>
+    ))
+  }
+</ul>
+
+<style>
+  .reassurance {
+    display: grid;
+    gap: var(--e-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 48rem) {
+    .reassurance:not(.reassurance--compact) {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  li {
+    display: flex;
+    gap: var(--e-3);
+    align-items: flex-start;
+  }
+  li > :global(svg) {
+    color: var(--c-cyan);
+    margin-top: 2px;
+  }
+  p {
+    margin: 0;
+  }
+  .reassurance-titre {
+    font-weight: 700;
+  }
+  .reassurance--compact {
+    gap: var(--e-2);
+  }
+  .reassurance--compact li {
+    align-items: center;
+  }
+  .reassurance--compact .reassurance-titre {
+    font-weight: 600;
+    font-size: var(--t-s);
+  }
+</style>

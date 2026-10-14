@@ -1,32 +1,483 @@
 ---
 /*
- * Accueil provisoire (phase 1). Remplacé en phase 2 par l'accueil complet.
- * noindex tant que la boutique n'est pas prête.
+ * Accueil (zone d'immersion). Mot-clé principal : « déco pixel art »,
+ * secondaires : « déco gaming pixel » et « Lumipix ». Tout est centré sur le
+ * cadre pixel art LED, produit phare.
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
+import Accordeon from '../components/Accordeon.astro';
+import Badge from '../components/Badge.astro';
 import Bouton from '../components/Bouton.astro';
+import PixelIcone from '../components/PixelIcone.astro';
+import Prix from '../components/Prix.astro';
+import Reassurance from '../components/Reassurance.astro';
+import TransitionBlocs from '../components/TransitionBlocs.astro';
+import CadreLed from '../components/produit/CadreLed.astro';
+import SceneBureau from '../components/produit/SceneBureau.astro';
+import { getCollectionsVisibles, getProduitPhare, lienProduit, prixAPartirDe, variantesAvecPrix } from '../lib/catalogue';
+import { formatDelai, formatPrix } from '../lib/format';
 import { lien } from '../lib/routes';
+import { jsonLdOrganisation, jsonLdSiteWeb } from '../lib/seo';
+import { BOUTIQUE } from '../config/boutique';
+import type { NomScene } from '../lib/pixel/scenes';
+
+const phare = await getProduitPhare();
+const collections = await getCollectionsVisibles();
+const variantes = phare ? variantesAvecPrix(phare) : [];
+const delai = phare ? formatDelai(phare.delai_livraison.min_jours_ouvres, phare.delai_livraison.max_jours_ouvres) : undefined;
+// Vidéo du cadre en fonctionnement : utilisée dès qu'elle est déclarée dans la fiche.
+const fichiersVideo = import.meta.glob<string>('/assets/produits/**/*.{mp4,webm}', { query: '?url', import: 'default', eager: true });
+const video = phare?.videos[0];
+const srcVideo = video && phare ? fichiersVideo[`/assets/produits/${phare.slug}/${video.src}`] : undefined;
+
+const demo: NomScene[] = ['coeur', 'vague-neon', 'chat', 'horloge'];
+
+const arguments_ = [
+  {
+    icone: 'coeur',
+    titre: 'Tes créations, en vrai',
+    texte: 'Dessine ou importe une image dans l’application iDotMatrix (iOS et Android) : le cadre l’affiche en LED.',
+  },
+  {
+    icone: 'eclair',
+    titre: 'Sans téléphone à côté',
+    texte: 'Les images et animations sont chargées dans le cadre, qui les affiche ensuite sans connexion.',
+  },
+  {
+    icone: 'etoile',
+    titre: '32x32 ou 64x64',
+    texte: '1 024 ou 4 096 LED RGB : du pixel art simple au tableau détaillé, au mur ou sur le bureau.',
+  },
+  {
+    icone: 'camion',
+    titre: phare?.frais_de_port === 0 ? 'Livraison offerte' : 'Livraison en France',
+    texte: delai ? `Livré en ${delai} en France métropolitaine.` : 'En France métropolitaine.',
+  },
+] as const;
+
+const faq = [
+  ...(phare?.faq.slice(0, 2) ?? []),
+  {
+    question: 'Combien coûte la livraison ?',
+    reponse: `La livraison du cadre est offerte en France métropolitaine${delai ? `, avec un délai estimé de ${delai}` : ''}.`,
+  },
+  {
+    question: 'Puis-je retourner ma commande ?',
+    reponse: `Oui, tu as ${BOUTIQUE.delaiRetractationJours} jours après la réception pour exercer ton droit de rétractation.`,
+  },
+];
 ---
 
 <BaseLayout
-  title="Lumipix, déco pixel art"
-  description="Lumipix, la boutique de déco pixel art et rétro arcade. Ouverture prochaine."
-  noindex
+  title="Déco pixel art lumineuse pour ton setup | Lumipix"
+  description="Lumipix, la déco pixel art et rétro arcade : un cadre LED connecté qui affiche tes propres créations. Une déco gaming pixel livrée gratuitement en France."
+  imageOg="/og/accueil.png"
+  jsonLd={[jsonLdOrganisation(), jsonLdSiteWeb()]}
 >
-  <section class="conteneur bientot">
-    <p class="pixel texte-doux">INSERT COIN</p>
-    <h1>Lumipix arrive bientôt</h1>
-    <p class="texte-doux">La boutique est en construction. Le design system est visible ci-dessous.</p>
-    <Bouton href={lien('/design-system')}>Voir le design system</Bouton>
+  <TransitionBlocs />
+
+  <section class="hero">
+    <div class="conteneur hero-grille">
+      <div class="hero-texte">
+        <p class="pixel hero-sur-titre">PRESS START</p>
+        <h1>La déco pixel art qui s’allume sur ton bureau</h1>
+        <p class="hero-intro">
+          Lumipix, c’est de la déco pixel art pensée pour ton setup : des objets lumineux qui affichent tes propres
+          créations, dans un esprit rétro arcade. Tout commence par le cadre pixel art LED, à poser sur le bureau ou à
+          accrocher au mur.
+        </p>
+        {
+          phare && (
+            <div class="hero-achat">
+              <Bouton href={lienProduit(phare)} taille="grand">
+                Découvrir le cadre <PixelIcone nom="fleche-droite" taille={20} />
+              </Bouton>
+              <div class="hero-prix">
+                <Prix montant={prixAPartirDe(phare)} aPartirDe={variantes.length > 1} />
+                {phare.frais_de_port === 0 && <Badge ton="jaune">Livraison offerte</Badge>}
+              </div>
+            </div>
+          )
+        }
+      </div>
+      <div class="hero-visuel">
+        <SceneBureau>
+          <CadreLed
+            scene="coucher-soleil"
+            taille={64}
+            pied
+            prioritaire
+            alt="Cadre pixel art LED posé sur un bureau, écran allumé sur un coucher de soleil rétro, déco pixel art Lumipix"
+          />
+        </SceneBureau>
+      </div>
+    </div>
+  </section>
+
+  <section class="conteneur section" aria-labelledby="t-action">
+    <div class="action">
+      <div class="action-media">
+        {
+          video && srcVideo ? (
+            <video src={srcVideo} controls muted playsinline preload="none" aria-label={video.alt} />
+          ) : (
+            <div class="action-boucle" aria-label="Le cadre change d’image : cœur, vagues néon, chat, horloge" role="img">
+              {demo.map((s, i) => (
+                <div class="action-diapo" style={`--i:${i}`}>
+                  <CadreLed scene={s} taille={64} alt="" />
+                </div>
+              ))}
+            </div>
+          )
+        }
+      </div>
+      <div>
+        <h2 id="t-action">Une déco gaming pixel qui change quand tu veux</h2>
+        <p class="texte-doux">
+          Un coucher de soleil rétro le matin, l’heure pendant la journée, ton dernier dessin le soir. Le cadre affiche des
+          images fixes et des animations, et tu changes de scène depuis ton téléphone en quelques secondes.
+        </p>
+        {phare && <Bouton href={lienProduit(phare)} variante="secondaire">Voir les deux tailles</Bouton>}
+      </div>
+    </div>
+  </section>
+
+  <section class="conteneur section" aria-labelledby="t-arguments">
+    <h2 id="t-arguments">Pourquoi tu vas l’adorer</h2>
+    <ul class="arguments">
+      {
+        arguments_.map((a) => (
+          <li>
+            <PixelIcone nom={a.icone} taille={32} />
+            <h3>{a.titre}</h3>
+            <p class="texte-doux">{a.texte}</p>
+          </li>
+        ))
+      }
+    </ul>
+  </section>
+
+  {
+    phare && (
+      <section class="section editeur-apercu" aria-labelledby="t-editeur">
+        <div class="conteneur editeur-grille">
+          <div>
+            <h2 id="t-editeur">Dessine ton pixel art avant de le recevoir</h2>
+            <p class="texte-doux">
+              Sur la page du cadre, un éditeur pixel art te permet de dessiner en 32x32 ou en 64x64, au doigt ou à la
+              souris, de voir le rendu en direct sur le cadre allumé et d’exporter ton dessin pour l’application.
+            </p>
+            <Bouton href={lienProduit(phare)}>Essayer l’éditeur</Bouton>
+          </div>
+          <div class="editeur-maquette" aria-hidden="true">
+            <div class="editeur-outils">
+              {['#ff2e5f', '#ffd23f', '#2ee6e6', '#46f28c', '#a98bff', '#f4f3ff'].map((c) => (
+                <span style={`background:${c}`} />
+              ))}
+            </div>
+            <div class="editeur-grille-pixels">
+              <img src={lien('/scenes/coeur-32.svg')} alt="" width="320" height="320" loading="lazy" decoding="async" />
+            </div>
+          </div>
+        </div>
+      </section>
+    )
+  }
+
+  {
+    phare && variantes.length > 0 && (
+      <section class="conteneur section" aria-labelledby="t-tailles">
+        <h2 id="t-tailles">Deux tailles, un seul cadre</h2>
+        <ul class="tailles">
+          {variantes.map((v, i) => (
+            <li>
+              <a class="taille" href={lienProduit(phare, v.id)}>
+                <CadreLed scene={i === 0 ? 'chat' : 'ciel-etoile'} taille={v.id.startsWith('32') ? 32 : 64} alt={`Cadre pixel art LED ${v.nom}`} />
+                <span class="taille-nom">{v.nom}</span>
+                <span class="taille-prix">{formatPrix(v.prix_ttc)}</span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  {
+    collections.length > 0 && (
+      <section class="conteneur section" aria-labelledby="t-collections">
+        <h2 id="t-collections">Collections</h2>
+        <ul class="collections">
+          {collections.map((c) => (
+            <li>
+              <a class="collection" href={lien(`/collections/${c.data.slug}`)}>
+                <img src={lien('/scenes/vague-neon-32.svg')} alt="" width="80" height="80" loading="lazy" decoding="async" />
+                <span>
+                  <span class="collection-nom">{c.data.nom}</span>
+                  <span class="texte-doux">{c.data.description}</span>
+                </span>
+              </a>
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
+  <section class="conteneur section" aria-labelledby="t-reassurance">
+    <h2 id="t-reassurance" class="sr-only">Nos engagements</h2>
+    <div class="bloc-reassurance">
+      <Reassurance delai={phare?.delai_livraison} livraisonOfferte={phare?.frais_de_port === 0} />
+    </div>
+  </section>
+
+  <section class="conteneur section faq-courte" aria-labelledby="t-faq">
+    <h2 id="t-faq">Questions fréquentes</h2>
+    <Accordeon elements={faq} />
   </section>
 </BaseLayout>
 
 <style>
-  .bientot {
-    padding-block: var(--e-9);
-    text-align: center;
+  .section {
+    margin-top: var(--e-9);
   }
-  .bientot p:first-child {
+
+  .hero {
+    padding-block: var(--e-6) var(--e-4);
+    background: radial-gradient(90% 80% at 70% 30%, #2a1650, var(--c-fond) 70%);
+  }
+  .hero-grille {
+    display: grid;
+    gap: var(--e-6);
+    align-items: center;
+  }
+  @media (min-width: 60rem) {
+    .hero-grille {
+      grid-template-columns: 1fr 1.1fr;
+    }
+  }
+  .hero-sur-titre {
+    color: var(--c-rose);
     letter-spacing: 0.2em;
+    margin-bottom: var(--e-2);
+  }
+  .hero h1 {
+    text-shadow: 0 0 24px rgb(255 79 168 / 0.35);
+  }
+  .hero-intro {
+    font-size: var(--t-l);
+    color: var(--c-texte-doux);
+    max-width: 34rem;
+  }
+  .hero-achat {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--e-4) var(--e-5);
+    margin-top: var(--e-5);
+  }
+  .hero-prix {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--e-2) var(--e-3);
+  }
+  .hero-visuel {
+    border: var(--b-pixel) solid var(--c-bordure);
+    box-shadow: 8px 8px 0 0 rgb(255 79 168 / 0.35);
+  }
+
+  .action {
+    display: grid;
+    gap: var(--e-6);
+    align-items: center;
+  }
+  @media (min-width: 48rem) {
+    .action {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .action-media {
+    padding: var(--e-6);
+    background: radial-gradient(70% 60% at 50% 45%, #1d1a40, #0c0b1e);
+    border: var(--b-pixel) solid var(--c-bordure);
+  }
+  .action-media video {
+    width: 100%;
+  }
+  .action-boucle {
+    display: grid;
+    max-width: 20rem;
+    margin-inline: auto;
+  }
+  .action-diapo {
+    grid-area: 1 / 1;
+    animation: diapo 12s steps(1, end) infinite;
+    animation-delay: calc(var(--i) * 3s - 12s);
+  }
+  @keyframes diapo {
+    0% {
+      opacity: 1;
+    }
+    25% {
+      opacity: 0;
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .action-diapo:not(:first-child) {
+      display: none;
+    }
+  }
+
+  .arguments {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: var(--e-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .arguments li {
+    padding: var(--e-5);
+    background: var(--c-surface);
+    border: var(--b-pixel) solid var(--c-bordure);
+  }
+  .arguments li > :global(svg) {
+    color: var(--c-cyan);
+    margin-bottom: var(--e-3);
+  }
+  .arguments h3 {
+    font-size: var(--t-l);
+    margin-bottom: var(--e-2);
+  }
+  .arguments p {
+    margin: 0;
+  }
+
+  .editeur-apercu {
+    padding-block: var(--e-8);
+    background: linear-gradient(90deg, #120f2c, #1a1240);
+    border-block: var(--b-pixel) solid var(--c-bordure);
+  }
+  .editeur-grille {
+    display: grid;
+    gap: var(--e-6);
+    align-items: center;
+  }
+  @media (min-width: 48rem) {
+    .editeur-grille {
+      grid-template-columns: 1.2fr 1fr;
+    }
+  }
+  .editeur-maquette {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--e-3);
+    max-width: 24rem;
+    padding: var(--e-4);
+    background: var(--c-fond);
+    border: var(--b-pixel) solid var(--c-bordure-ui);
+    box-shadow: 8px 8px 0 0 rgb(46 230 230 / 0.3);
+  }
+  .editeur-outils {
+    display: grid;
+    gap: var(--e-2);
+    align-content: start;
+  }
+  .editeur-outils span {
+    width: 28px;
+    height: 28px;
+    border: 2px solid #000;
+  }
+  .editeur-outils span:first-child {
+    outline: 3px solid var(--c-jaune);
+  }
+  .editeur-grille-pixels {
+    background-image:
+      linear-gradient(rgb(255 255 255 / 0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgb(255 255 255 / 0.08) 1px, transparent 1px);
+    background-size: calc(100% / 16) calc(100% / 16);
+  }
+
+  .tailles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+    gap: var(--e-6);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .taille {
+    display: grid;
+    gap: var(--e-3);
+    justify-items: center;
+    padding: var(--e-6) var(--e-5);
+    background: var(--c-surface);
+    border: var(--b-pixel) solid var(--c-bordure);
+    color: var(--c-texte);
+    text-decoration: none;
+    --cadre-max: 14rem;
+    transition:
+      transform var(--d-moyen) var(--pas),
+      box-shadow var(--d-moyen) var(--pas);
+  }
+  .taille:hover,
+  .taille:focus-visible {
+    color: var(--c-texte);
+    transform: translate(-4px, -4px);
+    box-shadow: 4px 4px 0 0 var(--c-cyan);
+  }
+  .taille-nom {
+    font-family: var(--f-pixel);
+    font-weight: 700;
+    font-size: var(--t-xl);
+  }
+  .taille-prix {
+    color: var(--c-jaune);
+    font-weight: 700;
+    font-size: var(--t-l);
+  }
+
+  .collections {
+    display: grid;
+    gap: var(--e-4);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .collection {
+    display: flex;
+    gap: var(--e-4);
+    align-items: center;
+    padding: var(--e-4);
+    background: var(--c-surface);
+    border: var(--b-pixel) solid var(--c-bordure);
+    color: var(--c-texte);
+    text-decoration: none;
+  }
+  .collection:hover {
+    color: var(--c-texte);
+    border-color: var(--c-rose);
+  }
+  .collection img {
+    flex-shrink: 0;
+  }
+  .collection > span {
+    display: grid;
+    gap: var(--e-1);
+  }
+  .collection-nom {
+    font-family: var(--f-pixel);
+    font-weight: 700;
+    font-size: var(--t-xl);
+  }
+
+  .bloc-reassurance {
+    padding: var(--e-6);
+    background: var(--c-surface);
+    border: var(--b-pixel) solid var(--c-bordure);
+  }
+  .faq-courte :global(.accordeon) {
+    max-width: var(--largeur-texte);
   }
 </style>

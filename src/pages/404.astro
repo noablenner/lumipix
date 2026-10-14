@@ -1,0 +1,54 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Bouton from '../components/Bouton.astro';
+import CadreLed from '../components/produit/CadreLed.astro';
+import { getProduitPhare, lienProduit } from '../lib/catalogue';
+import { lien } from '../lib/routes';
+
+const phare = await getProduitPhare();
+---
+
+<BaseLayout title="Page introuvable" description="Cette page n’existe pas ou plus. Retrouve le cadre pixel art LED et la déco Lumipix." noindex>
+  <section class="conteneur erreur">
+    <div class="erreur-cadre">
+      <CadreLed scene="erreur-404" taille={64} alt="Cadre LED affichant le code d’erreur 404" prioritaire />
+    </div>
+    <div class="erreur-texte">
+      <p class="pixel erreur-sur-titre">GAME OVER ?</p>
+      <h1>Page introuvable</h1>
+      <p class="texte-doux">Ce niveau n’existe pas, ou il a changé d’adresse. Pas de panique, il te reste des vies.</p>
+      <div class="erreur-actions">
+        {phare && <Bouton href={lienProduit(phare)}>Voir le {phare.seo.mot_cle_principal}</Bouton>}
+        <Bouton href={lien('/')} variante="secondaire">Retour à l’accueil</Bouton>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .erreur {
+    display: grid;
+    gap: var(--e-7);
+    align-items: center;
+    padding-block: var(--e-8);
+  }
+  @media (min-width: 48rem) {
+    .erreur {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .erreur-cadre {
+    --cadre-max: 20rem;
+  }
+  .erreur-sur-titre {
+    color: var(--c-rose);
+    letter-spacing: 0.15em;
+    margin-bottom: var(--e-2);
+  }
+  .erreur-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e-4);
+    margin-top: var(--e-5);
+  }
+</style>

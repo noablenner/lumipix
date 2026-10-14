@@ -1,0 +1,71 @@
+---
+import Badge from '../Badge.astro';
+import Prix from '../Prix.astro';
+import CadreLed from './CadreLed.astro';
+import { lienProduit, prixAPartirDe, type ProduitPublic } from '../../lib/catalogue';
+import type { NomScene } from '../../lib/pixel/scenes';
+
+interface Props {
+  produit: ProduitPublic;
+  scene?: NomScene;
+  niveauTitre?: 'h2' | 'h3';
+}
+const { produit, scene = 'coucher-soleil', niveauTitre: Titre = 'h3' } = Astro.props;
+---
+
+<article class="carte-produit">
+  <div class="carte-produit-visuel">
+    <CadreLed scene={scene} taille={32} alt={`${produit.nom} allumé`} />
+  </div>
+  <div class="carte-produit-texte">
+    {produit.frais_de_port === 0 && <Badge ton="jaune">Livraison offerte</Badge>}
+    <Titre class="carte-produit-nom"><a class="lien-carte" href={lienProduit(produit)}>{produit.nom}</a></Titre>
+    {produit.description_courte && <p class="texte-doux">{produit.description_courte}</p>}
+    <Prix montant={prixAPartirDe(produit)} aPartirDe={produit.variantes.length > 1} />
+  </div>
+</article>
+
+<style>
+  .carte-produit {
+    position: relative;
+    display: grid;
+    background: var(--c-surface);
+    border: var(--b-pixel) solid var(--c-bordure);
+    transition:
+      transform var(--d-moyen) var(--pas),
+      box-shadow var(--d-moyen) var(--pas),
+      border-color var(--d-moyen) var(--pas);
+  }
+  .carte-produit:hover,
+  .carte-produit:focus-within {
+    transform: translate(-4px, -4px);
+    border-color: var(--c-cyan);
+    box-shadow: 4px 4px 0 0 var(--c-cyan), 8px 8px 0 0 rgb(0 0 0 / 0.4);
+  }
+  .carte-produit-visuel {
+    padding: 12%;
+    background: radial-gradient(70% 60% at 50% 45%, #1d1a40, #0c0b1e);
+  }
+  .carte-produit-texte {
+    display: grid;
+    gap: var(--e-2);
+    justify-items: start;
+    padding: var(--e-4) var(--e-5) var(--e-5);
+  }
+  .carte-produit-nom {
+    margin: 0;
+    font-size: var(--t-xl);
+  }
+  .carte-produit-nom a {
+    color: var(--c-texte);
+    text-decoration: none;
+  }
+  .carte-produit-nom a::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .carte-produit p {
+    margin: 0;
+  }
+</style>

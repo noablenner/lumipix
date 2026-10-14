@@ -4,7 +4,7 @@ import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { SOCIETE } from '../config/societe';
 import { cheminPublic, estPrevisualisation, lien } from '../lib/routes';
-import policeTitres from '../styles/fonts/pixelify-sans-latin-700-normal.woff2?url';
+import policeTitres from '../styles/fonts/jersey-10-latin-400-normal.woff2?url';
 
 interface Props {
   /** Title unique de la page (le nom de marque est ajouté s'il manque). */
@@ -12,7 +12,7 @@ interface Props {
   description: string;
   /** Exclut la page des moteurs (admin, commande, démo). */
   noindex?: boolean;
-  /** Chemin absolu de l'image de partage. Image par défaut en phase 2. */
+  /** Chemin de l'image de partage (1200 x 630), par défaut /og/defaut.png. */
   imageOg?: string;
   typeOg?: 'website' | 'product' | 'article';
   /** Données structurées JSON-LD de la page. */
@@ -24,7 +24,8 @@ const titreComplet = title.includes(SOCIETE.marque) ? title : `${title} | ${SOCI
 // Le canonique pointe toujours vers le domaine de production, même en prévisualisation.
 const canonique = new URL(cheminPublic(Astro.url.pathname), SOCIETE.urlSite).href;
 const indexer = !noindex && !estPrevisualisation;
-const urlImageOg = imageOg ? new URL(imageOg, SOCIETE.urlSite).href : undefined;
+// L'image de partage est servie par le déploiement courant (production ou prévisualisation).
+const urlImageOg = new URL(lien(imageOg ?? '/og/defaut.png'), Astro.site).href;
 const jetonAnalytics = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
 ---
 
@@ -47,11 +48,13 @@ const jetonAnalytics = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
     <meta property="og:title" content={titreComplet} />
     <meta property="og:description" content={description} />
     <meta property="og:url" content={canonique} />
-    {urlImageOg && <meta property="og:image" content={urlImageOg} />}
-    <meta name="twitter:card" content={urlImageOg ? 'summary_large_image' : 'summary'} />
+    <meta property="og:image" content={urlImageOg} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={titreComplet} />
     <meta name="twitter:description" content={description} />
-    {urlImageOg && <meta name="twitter:image" content={urlImageOg} />}
+    <meta name="twitter:image" content={urlImageOg} />
 
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
 

@@ -2,19 +2,22 @@
 import Logo from './Logo.astro';
 import BoutonSon from './BoutonSon.astro';
 import PixelIcone from './PixelIcone.astro';
-import { getCollectionsVisibles } from '../lib/catalogue';
+import { getCollectionsVisibles, getProduitPhare } from '../lib/catalogue';
 import { cheminPublic, lien, routeExiste } from '../lib/routes';
 
 /*
  * Navigation : uniquement les collections qui ont au moins un produit actif,
  * puis les pages éditoriales déjà construites. Aucun lien vers une page vide.
  */
-const collections = await getCollectionsVisibles();
+const [collections, phare] = await Promise.all([getCollectionsVisibles(), getProduitPhare()]);
 const liens = [
+  ...(phare ? [{ href: `/produits/${phare.slug}`, label: 'Cadre LED' }] : []),
   ...collections.map((c) => ({ href: `/collections/${c.data.slug}`, label: c.data.nom })),
-  { href: '/idees-cadeaux', label: 'Idées cadeaux' },
-  { href: '/faq', label: 'FAQ' },
-].filter((l) => routeExiste(l.href));
+  ...[
+    { href: '/idees-cadeaux', label: 'Idées cadeaux' },
+    { href: '/faq', label: 'FAQ' },
+  ].filter((l) => routeExiste(l.href)),
+];
 
 const cheminCourant = cheminPublic(Astro.url.pathname);
 const panierDisponible = routeExiste('/panier');

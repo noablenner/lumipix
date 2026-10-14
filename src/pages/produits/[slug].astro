@@ -1,0 +1,546 @@
+---
+/*
+ * Page produit (brief §5) : efficacité d'abord. Galerie, prix, variantes,
+ * ajout au panier toujours visible sur mobile, délai, specs, contenu de la
+ * boîte, FAQ. Les avis n'apparaîtront qu'avec de vrais avis vérifiés.
+ */
+import type { GetStaticPaths } from 'astro';
+import { getEntry, render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Accordeon from '../../components/Accordeon.astro';
+import Badge from '../../components/Badge.astro';
+import Bouton from '../../components/Bouton.astro';
+import FilAriane from '../../components/FilAriane.astro';
+import Notice from '../../components/Notice.astro';
+import PixelIcone from '../../components/PixelIcone.astro';
+import Prix from '../../components/Prix.astro';
+import Reassurance from '../../components/Reassurance.astro';
+import CadreLed from '../../components/produit/CadreLed.astro';
+import Galerie, { type ElementGalerie } from '../../components/produit/Galerie.astro';
+import ProduitCarte from '../../components/produit/ProduitCarte.astro';
+import {
+  getProduitsPublies,
+  specsPubliques,
+  variantesAvecPrix,
+  type ProduitPublic,
+} from '../../lib/catalogue';
+import { formatDelai, formatPrix } from '../../lib/format';
+import { SCENES, SCENES_VITRINE } from '../../lib/pixel/scenes';
+import { jsonLdFaq, jsonLdFilAriane, jsonLdProduit } from '../../lib/seo';
+import { BOUTIQUE } from '../../config/boutique';
+
+export const getStaticPaths = (async () => {
+  const produits = await getProduitsPublies();
+  return produits.map((produit) => ({ params: { slug: produit.slug }, props: { produit } }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  produit: ProduitPublic;
+}
+const { produit } = Astro.props;
+
+// Corps Markdown (description longue). L'entrée complète n'est utilisée que pour le rendu.
+const entree = await getEntry('produits', produit.slug);
+const { Content } = await render(entree!);
+
+const variantes = variantesAvecPrix(produit);
+const parDefaut = variantes.find((v) => v.disponible) ?? variantes[0]!;
+const tailleDe = (id: string): 32 | 64 => (id.startsWith('32') ? 32 : 64);
+const estCadre = produit.slug === BOUTIQUE.produitPhare;
+
+const collection = produit.collections[0] ? await getEntry(produit.collections[0]) : undefined;
+const ariane = [
+  { nom: 'Accueil', chemin: '/' },
+  ...(collection ? [{ nom: collection.data.nom, chemin: `/collections/${collection.data.slug}` }] : []),
+  { nom: produit.nom, chemin: `/produits/${produit.slug}` },
+];
+
+const motCle = produit.seo.mot_cle_principal;
+const galerie: ElementGalerie[] = produit.photos.length
+  ? produit.photos.map((p) => ({ type: 'photo' as const, ...p }))
+  : [
+      {
+        type: 'rendu',
+        scene: 'coucher-soleil',
+        bureau: true,
+        alt: `${produit.nom} posé sur un bureau, écran allumé sur un coucher de soleil rétro`,
+        basculable: true,
+      },
+      { type: 'rendu', scene: 'ciel-etoile', vue: 'trois-quarts', alt: `${produit.nom} vu de trois quarts, ciel étoilé à l’écran`, basculable: true },
+      { type: 'rendu', scene: 'chat', bureau: true, ambiance: 'violet', alt: `${produit.nom} affichant un chat en pixel art`, basculable: true },
+      { type: 'rendu', scene: 'horloge', alt: `${produit.nom} en mode horloge`, basculable: true },
+      { type: 'rendu', scene: 'fusee', vue: 'trois-quarts', alt: `${produit.nom} affichant une fusée en pixel art`, basculable: true },
+    ];
+// Texte alternatif de l'image principale : contient le mot-clé principal.
+if (galerie[0] && !galerie[0].alt.toLowerCase().includes(motCle.toLowerCase())) {
+  galerie[0] = { ...galerie[0], alt: `${motCle.charAt(0).toUpperCase()}${motCle.slice(1)} : ${galerie[0].alt}` };
+}
+
+const delai = formatDelai(produit.delai_livraison.min_jours_ouvres, produit.delai_livraison.max_jours_ouvres);
+const faq = [
+  ...produit.faq,
+  {
+    question: 'Combien coûte la livraison et combien de temps prend-elle ?',
+    reponse: `${produit.frais_de_port === 0 ? 'La livraison est offerte' : `La livraison coûte ${formatPrix(produit.frais_de_port)}`} en France métropolitaine. Délai estimé : ${delai}.`,
+  },
+  {
+    question: 'Puis-je changer d’avis après l’achat ?',
+    reponse: `Oui. Tu disposes de ${BOUTIQUE.delaiRetractationJours} jours après la réception pour exercer ton droit de rétractation.`,
+  },
+];
+const specs = specsPubliques(produit);
+const lies = (await getProduitsPublies()).filter((p) => produit.produits_lies.some((l) => l.id === p.slug));
+const brouillon = produit.statut !== 'actif';
+---
+
+<BaseLayout
+  title={produit.seo.title}
+  description={produit.seo.meta_description}
+  imageOg={`/og/${produit.slug}.png`}
+  noindex={brouillon}
+  jsonLd={[jsonLdProduit(produit, `/og/${produit.slug}.png`), jsonLdFilAriane(ariane), jsonLdFaq(faq)]}
+>
+  <div class="conteneur fiche" data-produit={produit.slug}>
+    <FilAriane elements={ariane} />
+
+    {
+      brouillon && (
+        <Notice ton="alerte" titre="Brouillon">
+          <p>Produit en brouillon : page visible uniquement en prévisualisation, jamais en production.</p>
+        </Notice>
+      )
+    }
+
+    <div class="fiche-haut">
+      <Galerie slug={produit.slug} elements={galerie} taille={tailleDe(parDefaut.id)} />
+
+      <div class="fiche-achat">
+        <h1>{produit.nom}</h1>
+        {produit.sous_titre && <p class="fiche-sous-titre">{produit.sous_titre}</p>}
+
+        <div class="fiche-prix">
+          <Prix montant={parDefaut.prix_ttc} barre={parDefaut.prix_barre_ttc ?? produit.prix_barre_ttc} taille="grand" />
+          {produit.frais_de_port === 0 && <Badge ton="jaune">Livraison offerte</Badge>}
+        </div>
+
+        {produit.description_courte && <p>{produit.description_courte}</p>}
+
+        <form class="fiche-form" data-form-achat>
+          <fieldset class="variantes">
+            <legend>Taille de l’écran</legend>
+            {
+              variantes.map((v) => (
+                <label class="variante">
+                  <input
+                    type="radio"
+                    name="variante"
+                    value={v.id}
+                    checked={v.id === parDefaut.id}
+                    disabled={!v.disponible}
+                    data-prix={v.prix_ttc}
+                    data-prix-texte={formatPrix(v.prix_ttc)}
+                    data-nom={v.nom}
+                    data-taille={tailleDe(v.id)}
+                  />
+                  <span class="variante-nom">{v.nom}</span>
+                  <span class="variante-prix">{formatPrix(v.prix_ttc)}</span>
+                  {!v.disponible && <span class="variante-indispo">Indisponible</span>}
+                </label>
+              ))
+            }
+          </fieldset>
+
+          <p class="fiche-delai">
+            <PixelIcone nom="camion" taille={20} />
+            <span>
+              Livraison estimée : <strong>{delai}</strong>
+              {produit.frais_de_port === 0 ? ', offerte' : `, ${formatPrix(produit.frais_de_port)}`} en France métropolitaine.
+            </span>
+          </p>
+
+          <Bouton type="submit" taille="grand" pleineLargeur data-son="ajout">
+            <PixelIcone nom="panier" taille={22} /> Ajouter au panier
+          </Bouton>
+          <p class="fiche-confirmation" role="status" aria-live="polite" data-confirmation></p>
+        </form>
+
+        <Reassurance compact delai={produit.delai_livraison} livraisonOfferte={produit.frais_de_port === 0} />
+      </div>
+    </div>
+
+    <div class="fiche-contenu">
+      <section class="fiche-description" aria-label="Description">
+        <Content />
+      </section>
+
+      {
+        estCadre && (
+          <section aria-labelledby="t-scenes">
+            <h2 id="t-scenes">Ce que l’écran peut afficher</h2>
+            <p class="texte-doux">Quelques scènes originales dessinées par Lumipix, ici en {tailleDe(parDefaut.id)}x{tailleDe(parDefaut.id)}.</p>
+            <ul class="fiche-scenes">
+              {SCENES_VITRINE.map((s) => (
+                <li>
+                  <CadreLed scene={s} taille={tailleDe(parDefaut.id)} basculable alt={`Écran du cadre : ${SCENES[s].toLowerCase()}`} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+
+      <div class="fiche-colonnes">
+        {
+          specs.length > 0 && (
+            <section aria-labelledby="t-specs">
+              <h2 id="t-specs">Caractéristiques</h2>
+              <dl class="fiche-specs">
+                {specs.map(([cle, valeur]) => (
+                  <div>
+                    <dt>{cle}</dt>
+                    <dd>{valeur}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          )
+        }
+
+        {
+          produit.contenu_boite.length > 0 && (
+            <section aria-labelledby="t-boite">
+              <h2 id="t-boite">Dans la boîte</h2>
+              <ul class="fiche-boite">
+                {produit.contenu_boite.map((c) => (
+                  <li>
+                    <PixelIcone nom="valide" taille={16} /> {c}
+                  </li>
+                ))}
+              </ul>
+              {estCadre && <p class="texte-doux">À brancher sur un adaptateur USB 5 V / 2 A minimum.</p>}
+            </section>
+          )
+        }
+      </div>
+
+      <section aria-labelledby="t-faq">
+        <h2 id="t-faq">Questions fréquentes</h2>
+        <Accordeon elements={faq} />
+      </section>
+
+      {
+        lies.length > 0 && (
+          <section aria-labelledby="t-lies">
+            <h2 id="t-lies">À associer</h2>
+            <ul class="fiche-lies">
+              {lies.map((p) => (
+                <li>
+                  <ProduitCarte produit={p} />
+                </li>
+              ))}
+            </ul>
+          </section>
+        )
+      }
+    </div>
+  </div>
+
+  <!-- Barre d'achat fixe sur mobile : le bouton reste toujours visible -->
+  <div class="barre-achat">
+    <div>
+      <p class="barre-achat-nom" data-barre-nom>{parDefaut.nom}</p>
+      <p class="barre-achat-prix" data-barre-prix>{formatPrix(parDefaut.prix_ttc)}</p>
+    </div>
+    <Bouton data-ajout-rapide data-son="ajout">Ajouter</Bouton>
+  </div>
+</BaseLayout>
+
+<script>
+  import { ajouterAuPanier, nombreArticles } from '../../scripts/panier';
+
+  const racine = document.querySelector<HTMLElement>('[data-produit]');
+  const form = document.querySelector<HTMLFormElement>('[data-form-achat]');
+  if (racine && form) {
+    const produit = racine.dataset.produit!;
+    const radios = [...form.querySelectorAll<HTMLInputElement>('input[name="variante"]')];
+    const prix = document.querySelector('.fiche-prix .prix-montant');
+    const barreNom = document.querySelector('[data-barre-nom]');
+    const barrePrix = document.querySelector('[data-barre-prix]');
+    const confirmation = form.querySelector<HTMLElement>('[data-confirmation]');
+
+    const choisie = () => radios.find((r) => r.checked) ?? radios[0]!;
+
+    const appliquer = (r: HTMLInputElement, majUrl: boolean) => {
+      const texte = r.dataset.prixTexte ?? '';
+      if (prix) prix.textContent = texte;
+      if (barreNom) barreNom.textContent = r.dataset.nom ?? '';
+      if (barrePrix) barrePrix.textContent = texte;
+      // Écrans du cadre : 32x32 ou 64x64 selon la variante choisie
+      const taille = r.dataset.taille === '32' ? '32' : '64';
+      document.querySelectorAll<HTMLElement>('[data-cadre]').forEach((c) => {
+        const img = c.querySelector('img');
+        const src = c.getAttribute(`data-src-${taille}`);
+        if (img && src && img.getAttribute('src') !== src) img.setAttribute('src', src);
+      });
+      if (majUrl) {
+        const url = new URL(location.href);
+        url.searchParams.set('variante', r.value);
+        history.replaceState(null, '', url);
+      }
+    };
+
+    // Variante demandée dans l'URL (?variante=64x64)
+    const demandee = new URLSearchParams(location.search).get('variante');
+    const cible = radios.find((r) => r.value === demandee && !r.disabled);
+    if (cible) cible.checked = true;
+    appliquer(choisie(), false);
+    radios.forEach((r) => r.addEventListener('change', () => appliquer(r, true)));
+
+    const ajouter = () => {
+      const r = choisie();
+      const lignes = ajouterAuPanier(produit, r.value);
+      if (confirmation) {
+        confirmation.textContent = `Ajouté au panier : ${r.dataset.nom} (${nombreArticles(lignes)} article${nombreArticles(lignes) > 1 ? 's' : ''}).`;
+      }
+    };
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      ajouter();
+    });
+    document.querySelector('[data-ajout-rapide]')?.addEventListener('click', ajouter);
+  }
+</script>
+
+<style>
+  .fiche {
+    padding-block: var(--e-4) var(--e-7);
+    display: grid;
+    gap: var(--e-5);
+  }
+  .fiche-haut {
+    display: grid;
+    gap: var(--e-6);
+    align-items: start;
+  }
+  @media (min-width: 60rem) {
+    .fiche-haut {
+      grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
+    }
+    .fiche-achat {
+      position: sticky;
+      top: 88px;
+    }
+  }
+  .fiche-achat {
+    display: grid;
+    gap: var(--e-4);
+  }
+  .fiche-achat h1 {
+    font-size: var(--t-2xl);
+    margin: 0;
+  }
+  .fiche-sous-titre {
+    margin: 0;
+    font-size: var(--t-l);
+    color: var(--c-cyan);
+  }
+  .fiche-achat > p {
+    margin: 0;
+  }
+  .fiche-prix {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--e-3);
+  }
+  .fiche-form {
+    display: grid;
+    gap: var(--e-4);
+  }
+  .variantes {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--e-3);
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .variantes legend {
+    margin-bottom: var(--e-2);
+    font-weight: 700;
+  }
+  .variante {
+    position: relative;
+    display: grid;
+    gap: var(--e-1);
+    min-height: 72px;
+    padding: var(--e-3) var(--e-4);
+    background: var(--c-surface);
+    border: var(--b-pixel) solid var(--c-bordure-ui);
+    cursor: pointer;
+  }
+  .variante input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    cursor: pointer;
+  }
+  .variante:has(input:checked) {
+    border-color: var(--c-cyan);
+    box-shadow: var(--ombre-pixel) var(--c-cyan);
+  }
+  .variante:has(input:focus-visible) {
+    outline: 3px solid var(--c-jaune);
+    outline-offset: 3px;
+  }
+  .variante:has(input:disabled) {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .variante-nom {
+    font-family: var(--f-pixel);
+    font-weight: 700;
+    font-size: var(--t-l);
+  }
+  .variante-prix {
+    color: var(--c-jaune);
+    font-weight: 700;
+  }
+  .variante-indispo {
+    font-size: var(--t-xs);
+    color: var(--c-rouge);
+  }
+  .fiche-delai {
+    display: flex;
+    gap: var(--e-2);
+    align-items: flex-start;
+    margin: 0;
+    font-size: var(--t-s);
+  }
+  .fiche-delai :global(svg) {
+    color: var(--c-cyan);
+    margin-top: 2px;
+  }
+  .fiche-confirmation {
+    margin: 0;
+    min-height: 1.5em;
+    color: var(--c-vert);
+    font-weight: 600;
+  }
+
+  .fiche-contenu {
+    display: grid;
+    gap: var(--e-8);
+    margin-top: var(--e-7);
+  }
+  .fiche-description {
+    max-width: var(--largeur-texte);
+  }
+  .fiche-description :global(h2) {
+    font-size: var(--t-xl);
+    margin-top: var(--e-6);
+  }
+  .fiche-description :global(h2:first-child) {
+    margin-top: 0;
+  }
+  .fiche-description :global(li) {
+    margin-bottom: var(--e-2);
+  }
+  .fiche-scenes {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(9rem, 1fr));
+    gap: var(--e-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .fiche-colonnes {
+    display: grid;
+    gap: var(--e-7);
+  }
+  @media (min-width: 48rem) {
+    .fiche-colonnes {
+      grid-template-columns: 1.4fr 1fr;
+    }
+  }
+  .fiche-specs {
+    margin: 0;
+  }
+  .fiche-specs div {
+    display: grid;
+    grid-template-columns: minmax(8rem, 2fr) 3fr;
+    gap: var(--e-3);
+    padding: var(--e-3) 0;
+    border-bottom: 1px solid var(--c-bordure);
+  }
+  .fiche-specs dt {
+    color: var(--c-texte-doux);
+  }
+  .fiche-specs dd {
+    margin: 0;
+  }
+  .fiche-boite {
+    display: grid;
+    gap: var(--e-2);
+    margin: 0 0 var(--e-4);
+    padding: 0;
+    list-style: none;
+  }
+  .fiche-boite li {
+    display: flex;
+    gap: var(--e-2);
+    align-items: center;
+  }
+  .fiche-boite :global(svg) {
+    color: var(--c-vert);
+  }
+  .fiche-lies {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+    gap: var(--e-5);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .barre-achat {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--e-4);
+    padding: var(--e-3) var(--e-4) calc(var(--e-3) + env(safe-area-inset-bottom));
+    background: rgb(10 10 24 / 0.96);
+    border-top: var(--b-pixel) solid var(--c-bordure-ui);
+  }
+  .barre-achat p {
+    margin: 0;
+    line-height: 1.3;
+  }
+  .barre-achat-nom {
+    font-size: var(--t-s);
+    color: var(--c-texte-doux);
+  }
+  .barre-achat-prix {
+    font-family: var(--f-pixel);
+    font-weight: 700;
+    font-size: var(--t-l);
+    color: var(--c-jaune);
+  }
+  /* Laisse la place à la barre en bas de page */
+  :global(body:has(.barre-achat)) {
+    padding-bottom: 84px;
+  }
+  @media (min-width: 60rem) {
+    .barre-achat {
+      display: none;
+    }
+    :global(body:has(.barre-achat)) {
+      padding-bottom: 0;
+    }
+  }
+</style>

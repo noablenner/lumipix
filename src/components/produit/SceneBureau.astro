@@ -1,0 +1,99 @@
+---
+/*
+ * Mise en scène de bureau en CSS : mur sombre, bandeau néon, plateau,
+ * clavier et tasse génériques. Le cadre est passé dans le slot.
+ */
+interface Props {
+  ambiance?: 'rose' | 'cyan' | 'violet';
+  class?: string;
+}
+const { ambiance = 'rose', class: classe } = Astro.props;
+const couleurs = { rose: '255 79 168', cyan: '46 230 230', violet: '169 139 255' };
+---
+
+<div class:list={['bureau', classe]} style={`--neon: ${couleurs[ambiance]}`}>
+  <div class="bureau-mur" aria-hidden="true"></div>
+  <div class="bureau-objet">
+    <slot />
+  </div>
+  <div class="bureau-plateau" aria-hidden="true">
+    <div class="bureau-clavier"></div>
+    <div class="bureau-tasse"></div>
+  </div>
+</div>
+
+<style>
+  .bureau {
+    position: relative;
+    display: grid;
+    align-items: end;
+    aspect-ratio: 4 / 3.4;
+    overflow: hidden;
+    background: #0c0b1e;
+    isolation: isolate;
+  }
+  .bureau-mur {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background:
+      radial-gradient(60% 50% at 50% 38%, rgb(var(--neon) / 0.28), transparent 70%),
+      linear-gradient(#0f0d26, #171433 75%);
+  }
+  .bureau-mur::before {
+    /* Bandeau LED au plafond */
+    content: '';
+    position: absolute;
+    left: 8%;
+    right: 8%;
+    top: 6%;
+    height: 3px;
+    background: rgb(var(--neon));
+    box-shadow: 0 0 16px 3px rgb(var(--neon) / 0.7), 0 0 60px 10px rgb(var(--neon) / 0.25);
+  }
+  .bureau-objet {
+    position: relative;
+    z-index: 1;
+    width: 58%;
+    margin: 0 auto -2%;
+    --cadre-max: 100%;
+  }
+  .bureau-plateau {
+    position: relative;
+    height: 22%;
+    background: linear-gradient(#2a2347, #1a1530 30%, #120f24);
+    box-shadow: 0 -2px 0 #3a3166;
+  }
+  .bureau-clavier {
+    position: absolute;
+    left: 6%;
+    top: 22%;
+    width: 30%;
+    height: 22%;
+    background:
+      radial-gradient(circle, #3a3a72 34%, transparent 36%) 0 0 / 8% 33%,
+      #15152b;
+    border-radius: 3px;
+    box-shadow: 0 0 12px rgb(var(--neon) / 0.25);
+  }
+  .bureau-tasse {
+    position: absolute;
+    right: 9%;
+    bottom: 38%;
+    width: 7%;
+    aspect-ratio: 1 / 1.1;
+    background: linear-gradient(90deg, #2d2d52, #3d3d6e 40%, #23234a);
+    border-radius: 0 0 20% 20%;
+  }
+  .bureau-tasse::after {
+    content: '';
+    position: absolute;
+    right: -38%;
+    top: 22%;
+    width: 40%;
+    height: 45%;
+    border: 3px solid #2d2d52;
+    border-left: 0;
+    border-radius: 0 50% 50% 0;
+  }
+</style>

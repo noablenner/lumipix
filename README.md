@@ -2,7 +2,7 @@
 
 Boutique e-commerce pixel art / rétro arcade ([lumipix.shop](https://lumipix.shop)). Le brief complet est dans `CLAUDE.md`.
 
-**État actuel : phase 1 terminée** (socle, schémas, design system). Démo : `/design-system`.
+**État actuel : phase 2 terminée** (rendu du cadre, scènes pixel art, accueil, page produit, collection, 404). Démo du design system : `/design-system`.
 
 ## Installation
 
@@ -35,7 +35,7 @@ Le build échoue si :
 ```
 assets/produits/[slug]/     visuels HD des produits (fournis, jamais d'image fournisseur)
 docs/                       documentation (ajout d'un produit)
-public/fonts/               police pixel auto-hébergée (Pixelify Sans, SIL OFL)
+src/styles/fonts/           police pixel auto-hébergée (Jersey 10, SIL OFL, licence dans public/licences/)
 scripts/                    garde-fous du build
 src/config/societe.ts       SOURCE UNIQUE des informations société
 src/config/boutique.ts      paramètres commerciaux (seuil de livraison gratuite…)
@@ -52,8 +52,22 @@ Choix techniques de la phase 1 :
 
 - **Astro 7** en sortie statique, TypeScript strict.
 - **CSS natif avec custom properties**, sans Tailwind : pas de dépendance de build, CSS par composant, poids minimal sur mobile.
-- **Typographies** : Pixelify Sans pour les titres (2 graisses, environ 15 Ko), police système pour le texte (0 octet chargé).
+- **Typographies** : Jersey 10 pour les titres (un fichier de 13 Ko, choisie pour la lisibilité des chiffres : « 32x32 » doit se lire sans hésitation), police système pour le texte (0 octet chargé).
 - **Liens de navigation conditionnels** : un lien n'apparaît que si la page existe déjà, et une collection n'apparaît que si elle contient un produit actif.
+
+## Rendu du cadre et scènes pixel art
+
+Aucune image fournisseur : tant que `assets/produits/[slug]/` est vide, les visuels sont générés par le code.
+
+- `src/lib/pixel/scenes.ts` : scènes originales (coucher de soleil rétro, ciel étoilé, horloge, cœur, chat, fusée, vagues néon, 404), dessinées en coordonnées unitaires pour sortir en 32x32 et en 64x64.
+- `src/lib/pixel/svg.ts` : rendu façon écran LED (diodes rondes, LED éteintes visibles, léger halo), animations CSS coupées en mouvement réduit.
+- `/scenes/[scene]-[32|64].svg` : fichiers statiques générés au build.
+- `src/components/produit/CadreLed.astro` : le cadre noir mat en vue de face ou de trois quarts ; `SceneBureau.astro` : la mise en scène de bureau.
+- `/og/[page].png` : images de partage générées au build avec sharp.
+
+## Brouillons et prévisualisation
+
+Un produit `brouillon` n'existe pas en production. En développement (`npm run dev`) et sur la prévisualisation GitHub Pages, il est publié avec un bandeau « Brouillon » et en noindex, pour voir le rendu avant de le passer en `actif`.
 
 ## Ajouter un produit
 

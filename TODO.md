@@ -19,19 +19,22 @@ Tous dans `src/config/societe.ts` (source unique), sauf mention contraire.
 - [ ] Conformité CE, FCC, RoHS : documents à obtenir du fabricant
 - [ ] Délai de livraison 5 à 10 jours ouvrés : à reconfirmer après la commande test
 - [ ] Identifiant de variante fournisseur (SKU) : champ `id_variante` vide pour l'instant, seul le libellé est connu
-- [ ] `description_courte` et FAQ structurée : à rédiger en phase 2 (obligatoires avant de passer le produit en `actif`)
-- [ ] Description longue : à rédiger en phase 2
+- [x] `description_courte`, FAQ structurée et description longue rédigées (phase 2), à relire
+- [ ] Spécifications masquées côté client tant qu'elles ne sont pas vérifiées : « Dimensions (version 32) » et « Conformité » (documents à obtenir)
+- [ ] Rendu SVG : la version 32x32 utilise le même gabarit que la 64x64 tant que ses dimensions ne sont pas mesurées
+- [ ] Vidéo du cadre en fonctionnement : à déposer dans `assets/produits/cadre-pixel-art-led/` et à déclarer dans `videos` (l'accueil affiche une boucle de scènes en attendant)
 - [ ] Passer `statut: actif` quand la fiche est complète (tant qu'il est en brouillon, la collection setup-gaming reste masquée)
 - [ ] Visuels : `assets/produits/cadre-pixel-art-led/` est vide, le rendu SVG/CSS (phase 2) sert en attendant
 
 ## Collection setup-gaming
 
-- [ ] Texte SEO à rédiger (phase 2)
+- [x] Texte SEO rédigé (phase 2), à relire
 
 ## Technique (phases suivantes)
 
-- [ ] Curseur pixel optionnel (phase 2)
-- [ ] Transitions de page en blocs (phase 2, sur l'accueil et les collections)
-- [ ] Image Open Graph par défaut (phase 2, à partir du rendu du cadre)
-- [ ] Accueil provisoire `src/pages/index.astro` (noindex) à remplacer en phase 2
+- [ ] Curseur pixel optionnel (non fait : effet facultatif du brief, à décider)
+- [ ] Inscription email en double opt-in sur l'accueil : phase 5 (nécessite Resend et D1)
+- [ ] Éditeur pixel art : phase 3 (l'accueil y renvoie déjà via la page produit)
+- [ ] Page /panier et paiement : phase 4 (le bouton d'ajout enregistre déjà le panier dans le navigateur)
+- [ ] Politique de retour : qui paie les frais de retour ? (à préciser pour les CGV et les données structurées)
 - [ ] Choix DNS : passer les serveurs de noms chez Cloudflare (recommandé, voir README) ou rester sur Hostinger avec `www`

@@ -3,6 +3,8 @@
  */
 
 export const BOUTIQUE = {
+  /** Slug du produit phare mis en avant partout (accueil, navigation, 404). */
+  produitPhare: 'cadre-pixel-art-led',
   devise: 'EUR',
   locale: 'fr-FR',
   /** Livraison en France métropolitaine uniquement au lancement. */

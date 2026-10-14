@@ -1,0 +1,43 @@
+---
+import { lien } from '../lib/routes';
+
+interface Props {
+  elements: { nom: string; chemin: string }[];
+}
+const { elements } = Astro.props;
+---
+
+<nav class="ariane" aria-label="Fil d’Ariane">
+  <ol>
+    {
+      elements.map((e, i) => (
+        <li>
+          {i < elements.length - 1 ? <a href={lien(e.chemin)}>{e.nom}</a> : <span aria-current="page">{e.nom}</span>}
+        </li>
+      ))
+    }
+  </ol>
+</nav>
+
+<style>
+  ol {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e-1) var(--e-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--t-s);
+    color: var(--c-texte-doux);
+  }
+  li:not(:last-child)::after {
+    content: '›';
+    margin-left: var(--e-2);
+  }
+  a {
+    color: var(--c-texte-doux);
+  }
+  a:hover {
+    color: var(--c-cyan);
+  }
+</style>

@@ -1,0 +1,128 @@
+---
+/*
+ * Page collection (zone d'immersion). Générée uniquement pour les collections
+ * qui contiennent au moins un produit publié.
+ */
+import type { GetStaticPaths } from 'astro';
+import { render, type CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FilAriane from '../../components/FilAriane.astro';
+import Reassurance from '../../components/Reassurance.astro';
+import TransitionBlocs from '../../components/TransitionBlocs.astro';
+import ProduitCarte from '../../components/produit/ProduitCarte.astro';
+import { getCollectionsVisibles, getProduitsDeCollection } from '../../lib/catalogue';
+import { lien } from '../../lib/routes';
+import { jsonLdFilAriane } from '../../lib/seo';
+
+export const getStaticPaths = (async () => {
+  const collections = await getCollectionsVisibles();
+  return collections.map((collection) => ({ params: { slug: collection.data.slug }, props: { collection } }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  collection: CollectionEntry<'collections'>;
+}
+const { collection } = Astro.props;
+const { data } = collection;
+const { Content } = await render(collection);
+const produits = await getProduitsDeCollection(data.slug);
+const ariane = [
+  { nom: 'Accueil', chemin: '/' },
+  { nom: data.nom, chemin: `/collections/${data.slug}` },
+];
+const og = `/og/${data.slug}.png`;
+const bandeau = ['coucher-soleil', 'vague-neon', 'coeur', 'ciel-etoile', 'fusee', 'chat', 'horloge'];
+---
+
+<BaseLayout title={data.seo.title} description={data.seo.meta_description} imageOg={og} jsonLd={jsonLdFilAriane(ariane)}>
+  <TransitionBlocs />
+  <section class="col-entete">
+    <div class="col-bandeau" aria-hidden="true">
+      {[...bandeau, ...bandeau].map((s) => <img src={lien(`/scenes/${s}-32.svg`)} alt="" width="72" height="72" decoding="async" />)}
+    </div>
+    <div class="conteneur col-entete-texte">
+      <FilAriane elements={ariane} />
+      <h1>{data.nom}</h1>
+      <p class="col-intro">{data.description}</p>
+    </div>
+  </section>
+
+  <div class="conteneur">
+    <ul class="col-grille" aria-label={`Produits : ${data.nom}`}>
+      {
+        produits.map((p) => (
+          <li>
+            <ProduitCarte produit={p} niveauTitre="h2" />
+          </li>
+        ))
+      }
+    </ul>
+
+    <section class="col-reassurance" aria-label="Nos engagements">
+      <Reassurance />
+    </section>
+
+    <section class="col-texte">
+      <Content />
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .col-entete {
+    position: relative;
+    overflow: hidden;
+    padding-bottom: var(--e-6);
+    border-bottom: var(--b-pixel) solid var(--c-bordure);
+    background: radial-gradient(80% 120% at 50% 0%, #241a52, var(--c-fond) 70%);
+  }
+  .col-bandeau {
+    display: flex;
+    gap: 6px;
+    padding-block: var(--e-5);
+    opacity: 0.9;
+    animation: col-defile 40s linear infinite;
+    width: max-content;
+  }
+  .col-bandeau img {
+    width: 72px;
+    height: 72px;
+    border: 3px solid #0c0c10;
+  }
+  @keyframes col-defile {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  .col-entete-texte h1 {
+    margin-top: var(--e-4);
+  }
+  .col-intro {
+    max-width: var(--largeur-texte);
+    font-size: var(--t-l);
+    color: var(--c-texte-doux);
+  }
+  .col-grille {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(16rem, 22rem));
+    gap: var(--e-6);
+    margin: var(--e-7) 0;
+    padding: 0;
+    list-style: none;
+  }
+  .col-reassurance {
+    padding: var(--e-5);
+    background: var(--c-surface);
+    border: var(--b-pixel) solid var(--c-bordure);
+  }
+  .col-texte {
+    max-width: var(--largeur-texte);
+    margin-top: var(--e-8);
+  }
+  .col-texte :global(h2) {
+    font-size: var(--t-xl);
+  }
+</style>

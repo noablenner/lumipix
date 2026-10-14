@@ -33,7 +33,7 @@
   --glow-jaune: 0 0 6px rgb(255 210 63 / 0.55), 0 0 18px rgb(255 210 63 / 0.25);
 
   /* Typographies : pixel pour les titres, système pour le texte (0 octet à charger) */
-  --f-pixel: 'Pixelify Sans', ui-monospace, 'Courier New', monospace;
+  --f-pixel: 'Jersey 10', ui-monospace, 'Courier New', monospace;
   --f-texte: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
 
   --t-xs: 0.8125rem;

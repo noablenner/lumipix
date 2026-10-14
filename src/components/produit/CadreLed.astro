@@ -1,0 +1,132 @@
+---
+/*
+ * Rendu du cadre LED pixel art entièrement en SVG / CSS (brief §10 bis).
+ * Cadre carré noir mat aux bords légèrement arrondis, écran de LED RGB avec
+ * un léger halo. Proportions de la version 64x64 : 26 x 26 x 1,7 cm.
+ * La taille de la version 32x32 n'est pas encore mesurée : même gabarit en attendant.
+ */
+import { SCENES, type NomScene } from '../../lib/pixel/scenes';
+import { lien } from '../../lib/routes';
+
+interface Props {
+  scene: NomScene;
+  taille?: 32 | 64;
+  vue?: 'face' | 'trois-quarts';
+  /** Texte alternatif ; par défaut, la description de la scène. */
+  alt?: string;
+  /** Image au-dessus de la ligne de flottaison : chargement prioritaire. */
+  prioritaire?: boolean;
+  pied?: boolean;
+  /** Permet au script de la page produit de basculer l'écran entre 32 et 64. */
+  basculable?: boolean;
+  class?: string;
+}
+
+const {
+  scene,
+  taille = 64,
+  vue = 'face',
+  alt,
+  prioritaire = false,
+  pied = false,
+  basculable = false,
+  class: classe,
+} = Astro.props;
+
+const HALOS: Record<NomScene, string> = {
+  'coucher-soleil': '255 79 168',
+  'ciel-etoile': '120 120 255',
+  horloge: '46 230 230',
+  coeur: '255 46 95',
+  chat: '255 154 60',
+  fusee: '255 210 63',
+  'vague-neon': '46 230 230',
+  'erreur-404': '255 79 168',
+};
+
+const src = (n: 32 | 64) => lien(`/scenes/${scene}-${n}.svg`);
+const texteAlt = alt ?? `Cadre pixel art LED ${taille}x${taille} affichant : ${SCENES[scene].toLowerCase()}`;
+---
+
+<div
+  class:list={['cadre', `cadre--${vue}`, classe]}
+  style={`--halo: ${HALOS[scene]}`}
+  data-cadre={basculable ? '' : undefined}
+  data-src-32={basculable ? src(32) : undefined}
+  data-src-64={basculable ? src(64) : undefined}
+>
+  <div class="cadre-corps">
+    <img
+      class="cadre-ecran"
+      src={src(taille)}
+      alt={texteAlt}
+      width="640"
+      height="640"
+      loading={prioritaire ? 'eager' : 'lazy'}
+      fetchpriority={prioritaire ? 'high' : undefined}
+      decoding="async"
+      draggable="false"
+    />
+  </div>
+  {pied && <div class="cadre-pied" aria-hidden="true" />}
+</div>
+
+<style>
+  .cadre {
+    position: relative;
+    width: 100%;
+    max-width: var(--cadre-max, 28rem);
+    margin-inline: auto;
+  }
+  .cadre-corps {
+    position: relative;
+    aspect-ratio: 1;
+    /* Bordure du cadre autour de l'écran */
+    padding: 4.2%;
+    border-radius: 3.2%;
+    background:
+      linear-gradient(150deg, rgb(255 255 255 / 0.07), transparent 38%),
+      linear-gradient(160deg, #1c1c24, #0a0a0e 70%);
+    box-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 0.05),
+      inset 0 -2px 6px rgb(0 0 0 / 0.6),
+      0 22px 40px -12px rgb(0 0 0 / 0.75),
+      0 0 70px -8px rgb(var(--halo) / 0.35);
+  }
+  .cadre-ecran {
+    width: 100%;
+    height: 100%;
+    border-radius: 0.8%;
+    background: #030306;
+    user-select: none;
+  }
+
+  /* Vue de trois quarts : épaisseur de 1,7 cm sur 26 cm, soit 6,5 % de la largeur */
+  .cadre--trois-quarts {
+    perspective: 1400px;
+  }
+  .cadre--trois-quarts .cadre-corps {
+    transform: rotateY(-28deg) rotateX(4deg);
+    transform-style: preserve-3d;
+    box-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 0.05),
+      -2px 0 0 #121218,
+      -4px 0 0 #101015,
+      -6px 0 0 #0e0e12,
+      -8px 0 0 #0c0c10,
+      -10px 0 0 #0a0a0d,
+      -12px 1px 0 #08080b,
+      -14px 2px 0 #060608,
+      0 26px 40px -10px rgb(0 0 0 / 0.75),
+      0 0 70px -8px rgb(var(--halo) / 0.35);
+  }
+
+  .cadre-pied {
+    width: 34%;
+    height: 0;
+    padding-bottom: 7%;
+    margin: -1% auto 0;
+    background: linear-gradient(#141418, #07070a);
+    clip-path: polygon(18% 0, 82% 0, 100% 100%, 0 100%);
+  }
+</style>
