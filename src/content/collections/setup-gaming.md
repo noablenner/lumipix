@@ -3,6 +3,9 @@ slug: setup-gaming
 nom: "Déco setup gaming"
 description: "La déco setup gaming de Lumipix : des objets lumineux en pixel art pour donner du caractère à ton bureau de jeu, à commencer par le cadre pixel art LED."
 ordre: 1
+visuel:
+  src: "cadre-pixel-art-led/05-studio-neon.jpg"
+  alt: "Déco setup gaming : cadre pixel art LED allumé sur des vagues néon, sa lumière se reflète sur le bureau"
 seo:
   mot_cle_principal: "déco setup gaming"
   mots_cles_secondaires: ["accessoires setup gaming"]

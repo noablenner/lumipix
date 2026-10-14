@@ -8,11 +8,14 @@ import { render, type CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import FilAriane from '../../components/FilAriane.astro';
 import Reassurance from '../../components/Reassurance.astro';
-import TransitionBlocs from '../../components/TransitionBlocs.astro';
+import Immersion from '../../components/Immersion.astro';
+import SeparateurPixels from '../../components/SeparateurPixels.astro';
 import ProduitCarte from '../../components/produit/ProduitCarte.astro';
 import { getCollectionsVisibles, getProduitsDeCollection } from '../../lib/catalogue';
 import { lien } from '../../lib/routes';
 import { jsonLdFilAriane } from '../../lib/seo';
+import { Picture } from 'astro:assets';
+import { imageProduit } from '../../lib/medias';
 
 export const getStaticPaths = (async () => {
   const collections = await getCollectionsVisibles();
@@ -31,24 +34,45 @@ const ariane = [
   { nom: data.nom, chemin: `/collections/${data.slug}` },
 ];
 const og = `/og/${data.slug}.png`;
+// Visuel principal : chemin relatif à assets/produits/ (« slug-produit/fichier.jpg »)
+const [dossierVisuel, fichierVisuel] = data.visuel?.src.split('/') ?? [];
+const visuel = dossierVisuel && fichierVisuel ? await imageProduit(dossierVisuel, fichierVisuel) : undefined;
 const bandeau = ['coucher-soleil', 'vague-neon', 'coeur', 'ciel-etoile', 'fusee', 'chat', 'horloge'];
 ---
 
 <BaseLayout title={data.seo.title} description={data.seo.meta_description} imageOg={og} jsonLd={jsonLdFilAriane(ariane)}>
-  <TransitionBlocs />
+  <Immersion />
   <section class="col-entete">
     <div class="col-bandeau" aria-hidden="true">
       {[...bandeau, ...bandeau].map((s) => <img src={lien(`/scenes/${s}-32.svg`)} alt="" width="72" height="72" decoding="async" />)}
     </div>
     <div class="conteneur col-entete-texte">
       <FilAriane elements={ariane} />
-      <h1>{data.nom}</h1>
-      <p class="col-intro">{data.description}</p>
+      <div class="col-entete-grille">
+        <div>
+          <h1>{data.nom}</h1>
+          <p class="col-intro">{data.description}</p>
+        </div>
+        {
+          visuel && data.visuel && (
+            <Picture
+              class="col-visuel"
+              src={visuel}
+              alt={data.visuel.alt}
+              formats={['avif', 'webp']}
+              widths={[480, 800, 1100]}
+              sizes="(min-width: 60rem) 30rem, 100vw"
+              loading="eager"
+              fetchpriority="high"
+            />
+          )
+        }
+      </div>
     </div>
   </section>
 
   <div class="conteneur">
-    <ul class="col-grille" aria-label={`Produits : ${data.nom}`}>
+    <ul class="col-grille revele-groupe" aria-label={`Produits : ${data.nom}`}>
       {
         produits.map((p) => (
           <li>
@@ -58,11 +82,13 @@ const bandeau = ['coucher-soleil', 'vague-neon', 'coeur', 'ciel-etoile', 'fusee'
       }
     </ul>
 
-    <section class="col-reassurance" aria-label="Nos engagements">
+    <section class="col-reassurance revele" aria-label="Nos engagements">
       <Reassurance />
     </section>
 
-    <section class="col-texte">
+    <SeparateurPixels />
+
+    <section class="col-texte revele">
       <Content />
     </section>
   </div>
@@ -96,6 +122,23 @@ const bandeau = ['coucher-soleil', 'vague-neon', 'coeur', 'ciel-etoile', 'fusee'
     to {
       transform: translateX(-50%);
     }
+  }
+  .col-entete-grille {
+    display: grid;
+    gap: var(--e-5);
+    align-items: center;
+  }
+  @media (min-width: 60rem) {
+    .col-entete-grille {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  .col-entete :global(.col-visuel) {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border: var(--b-pixel) solid var(--c-bordure);
   }
   .col-entete-texte h1 {
     margin-top: var(--e-4);

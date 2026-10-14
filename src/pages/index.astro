@@ -12,7 +12,8 @@ import Bouton from '../components/Bouton.astro';
 import PixelIcone from '../components/PixelIcone.astro';
 import Prix from '../components/Prix.astro';
 import Reassurance from '../components/Reassurance.astro';
-import TransitionBlocs from '../components/TransitionBlocs.astro';
+import Immersion from '../components/Immersion.astro';
+import SeparateurPixels from '../components/SeparateurPixels.astro';
 import CadreLed from '../components/produit/CadreLed.astro';
 import SceneBureau from '../components/produit/SceneBureau.astro';
 import { getCollectionsVisibles, getProduitPhare, lienProduit, prixAPartirDe, variantesAvecPrix } from '../lib/catalogue';
@@ -79,7 +80,7 @@ const faq = [
   imageOg="/og/accueil.png"
   jsonLd={[jsonLdOrganisation(), jsonLdSiteWeb()]}
 >
-  <TransitionBlocs />
+  <Immersion />
 
   <section class="hero">
     <div class="conteneur hero-grille">
@@ -105,12 +106,13 @@ const faq = [
           )
         }
       </div>
-      <div class="hero-visuel">
+      <div class="hero-visuel parallaxe">
         {
           imageHero && photoHero ? (
             <Picture
               src={imageHero}
               alt={`${photoHero.alt}, déco pixel art Lumipix`}
+              class="allumage"
               formats={['avif', 'webp']}
               widths={[480, 720, 960]}
               sizes="(min-width: 60rem) 34rem, 100vw"
@@ -133,8 +135,10 @@ const faq = [
     </div>
   </section>
 
+  <SeparateurPixels />
+
   <section class="conteneur section" aria-labelledby="t-action">
-    <div class="action">
+    <div class="action revele">
       <div class="action-media">
         {
           video && srcVideo ? (
@@ -175,7 +179,7 @@ const faq = [
 
   <section class="conteneur section" aria-labelledby="t-arguments">
     <h2 id="t-arguments">Pourquoi tu vas l’adorer</h2>
-    <ul class="arguments">
+    <ul class="arguments revele-groupe">
       {
         arguments_.map((a) => (
           <li>
@@ -191,7 +195,7 @@ const faq = [
   {
     phare && (
       <section class="section editeur-apercu" aria-labelledby="t-editeur">
-        <div class="conteneur editeur-grille">
+        <div class="conteneur editeur-grille revele">
           <div>
             <h2 id="t-editeur">Dessine ton pixel art avant de le recevoir</h2>
             <p class="texte-doux">
@@ -219,7 +223,7 @@ const faq = [
     phare && variantes.length > 0 && (
       <section class="conteneur section" aria-labelledby="t-tailles">
         <h2 id="t-tailles">Deux tailles, un seul cadre</h2>
-        <ul class="tailles">
+        <ul class="tailles revele-groupe">
           {variantes.map((v, i) => (
             <li>
               <a class="taille" href={lienProduit(phare, v.id)}>
@@ -238,7 +242,7 @@ const faq = [
     collections.length > 0 && (
       <section class="conteneur section" aria-labelledby="t-collections">
         <h2 id="t-collections">Collections</h2>
-        <ul class="collections">
+        <ul class="collections revele-groupe">
           {collections.map((c) => (
             <li>
               <a class="collection" href={lien(`/collections/${c.data.slug}`)}>
@@ -257,12 +261,14 @@ const faq = [
 
   <section class="conteneur section" aria-labelledby="t-reassurance">
     <h2 id="t-reassurance" class="sr-only">Nos engagements</h2>
-    <div class="bloc-reassurance">
+    <div class="bloc-reassurance revele">
       <Reassurance delai={phare?.delai_livraison} livraisonOfferte={phare?.frais_de_port === 0} />
     </div>
   </section>
 
-  <section class="conteneur section faq-courte" aria-labelledby="t-faq">
+  <SeparateurPixels />
+
+  <section class="conteneur section faq-courte revele" aria-labelledby="t-faq">
     <h2 id="t-faq">Questions fréquentes</h2>
     <Accordeon elements={faq} />
   </section>
@@ -296,6 +302,42 @@ const faq = [
   @media (min-width: 60rem) {
     .hero-grille {
       grid-template-columns: 1fr 1.1fr;
+    }
+  }
+  /* Mobile : le cadre d'abord, visible dès l'arrivée, recadré en 4:3 pour laisser la place au texte */
+  @media (max-width: 59.99rem) {
+    .hero {
+      padding-top: var(--e-3);
+    }
+    .hero-grille {
+      gap: var(--e-5);
+    }
+    .hero-visuel {
+      order: -1;
+    }
+    .hero-visuel :global(img) {
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+    }
+    .hero-intro {
+      font-size: var(--t-m);
+    }
+    /* bouton d'achat juste sous le titre, le texte ensuite */
+    .hero-texte {
+      display: flex;
+      flex-direction: column;
+    }
+    .hero-texte h1 {
+      font-size: clamp(1.9rem, 1.4rem + 2.6vw, 2.6rem);
+      margin-bottom: var(--e-3);
+    }
+    .hero-achat {
+      order: 1;
+      margin-top: 0;
+      margin-bottom: var(--e-4);
+    }
+    .hero-intro {
+      order: 2;
     }
   }
   .hero-sur-titre {

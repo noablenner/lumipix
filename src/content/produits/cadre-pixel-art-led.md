@@ -4,7 +4,7 @@ slug: cadre-pixel-art-led
 statut: brouillon
 nom: "Cadre Pixel Art LED"
 sous_titre: "Ton pixel art, en vrai, sur ton bureau"
-description_courte: "Un cadre LED connecté en Bluetooth qui affiche ton pixel art, tes animations et l'heure. En 32x32 ou 64x64, livraison offerte."
+description_courte: "Le cadre pixel art LED connecté en Bluetooth qui affiche ton pixel art, tes animations et l'heure. En 32x32 ou 64x64, livraison offerte."
 collections: ["setup-gaming"]
 type: simple
 
@@ -36,7 +36,7 @@ photos:
     alt: "Écran pixel art du cadre affichant un chat roux sous un ciel étoilé"
 videos:
   - src: "05-demo.mp4"
-    alt: "Démonstration : retrait du film de protection, connexion à l'application, dessin envoyé en direct au cadre puis sapin pixel art"
+    alt: "Démonstration du cadre : retrait du film, connexion à l'application, dessin envoyé en direct, dégradé arc-en-ciel, texte défilant, horloges et animations"
     poster: "05-demo-poster.jpg"
 
 delai_livraison:
@@ -82,7 +82,7 @@ seo:
   mot_cle_principal: "cadre pixel art LED"
   mots_cles_secondaires: ["écran pixel art", "cadre LED pixel", "écran LED 32x32", "cadre pixel art connecté", "écran LED 64x64"]
   title: "Cadre Pixel Art LED connecté 32x32 et 64x64 | Lumipix"
-  meta_description: "Dessine ton pixel art et affiche-le en vrai : cadre LED connecté en Bluetooth, animations, horloge, 32x32 ou 64x64. Livraison offerte en France."
+  meta_description: "Dessine ton pixel art et affiche-le en vrai : ce cadre pixel art LED se connecte en Bluetooth, en 32x32 ou 64x64. Animations, horloge, livraison offerte."
 
 produits_lies: []
 
@@ -111,7 +111,7 @@ Le cadre pixel art LED Lumipix transforme ton bureau en petit écran rétro : un
 
 La version 32x32 aligne 1 024 LED. C'est l'écran LED 32x32 qu'il faut pour du pixel art simple et bien lisible, posé à côté de l'écran ou du clavier.
 
-La version 64x64 en compte 4 096, sur un format de 26 x 26 cm pour 1,7 cm d'épaisseur. Avec quatre fois plus de pixels, l'écran pixel art affiche des images plus fines, et il est assez grand pour faire office de tableau au mur.
+La version 64x64 en compte 4 096 : cet écran LED 64x64 mesure 26 x 26 cm pour 1,7 cm d'épaisseur. Avec quatre fois plus de pixels, l'écran pixel art affiche des images plus fines, et il est assez grand pour faire office de tableau au mur.
 
 ## Un cadre pixel art connecté, mais autonome
 

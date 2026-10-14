@@ -80,7 +80,7 @@ const avecPhotos = resolus.some((e) => e.type === 'photo');
       ))
     }
   </nav>
-  {legende && avecPhotos && <p class="galerie-legende">{legende}</p>}
+  {legende && avecPhotos && <small class="galerie-legende">{legende}</small>}
 </div>
 
 <script>
@@ -136,6 +136,7 @@ const avecPhotos = resolus.some((e) => e.type === 'photo');
     object-fit: cover;
   }
   .galerie-legende {
+    display: block;
     margin: 0;
     font-size: var(--t-xs);
     color: var(--c-texte-doux);

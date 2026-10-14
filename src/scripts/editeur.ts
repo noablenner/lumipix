@@ -30,6 +30,8 @@ export function demarrer(racine: HTMLElement) {
   const led = $<HTMLCanvasElement>('[data-led]')!;
   const ctx = toile.getContext('2d')!;
   const ctxLed = led.getContext('2d')!;
+  const mini = $<HTMLCanvasElement>('[data-led-mini]');
+  const ctxMini = mini?.getContext('2d');
   const statut = $<HTMLElement>('[data-statut]')!;
   const produit = racine.dataset.produit!;
   const formAchat = document.querySelector<HTMLFormElement>('[data-form-achat]');
@@ -141,6 +143,10 @@ export function demarrer(racine: HTMLElement) {
     ctxLed.drawImage(halo, 0, 0, W, W);
     ctxLed.globalAlpha = 1;
     ctxLed.globalCompositeOperation = 'source-over';
+    if (mini && ctxMini && mini.offsetParent) {
+      ctxMini.imageSmoothingEnabled = true;
+      ctxMini.drawImage(led, 0, 0, mini.width, mini.height);
+    }
   }
 
   // ---------- Dessin ----------

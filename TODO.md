@@ -44,3 +44,12 @@ Tous dans `src/config/societe.ts` (source unique), sauf mention contraire.
 - [ ] Page /panier et paiement : phase 4 (le bouton d'ajout enregistre déjà le panier dans le navigateur)
 - [ ] Politique de retour : qui paie les frais de retour ? (à préciser pour les CGV et les données structurées)
 - [ ] Choix DNS : passer les serveurs de noms chez Cloudflare (recommandé, voir README) ou rester sur Hostinger avec `www`
+
+## Avant Stripe (phase 4)
+
+- [ ] Vérifier que le Worker Cloudflare de préproduction répond (adresse workers.dev) avec `CIBLE_DEPLOIEMENT=preprod` et `URL_SITE`
+- [ ] Une fois Cloudflare validé : supprimer la prévisualisation GitHub Pages (`.github/workflows/github-pages.yml`), surtout si le dépôt passe en privé (le workflow échouerait)
+- [ ] Passer le dépôt GitHub en privé
+- [ ] Pages légales (CGV, mentions légales, confidentialité, livraison, retours et formulaire de rétractation) : Stripe demande l'URL des CGV pour la case de consentement, et la loi impose les informations précontractuelles avant le paiement. Placeholders à fournir : directeur de la publication, médiateur, adresse de retour, qui paie le retour
+- [ ] Créer une base Cloudflare D1 (commandes, avis, inscriptions)
+- [ ] Créer un compte Stripe (mode test suffit pour développer), activer les factures et la TVA

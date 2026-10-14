@@ -1,0 +1,31 @@
+---
+/* Rangée de LED qui s'allument une à une au défilement (effet décoratif). */
+const couleurs = ['var(--c-rose)', 'var(--c-violet)', 'var(--c-cyan)', 'var(--c-jaune)'];
+const n = 24;
+---
+
+<div class="separateur-pixels" aria-hidden="true">
+  {Array.from({ length: n }, (_, i) => <span style={`--i:${i};--led:${couleurs[Math.floor((i / n) * couleurs.length)]}`} />)}
+</div>
+
+<style>
+  .separateur-pixels {
+    display: flex;
+    justify-content: center;
+    gap: 6px;
+    margin: var(--e-8) auto 0;
+    padding-inline: var(--e-4);
+  }
+  span {
+    width: 10px;
+    height: 10px;
+    border-radius: 2px;
+    background: var(--led);
+    box-shadow: 0 0 8px var(--led);
+  }
+  @media (max-width: 30rem) {
+    span:nth-child(n + 17) {
+      display: none;
+    }
+  }
+</style>
