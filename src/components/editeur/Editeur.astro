@@ -1,0 +1,389 @@
+---
+/*
+ * Éditeur pixel art (brief §5) : îlot chargé uniquement sur la page du cadre,
+ * et seulement quand la section approche de l'écran. Le HTML est rendu au
+ * build ; la logique (scripts/editeur.ts) arrive à la demande.
+ */
+import PixelIcone from '../PixelIcone.astro';
+import Bouton from '../Bouton.astro';
+import CadreLed from '../produit/CadreLed.astro';
+import SceneBureau from '../produit/SceneBureau.astro';
+import { NOMS_COULEURS, PALETTE } from '../../lib/pixel/dessin';
+import { MODELES } from '../../lib/pixel/modeles';
+import { estPrevisualisation, lien } from '../../lib/routes';
+
+interface Props {
+  slug: string;
+  taille: 32 | 64;
+}
+const { slug, taille } = Astro.props;
+
+const outils = [
+  { id: 'crayon', nom: 'Crayon', touche: 'B' },
+  { id: 'gomme', nom: 'Gomme', touche: 'E' },
+  { id: 'remplir', nom: 'Remplissage', touche: 'G' },
+  { id: 'pipette', nom: 'Pipette', touche: 'I' },
+] as const;
+---
+
+<section
+  id="editeur"
+  class="editeur"
+  aria-labelledby="t-editeur"
+  data-editeur
+  data-produit={slug}
+  data-taille={taille}
+  data-lien-produit={lien(`/produits/${slug}`)}
+  data-partage-serveur={estPrevisualisation ? undefined : ''}
+>
+  <div class="editeur-entete">
+    <h2 id="t-editeur">Dessine ton pixel art</h2>
+    <p class="texte-doux">
+      Dessine au doigt ou à la souris, regarde le rendu en direct sur le cadre allumé, puis exporte ton dessin en PNG pour
+      l’importer dans l’application iDotMatrix.
+    </p>
+  </div>
+
+  <div class="editeur-grille">
+    <div class="editeur-plan">
+      <div class="editeur-barre" role="toolbar" aria-label="Outils de dessin">
+        <div class="editeur-groupe">
+          {
+            outils.map((o) => (
+              <button type="button" class="editeur-outil" data-outil={o.id} aria-pressed={o.id === 'crayon' ? 'true' : 'false'} title={`${o.nom} (${o.touche})`} data-son="clic">
+                {o.nom}
+              </button>
+            ))
+          }
+        </div>
+        <div class="editeur-groupe">
+          <button type="button" class="editeur-outil" data-action="annuler" title="Annuler (Ctrl+Z)" disabled>Annuler</button>
+          <button type="button" class="editeur-outil" data-action="retablir" title="Rétablir (Ctrl+Y)" disabled>Rétablir</button>
+          <button type="button" class="editeur-outil" data-action="effacer" title="Tout effacer" data-son="erreur">Effacer</button>
+        </div>
+      </div>
+
+      <fieldset class="editeur-taille">
+        <legend>Grille</legend>
+        {
+          ([32, 64] as const).map((n) => (
+            <label>
+              <input type="radio" name="editeur-taille" value={n} checked={n === taille} />
+              <span>
+                {n}x{n}
+              </span>
+            </label>
+          ))
+        }
+      </fieldset>
+
+      <div class="editeur-support">
+        <canvas
+          class="editeur-toile"
+          width="640"
+          height="640"
+          tabindex="0"
+          role="img"
+          aria-label="Grille de dessin. Flèches pour déplacer le curseur, Espace pour dessiner."
+          data-toile></canvas>
+        <p class="editeur-chargement" data-chargement>Chargement de l’éditeur…</p>
+      </div>
+
+      <div class="editeur-palette" role="group" aria-label="Couleurs">
+        {
+          PALETTE.map((c, i) => (
+            <button
+              type="button"
+              class="editeur-couleur"
+              style={`--c:${c}`}
+              data-couleur={i}
+              aria-pressed={i === 2 ? 'true' : 'false'}
+              aria-label={NOMS_COULEURS[i]}
+              title={NOMS_COULEURS[i]}
+            />
+          ))
+        }
+      </div>
+
+      <div class="editeur-modeles">
+        <p class="editeur-label">Modèles de départ</p>
+        <div class="editeur-liste-modeles">
+          {
+            Object.entries(MODELES).map(([id, nom]) => (
+              <button type="button" class="editeur-modele" data-modele={id} data-son="clic">
+                <canvas width="32" height="32" aria-hidden="true" data-apercu-modele={id} />
+                <span>{nom}</span>
+              </button>
+            ))
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="editeur-rendu">
+      <SceneBureau ambiance="cyan">
+        <CadreLed scene="vague-neon" taille={taille} pied alt="">
+          <canvas width="640" height="640" role="img" aria-label="Aperçu de ton dessin sur le cadre allumé" data-led></canvas>
+        </CadreLed>
+      </SceneBureau>
+
+      <div class="editeur-actions">
+        <Bouton variante="secondaire" data-action="exporter" data-son="clic">
+          Exporter en PNG <span class="editeur-dim" data-dim>{taille}x{taille}</span>
+        </Bouton>
+        <Bouton variante="secondaire" data-action="partager" data-son="clic">Partager mon dessin</Bouton>
+        <Bouton data-action="panier" data-son="ajout">
+          <PixelIcone nom="panier" taille={20} /> Ajouter le cadre <span data-prix-editeur></span>
+        </Bouton>
+      </div>
+      <div class="editeur-partage" data-zone-partage hidden>
+        <label for="editeur-lien">Lien de ton dessin</label>
+        <input id="editeur-lien" type="text" readonly data-lien-partage />
+      </div>
+      <p class="editeur-statut" role="status" aria-live="polite" data-statut></p>
+    </div>
+  </div>
+  <noscript><p class="texte-doux">L’éditeur pixel art nécessite JavaScript.</p></noscript>
+</section>
+
+<script>
+  // Chargement différé : la logique de l'éditeur n'est téléchargée qu'à l'approche de la section.
+  const racine = document.querySelector<HTMLElement>('[data-editeur]');
+  if (racine) {
+    let charge = false;
+    const charger = () => {
+      if (charge) return;
+      charge = true;
+      import('../../scripts/editeur').then((m) => m.demarrer(racine));
+    };
+    const demande = new URLSearchParams(location.search).has('dessin') || location.hash === '#editeur';
+    if (demande || !('IntersectionObserver' in window)) charger();
+    else {
+      const obs = new IntersectionObserver(
+        (entrees) => {
+          if (entrees.some((e) => e.isIntersecting)) {
+            obs.disconnect();
+            charger();
+          }
+        },
+        { rootMargin: '600px 0px' },
+      );
+      obs.observe(racine);
+    }
+  }
+</script>
+
+<style>
+  .editeur {
+    scroll-margin-top: 80px;
+  }
+  .editeur-entete {
+    max-width: var(--largeur-texte);
+    margin-bottom: var(--e-5);
+  }
+  .editeur-grille {
+    display: grid;
+    gap: var(--e-6);
+    align-items: start;
+  }
+  @media (min-width: 60rem) {
+    .editeur-grille {
+      grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    }
+    .editeur-rendu {
+      position: sticky;
+      top: 88px;
+    }
+  }
+  .editeur-plan {
+    display: grid;
+    gap: var(--e-4);
+    min-width: 0;
+  }
+  .editeur-barre {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--e-2);
+  }
+  .editeur-groupe {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e-2);
+  }
+  .editeur-outil {
+    min-height: 44px;
+    padding: 0 var(--e-3);
+    background: var(--c-surface);
+    border: 2px solid var(--c-bordure-ui);
+    font-family: var(--f-pixel);
+    font-size: var(--t-m);
+    cursor: pointer;
+  }
+  .editeur-outil:hover:not(:disabled) {
+    border-color: var(--c-cyan);
+  }
+  .editeur-outil[aria-pressed='true'] {
+    background: var(--c-cyan);
+    border-color: var(--c-cyan);
+    color: var(--c-sur-neon);
+  }
+  .editeur-outil:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  .editeur-taille {
+    display: flex;
+    align-items: center;
+    gap: var(--e-2);
+    margin: 0;
+    padding: 0;
+    border: 0;
+  }
+  .editeur-taille legend {
+    float: left;
+    margin-right: var(--e-3);
+    font-weight: 700;
+  }
+  .editeur-taille label {
+    position: relative;
+  }
+  .editeur-taille input {
+    position: absolute;
+    opacity: 0;
+    inset: 0;
+    cursor: pointer;
+  }
+  .editeur-taille span {
+    display: inline-grid;
+    place-items: center;
+    min-height: 40px;
+    padding: 0 var(--e-4);
+    border: 2px solid var(--c-bordure-ui);
+    font-family: var(--f-pixel);
+    font-size: var(--t-l);
+  }
+  .editeur-taille input:checked + span {
+    border-color: var(--c-jaune);
+    color: var(--c-jaune);
+  }
+  .editeur-taille input:focus-visible + span {
+    outline: 3px solid var(--c-jaune);
+    outline-offset: 2px;
+  }
+  .editeur-support {
+    position: relative;
+  }
+  .editeur-toile {
+    display: block;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    background: #08080c;
+    border: var(--b-pixel) solid var(--c-bordure-ui);
+    image-rendering: pixelated;
+    touch-action: none;
+    cursor: crosshair;
+  }
+  .editeur-toile:focus-visible {
+    outline: 3px solid var(--c-jaune);
+    outline-offset: 3px;
+  }
+  .editeur-chargement {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    color: var(--c-texte-doux);
+  }
+  .editeur-palette {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: var(--e-2);
+  }
+  .editeur-couleur {
+    aspect-ratio: 1;
+    min-height: 36px;
+    padding: 0;
+    background: var(--c);
+    border: 3px solid #000;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.15);
+    cursor: pointer;
+  }
+  .editeur-couleur[data-couleur='0'] {
+    background: repeating-conic-gradient(#000 0 25%, #2a2a33 0 50%) 0 0 / 12px 12px;
+  }
+  .editeur-couleur[aria-pressed='true'] {
+    border-color: var(--c-jaune);
+    transform: translateY(-2px);
+  }
+  .editeur-label {
+    margin: 0 0 var(--e-2);
+    font-weight: 700;
+  }
+  .editeur-liste-modeles {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: var(--e-2);
+  }
+  @media (min-width: 30rem) {
+    .editeur-liste-modeles {
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+    }
+  }
+  .editeur-modele {
+    display: grid;
+    justify-items: center;
+    gap: var(--e-1);
+    padding: var(--e-2);
+    background: var(--c-surface);
+    border: 2px solid var(--c-bordure-ui);
+    font-size: var(--t-s);
+    cursor: pointer;
+  }
+  .editeur-modele:hover {
+    border-color: var(--c-rose);
+  }
+  .editeur-modele canvas {
+    width: 40px;
+    height: 40px;
+    image-rendering: pixelated;
+    background: #000;
+  }
+  .editeur-rendu {
+    display: grid;
+    gap: var(--e-4);
+    min-width: 0;
+  }
+  .editeur-rendu :global(.bureau) {
+    --bureau-ratio: 1;
+    border: var(--b-pixel) solid var(--c-bordure);
+  }
+  .editeur-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e-3);
+  }
+  .editeur-dim {
+    font-size: var(--t-s);
+    opacity: 0.8;
+  }
+  .editeur-partage {
+    display: grid;
+    gap: var(--e-2);
+  }
+  .editeur-partage input {
+    min-height: 44px;
+    padding: 0 var(--e-3);
+    background: var(--c-fond-2);
+    border: 2px solid var(--c-bordure-ui);
+    font-size: 0.875rem;
+  }
+  .editeur-statut {
+    margin: 0;
+    min-height: 1.5em;
+    color: var(--c-vert);
+    font-weight: 600;
+  }
+</style>

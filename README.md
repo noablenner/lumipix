@@ -2,7 +2,7 @@
 
 Boutique e-commerce pixel art / rétro arcade ([lumipix.shop](https://lumipix.shop)). Le brief complet est dans `CLAUDE.md`.
 
-**État actuel : phase 2 terminée** (rendu du cadre, scènes pixel art, accueil, page produit, collection, 404). Démo du design system : `/design-system`.
+**État actuel : phase 3 terminée** (éditeur pixel art, export PNG, partage par URL avec image Open Graph). Démo du design system : `/design-system`.
 
 ## Installation
 
@@ -18,6 +18,7 @@ npm run dev              # http://localhost:4321
 | --- | --- |
 | `npm run dev` | Serveur de développement |
 | `npm run build` | Vérification TypeScript, build statique dans `dist/`, puis garde-fous |
+| `npm test` | Tests du format de dessin, des modèles et des fonctions de partage |
 | `npm run verifier` | Garde-fous seuls (sur un `dist/` existant) |
 | `npm run preview` | Sert `dist/` en local |
 
@@ -64,6 +65,25 @@ Aucune image fournisseur : tant que `assets/produits/[slug]/` est vide, les visu
 - `/scenes/[scene]-[32|64].svg` : fichiers statiques générés au build.
 - `src/components/produit/CadreLed.astro` : le cadre noir mat en vue de face ou de trois quarts ; `SceneBureau.astro` : la mise en scène de bureau.
 - `/og/[page].png` : images de partage générées au build avec sharp.
+
+## Éditeur pixel art
+
+Sur la page du cadre, section `#editeur` (`src/components/editeur/Editeur.astro`). Le HTML est rendu au build ; la logique (`src/scripts/editeur.ts`, environ 14 Ko) n'est téléchargée qu'à l'approche de la section.
+
+- Grille 32x32 ou 64x64, synchronisée avec la variante choisie sur la page ; un dessin 32x32 passe en 64x64 sans perte.
+- Crayon, gomme, remplissage, pipette, annuler / rétablir, tout effacer ; doigt, souris et clavier (flèches + Espace, Ctrl+Z / Ctrl+Y).
+- Six modèles de départ originaux (`src/lib/pixel/modeles.ts`), palette de 16 couleurs adaptées aux LED.
+- Rendu en direct sur le cadre allumé ; export PNG à la résolution exacte (32x32 ou 64x64) pour l'application iDotMatrix.
+- Brouillon conservé dans le navigateur ; ajout au panier depuis l'éditeur.
+
+### Partage sans stockage serveur
+
+Le dessin entier est encodé dans l'URL (`src/lib/pixel/dessin.ts` : compression par plages + base64url, 80 à 450 caractères pour un dessin courant).
+
+- En production : lien `https://lumipix.shop/dessin/<code>`, servi par la fonction `functions/dessin/[code].ts` (balises Open Graph, puis redirection vers l'éditeur avec le dessin chargé). L'aperçu est généré par `functions/api/dessin/[code].ts` (PNG 600 x 315, encodeur maison sans dépendance, mis en cache sur le réseau Cloudflare).
+- Sur la prévisualisation GitHub Pages (pas de fonctions serveur) : lien direct vers la page produit `?dessin=<code>`, sans image d'aperçu.
+
+Cloudflare Pages détecte automatiquement le dossier `functions/` à la racine du dépôt : aucune configuration supplémentaire.
 
 ## Photos et vidéo produit
 

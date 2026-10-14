@@ -9,9 +9,10 @@
   "scripts": {
     "dev": "astro dev",
     "check": "astro check",
-    "build": "astro check && astro build && npm run verifier",
+    "build": "astro check && npm test && astro build && npm run verifier",
     "verifier": "node scripts/verifier-build.ts",
-    "preview": "astro preview"
+    "preview": "astro preview",
+    "test": "node scripts/tester-dessin.ts"
   },
   "dependencies": {
     "astro": "7.3.8",

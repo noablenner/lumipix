@@ -38,7 +38,9 @@ Tous dans `src/config/societe.ts` (source unique), sauf mention contraire.
 
 - [ ] Curseur pixel optionnel (non fait : effet facultatif du brief, à décider)
 - [ ] Inscription email en double opt-in sur l'accueil : phase 5 (nécessite Resend et D1)
-- [ ] Éditeur pixel art : phase 3 (l'accueil y renvoie déjà via la page produit)
+- [x] Éditeur pixel art (phase 3)
+- [ ] Tester le lien de partage `/dessin/<code>` et son aperçu sur un vrai déploiement Cloudflare Pages (impossible sur GitHub Pages)
+- [ ] Vérifier sur un vrai cadre que l'import d'un PNG 32x32 / 64x64 exporté par l'éditeur fonctionne dans l'application iDotMatrix
 - [ ] Page /panier et paiement : phase 4 (le bouton d'ajout enregistre déjà le panier dans le navigateur)
 - [ ] Politique de retour : qui paie les frais de retour ? (à préciser pour les CGV et les données structurées)
 - [ ] Choix DNS : passer les serveurs de noms chez Cloudflare (recommandé, voir README) ou rester sur Hostinger avec `www`
