@@ -76,6 +76,15 @@ Voir `.env.example`. En production, elles se renseignent dans Cloudflare Pages, 
 2. Réglages de build : preset **Astro**, commande `npm run build`, dossier de sortie `dist`, variable `NODE_VERSION=22`.
 3. Branche de production : `main`. Chaque push sur `main` déploie la production, et chaque autre branche obtient une URL de prévisualisation.
 
+## Prévisualisation GitHub Pages
+
+Chaque push sur `main` publie aussi le site sur **https://noablenner.github.io/lumipix/** (workflow `.github/workflows/github-pages.yml`), pour voir le rendu sans attendre Cloudflare.
+
+- Prérequis (une seule fois) : *Settings > Pages > Build and deployment > Source : GitHub Actions*.
+- Le build est lancé avec `CIBLE_DEPLOIEMENT=github-pages`, qui sert le site sous `/lumipix` et passe **toutes les pages en noindex**. Le canonique pointe toujours vers `lumipix.shop`.
+- Dans le code, tout lien interne passe par `lien('/chemin')` (`src/lib/routes.ts`) pour rester compatible avec ce préfixe.
+- Limite : GitHub Pages ne sert que des fichiers statiques. Le panier, Stripe, D1 et les emails (phases 4 et 5) ne fonctionneront que sur Cloudflare Pages.
+
 ## DNS : domaine chez Hostinger, site chez Cloudflare Pages
 
 > À finaliser en phase 7. Ne rien modifier tant que le site n'est pas prêt.

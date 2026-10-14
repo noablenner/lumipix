@@ -5,6 +5,7 @@
  */
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Bouton from '../components/Bouton.astro';
+import { lien } from '../lib/routes';
 ---
 
 <BaseLayout
@@ -16,7 +17,7 @@ import Bouton from '../components/Bouton.astro';
     <p class="pixel texte-doux">INSERT COIN</p>
     <h1>Lumipix arrive bientôt</h1>
     <p class="texte-doux">La boutique est en construction. Le design system est visible ci-dessous.</p>
-    <Bouton href="/design-system">Voir le design system</Bouton>
+    <Bouton href={lien('/design-system')}>Voir le design system</Bouton>
   </section>
 </BaseLayout>
 

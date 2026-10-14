@@ -3,7 +3,8 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { SOCIETE } from '../config/societe';
-import { cheminPublic } from '../lib/routes';
+import { cheminPublic, estPrevisualisation, lien } from '../lib/routes';
+import policeTitres from '../styles/fonts/pixelify-sans-latin-700-normal.woff2?url';
 
 interface Props {
   /** Title unique de la page (le nom de marque est ajouté s'il manque). */
@@ -20,8 +21,10 @@ interface Props {
 
 const { title, description, noindex = false, imageOg, typeOg = 'website', jsonLd } = Astro.props;
 const titreComplet = title.includes(SOCIETE.marque) ? title : `${title} | ${SOCIETE.marque}`;
-const canonique = new URL(cheminPublic(Astro.url.pathname), Astro.site).href;
-const urlImageOg = imageOg ? new URL(imageOg, Astro.site).href : undefined;
+// Le canonique pointe toujours vers le domaine de production, même en prévisualisation.
+const canonique = new URL(cheminPublic(Astro.url.pathname), SOCIETE.urlSite).href;
+const indexer = !noindex && !estPrevisualisation;
+const urlImageOg = imageOg ? new URL(imageOg, SOCIETE.urlSite).href : undefined;
 const jetonAnalytics = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
 ---
 
@@ -33,10 +36,10 @@ const jetonAnalytics = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
     <title>{titreComplet}</title>
     <meta name="description" content={description} />
     <link rel="canonical" href={canonique} />
-    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    {!indexer && <meta name="robots" content="noindex, nofollow" />}
     <meta name="theme-color" content="#0a0a18" />
-    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <link rel="preload" href="/fonts/pixelify-sans-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="icon" href={lien('/favicon.svg')} type="image/svg+xml" />
+    <link rel="preload" href={policeTitres} as="font" type="font/woff2" crossorigin />
 
     <meta property="og:locale" content="fr_FR" />
     <meta property="og:site_name" content={SOCIETE.marque} />

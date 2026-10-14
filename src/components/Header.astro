@@ -3,7 +3,7 @@ import Logo from './Logo.astro';
 import BoutonSon from './BoutonSon.astro';
 import PixelIcone from './PixelIcone.astro';
 import { getCollectionsVisibles } from '../lib/catalogue';
-import { cheminPublic, routeExiste } from '../lib/routes';
+import { cheminPublic, lien, routeExiste } from '../lib/routes';
 
 /*
  * Navigation : uniquement les collections qui ont au moins un produit actif,
@@ -22,7 +22,7 @@ const panierDisponible = routeExiste('/panier');
 
 <header class="entete">
   <div class="conteneur entete-barre">
-    <a href="/" class="entete-logo" aria-label="Lumipix, accueil">
+    <a href={lien('/')} class="entete-logo" aria-label="Lumipix, accueil">
       <Logo />
     </a>
 
@@ -32,7 +32,7 @@ const panierDisponible = routeExiste('/panier');
           <ul>
             {liens.map((l) => (
               <li>
-                <a href={l.href} aria-current={cheminCourant === l.href ? 'page' : undefined}>
+                <a href={lien(l.href)} aria-current={cheminCourant === l.href ? 'page' : undefined}>
                   {l.label}
                 </a>
               </li>
@@ -46,7 +46,7 @@ const panierDisponible = routeExiste('/panier');
       <BoutonSon />
       {
         panierDisponible && (
-          <a href="/panier" class="entete-panier" aria-label="Panier">
+          <a href={lien('/panier')} class="entete-panier" aria-label="Panier">
             <PixelIcone nom="panier" taille={24} />
             <span class="entete-panier-compte" data-panier-compte hidden />
           </a>

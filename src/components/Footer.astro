@@ -1,7 +1,7 @@
 ---
 import Logo from './Logo.astro';
 import { SOCIETE } from '../config/societe';
-import { routeExiste } from '../lib/routes';
+import { lien, routeExiste } from '../lib/routes';
 
 /* Seuls les liens vers des pages déjà construites sont affichés. */
 const groupes = [
@@ -46,7 +46,7 @@ const annee = new Date().getFullYear();
           <ul>
             {g.liens.map((l) => (
               <li>
-                <a href={l.href}>{l.label}</a>
+                <a href={lien(l.href)}>{l.label}</a>
               </li>
             ))}
           </ul>
