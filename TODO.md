@@ -47,8 +47,9 @@ Tous dans `src/config/societe.ts` (source unique), sauf mention contraire.
 
 ## Avant Stripe (phase 4)
 
-- [ ] Vérifier que le Worker Cloudflare de préproduction répond (adresse workers.dev) avec `CIBLE_DEPLOIEMENT=preprod` et `URL_SITE`
-- [ ] Une fois Cloudflare validé : supprimer la prévisualisation GitHub Pages (`.github/workflows/github-pages.yml`), surtout si le dépôt passe en privé (le workflow échouerait)
+- [x] Worker Cloudflare de préproduction vérifié (7 vérifications sur 8, lien /dessin corrigé par run_worker_first)
+- [x] Prévisualisation GitHub Pages supprimée
+- [x] Base D1 « lumipix » créée (Western Europe) : Database ID à reporter dans wrangler.jsonc en phase 4
 - [ ] Passer le dépôt GitHub en privé
 - [ ] Pages légales (CGV, mentions légales, confidentialité, livraison, retours et formulaire de rétractation) : Stripe demande l'URL des CGV pour la case de consentement, et la loi impose les informations précontractuelles avant le paiement. Placeholders à fournir : directeur de la publication, médiateur, adresse de retour, qui paie le retour
 - [ ] Créer une base Cloudflare D1 (commandes, avis, inscriptions)

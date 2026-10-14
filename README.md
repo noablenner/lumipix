@@ -125,14 +125,9 @@ Réglages du projet dans Cloudflare (*Workers & Pages* > *Create* > *Import a re
 
 Tester le Worker en local : `npm run build && npx wrangler dev`.
 
-## Prévisualisation GitHub Pages
+## Prévisualisation
 
-Chaque push sur `main` publie aussi le site sur **https://noablenner.github.io/lumipix/** (workflow `.github/workflows/github-pages.yml`), pour voir le rendu sans attendre Cloudflare.
-
-- Prérequis (une seule fois) : *Settings > Pages > Build and deployment > Source : GitHub Actions*.
-- Le build est lancé avec `CIBLE_DEPLOIEMENT=github-pages`, qui sert le site sous `/lumipix` et passe **toutes les pages en noindex**. Le canonique pointe toujours vers `lumipix.shop`.
-- Dans le code, tout lien interne passe par `lien('/chemin')` (`src/lib/routes.ts`) pour rester compatible avec ce préfixe.
-- Limite : GitHub Pages ne sert que des fichiers statiques. Le panier, Stripe, D1 et les emails (phases 4 et 5) ne fonctionneront que sur Cloudflare.
+La préproduction tourne sur le Worker Cloudflare (`CIBLE_DEPLOIEMENT=preprod`, adresse workers.dev), redéployé à chaque push sur `main`. L'ancienne prévisualisation GitHub Pages a été supprimée (dépôt privé). La cible `github-pages` reste disponible dans `astro.config.mjs` si besoin.
 
 ## DNS : domaine chez Hostinger, site chez Cloudflare
 

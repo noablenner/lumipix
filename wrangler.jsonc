@@ -9,7 +9,10 @@
     "directory": "./dist",
     "binding": "ASSETS",
     "not_found_handling": "404-page",
-    "html_handling": "auto-trailing-slash"
+    "html_handling": "auto-trailing-slash",
+    // Routes serveur : le Worker passe avant les fichiers statiques. Sans ça, une
+    // navigation directe vers /dessin/<code> reçoit la page 404 sans appeler le Worker.
+    "run_worker_first": ["/dessin/*", "/api/*"]
   },
   "observability": { "enabled": true }
 }
