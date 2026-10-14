@@ -16,7 +16,7 @@ export default defineConfig({
   trailingSlash: 'never',
   build: {
     format: 'file',
-    inlineStylesheets: 'auto',
+    inlineStylesheets: 'always',
   },
   devToolbar: { enabled: false },
 });

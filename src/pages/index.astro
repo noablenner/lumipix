@@ -4,6 +4,7 @@
  * secondaires : « déco gaming pixel » et « Lumipix ». Tout est centré sur le
  * cadre pixel art LED, produit phare.
  */
+import { Picture, getImage } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Accordeon from '../components/Accordeon.astro';
 import Badge from '../components/Badge.astro';
@@ -17,6 +18,7 @@ import SceneBureau from '../components/produit/SceneBureau.astro';
 import { getCollectionsVisibles, getProduitPhare, lienProduit, prixAPartirDe, variantesAvecPrix } from '../lib/catalogue';
 import { formatDelai, formatPrix } from '../lib/format';
 import { lien } from '../lib/routes';
+import { imageProduit, urlVideoProduit } from '../lib/medias';
 import { jsonLdOrganisation, jsonLdSiteWeb } from '../lib/seo';
 import { BOUTIQUE } from '../config/boutique';
 import type { NomScene } from '../lib/pixel/scenes';
@@ -25,10 +27,13 @@ const phare = await getProduitPhare();
 const collections = await getCollectionsVisibles();
 const variantes = phare ? variantesAvecPrix(phare) : [];
 const delai = phare ? formatDelai(phare.delai_livraison.min_jours_ouvres, phare.delai_livraison.max_jours_ouvres) : undefined;
-// Vidéo du cadre en fonctionnement : utilisée dès qu'elle est déclarée dans la fiche.
-const fichiersVideo = import.meta.glob<string>('/assets/produits/**/*.{mp4,webm}', { query: '?url', import: 'default', eager: true });
+// Photo principale et vidéo du cadre en fonctionnement, dès qu'elles sont déclarées dans la fiche.
+const photoHero = phare?.photos[0];
+const imageHero = photoHero && phare ? await imageProduit(phare.slug, photoHero.src) : undefined;
 const video = phare?.videos[0];
-const srcVideo = video && phare ? fichiersVideo[`/assets/produits/${phare.slug}/${video.src}`] : undefined;
+const srcVideo = video && phare ? urlVideoProduit(phare.slug, video.src) : undefined;
+const poster =
+  video?.poster && phare ? await getImage({ src: await imageProduit(phare.slug, video.poster), format: 'webp', width: 1280 }) : undefined;
 
 const demo: NomScene[] = ['coeur', 'vague-neon', 'chat', 'horloge'];
 
@@ -101,15 +106,29 @@ const faq = [
         }
       </div>
       <div class="hero-visuel">
-        <SceneBureau>
-          <CadreLed
-            scene="coucher-soleil"
-            taille={64}
-            pied
-            prioritaire
-            alt="Cadre pixel art LED posé sur un bureau, écran allumé sur un coucher de soleil rétro, déco pixel art Lumipix"
-          />
-        </SceneBureau>
+        {
+          imageHero && photoHero ? (
+            <Picture
+              src={imageHero}
+              alt={`${photoHero.alt}, déco pixel art Lumipix`}
+              formats={['avif', 'webp']}
+              widths={[480, 720, 960]}
+              sizes="(min-width: 60rem) 34rem, 100vw"
+              loading="eager"
+              fetchpriority="high"
+            />
+          ) : (
+            <SceneBureau>
+              <CadreLed
+                scene="coucher-soleil"
+                taille={64}
+                pied
+                prioritaire
+                alt="Cadre pixel art LED posé sur un bureau, écran allumé sur un coucher de soleil rétro, déco pixel art Lumipix"
+              />
+            </SceneBureau>
+          )
+        }
       </div>
     </div>
   </section>
@@ -119,7 +138,19 @@ const faq = [
       <div class="action-media">
         {
           video && srcVideo ? (
-            <video src={srcVideo} controls muted playsinline preload="none" aria-label={video.alt} />
+            <video
+              src={srcVideo}
+              poster={poster?.src}
+              width="1280"
+              height="720"
+              controls
+              muted
+              loop
+              playsinline
+              preload="none"
+              aria-label={video.alt}
+              data-video-auto
+            />
           ) : (
             <div class="action-boucle" aria-label="Le cadre change d’image : cœur, vagues néon, chat, horloge" role="img">
               {demo.map((s, i) => (
@@ -237,6 +268,17 @@ const faq = [
   </section>
 </BaseLayout>
 
+<script>
+  // Lecture automatique (muette) quand la vidéo est visible, sauf en mouvement réduit.
+  const video = document.querySelector<HTMLVideoElement>('[data-video-auto]');
+  if (video && !matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+    new IntersectionObserver(([e]) => {
+      if (e?.isIntersecting) video.play().catch(() => {});
+      else video.pause();
+    }, { threshold: 0.5 }).observe(video);
+  }
+</script>
+
 <style>
   .section {
     margin-top: var(--e-9);
@@ -282,6 +324,10 @@ const faq = [
     align-items: center;
     gap: var(--e-2) var(--e-3);
   }
+  .hero-visuel :global(img) {
+    width: 100%;
+    height: auto;
+  }
   .hero-visuel {
     border: var(--b-pixel) solid var(--c-bordure);
     box-shadow: 8px 8px 0 0 rgb(255 79 168 / 0.35);
@@ -303,6 +349,8 @@ const faq = [
     border: var(--b-pixel) solid var(--c-bordure);
   }
   .action-media video {
+    display: block;
+    height: auto;
     width: 100%;
   }
   .action-boucle {

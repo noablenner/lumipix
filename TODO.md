@@ -24,7 +24,11 @@ Tous dans `src/config/societe.ts` (source unique), sauf mention contraire.
 - [ ] Rendu SVG : la version 32x32 utilise le même gabarit que la 64x64 tant que ses dimensions ne sont pas mesurées
 - [ ] Vidéo du cadre en fonctionnement : à déposer dans `assets/produits/cadre-pixel-art-led/` et à déclarer dans `videos` (l'accueil affiche une boucle de scènes en attendant)
 - [ ] Passer `statut: actif` quand la fiche est complète (tant qu'il est en brouillon, la collection setup-gaming reste masquée)
-- [ ] Visuels : `assets/produits/cadre-pixel-art-led/` est vide, le rendu SVG/CSS (phase 2) sert en attendant
+- [x] Visuels : 4 photos et 1 vidéo retravaillées depuis les médias fournisseur (texte retiré, écrans remplacés par nos scènes)
+- [ ] **Droits sur les photos** : elles restent la propriété du vendeur. Lui demander par écrit l'autorisation de les utiliser (et garder la réponse), ou les remplacer par nos propres photos dès réception de l'échantillon
+- [ ] Photos de la version 32x32 : aucune pour l'instant (la galerie précise « version 64x64 »)
+- [ ] Marque « iDM / Pixel 64 » imprimée sur le carton d'origine : le client la verra à la réception, à prendre en compte (packaging neutre ou mention sur la fiche)
+- [ ] Sources brutes du fournisseur dans `sources/fournisseur/` : jamais publiées, mais visibles dans le dépôt public (et dans son historique)
 
 ## Collection setup-gaming
 

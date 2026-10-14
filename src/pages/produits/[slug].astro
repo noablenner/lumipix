@@ -56,9 +56,8 @@ const ariane = [
 ];
 
 const motCle = produit.seo.mot_cle_principal;
-const galerie: ElementGalerie[] = produit.photos.length
-  ? produit.photos.map((p) => ({ type: 'photo' as const, ...p }))
-  : [
+// Vraies photos d'abord, puis le rendu du cadre, qui montre ce que le client peut créer (brief §10 bis).
+const rendus: ElementGalerie[] = [
       {
         type: 'rendu',
         scene: 'coucher-soleil',
@@ -71,6 +70,9 @@ const galerie: ElementGalerie[] = produit.photos.length
       { type: 'rendu', scene: 'horloge', alt: `${produit.nom} en mode horloge`, basculable: true },
       { type: 'rendu', scene: 'fusee', vue: 'trois-quarts', alt: `${produit.nom} affichant une fusée en pixel art`, basculable: true },
     ];
+const galerie: ElementGalerie[] = produit.photos.length
+  ? [...produit.photos.map((p) => ({ type: 'photo' as const, ...p })), ...rendus.slice(1, 3)]
+  : rendus;
 // Texte alternatif de l'image principale : contient le mot-clé principal.
 if (galerie[0] && !galerie[0].alt.toLowerCase().includes(motCle.toLowerCase())) {
   galerie[0] = { ...galerie[0], alt: `${motCle.charAt(0).toUpperCase()}${motCle.slice(1)} : ${galerie[0].alt}` };
@@ -112,7 +114,12 @@ const brouillon = produit.statut !== 'actif';
     }
 
     <div class="fiche-haut">
-      <Galerie slug={produit.slug} elements={galerie} taille={tailleDe(parDefaut.id)} />
+      <Galerie
+        slug={produit.slug}
+        elements={galerie}
+        taille={tailleDe(parDefaut.id)}
+        legende={estCadre ? 'Photos : version 64x64, contenu des écrans simulé avec nos scènes originales.' : undefined}
+      />
 
       <div class="fiche-achat">
         <h1>{produit.nom}</h1>

@@ -1,7 +1,9 @@
 ---
 import Badge from '../Badge.astro';
 import Prix from '../Prix.astro';
+import { Picture } from 'astro:assets';
 import CadreLed from './CadreLed.astro';
+import { imageProduit } from '../../lib/medias';
 import { lienProduit, prixAPartirDe, type ProduitPublic } from '../../lib/catalogue';
 import type { NomScene } from '../../lib/pixel/scenes';
 
@@ -11,12 +13,20 @@ interface Props {
   niveauTitre?: 'h2' | 'h3';
 }
 const { produit, scene = 'coucher-soleil', niveauTitre: Titre = 'h3' } = Astro.props;
+const photo = produit.photos[0];
+const image = photo ? await imageProduit(produit.slug, photo.src) : undefined;
 ---
 
 <article class="carte-produit">
-  <div class="carte-produit-visuel">
-    <CadreLed scene={scene} taille={32} alt={`${produit.nom} allumé`} />
-  </div>
+  {
+    image && photo ? (
+      <Picture class="carte-produit-photo" src={image} alt={photo.alt} formats={['avif', 'webp']} widths={[360, 640]} sizes="22rem" loading="lazy" />
+    ) : (
+      <div class="carte-produit-visuel">
+        <CadreLed scene={scene} taille={32} alt={`${produit.nom} allumé`} />
+      </div>
+    )
+  }
   <div class="carte-produit-texte">
     {produit.frais_de_port === 0 && <Badge ton="jaune">Livraison offerte</Badge>}
     <Titre class="carte-produit-nom"><a class="lien-carte" href={lienProduit(produit)}>{produit.nom}</a></Titre>
@@ -45,6 +55,12 @@ const { produit, scene = 'coucher-soleil', niveauTitre: Titre = 'h3' } = Astro.p
   .carte-produit-visuel {
     padding: 12%;
     background: radial-gradient(70% 60% at 50% 45%, #1d1a40, #0c0b1e);
+  }
+  .carte-produit :global(.carte-produit-photo) {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    object-fit: cover;
   }
   .carte-produit-texte {
     display: grid;

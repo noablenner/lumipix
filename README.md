@@ -65,6 +65,12 @@ Aucune image fournisseur : tant que `assets/produits/[slug]/` est vide, les visu
 - `src/components/produit/CadreLed.astro` : le cadre noir mat en vue de face ou de trois quarts ; `SceneBureau.astro` : la mise en scène de bureau.
 - `/og/[page].png` : images de partage générées au build avec sharp.
 
+## Photos et vidéo produit
+
+`assets/produits/cadre-pixel-art-led/` contient les visuels publiés : photos et vidéo du fournisseur retravaillées (texte marketing retiré, écrans remplacés par nos scènes originales, son supprimé). Les fichiers bruts sont dans `sources/fournisseur/`, qui n'est jamais servi par le site. La galerie précise que le contenu des écrans est simulé.
+
+Pour refaire un visuel : détecter les coins de l'écran, puis incruster une scène rendue en 1024 px (`src/lib/pixel/`) en perspective, avec un léger halo.
+
 ## Brouillons et prévisualisation
 
 Un produit `brouillon` n'existe pas en production. En développement (`npm run dev`) et sur la prévisualisation GitHub Pages, il est publié avec un bandeau « Brouillon » et en noindex, pour voir le rendu avant de le passer en `actif`.
