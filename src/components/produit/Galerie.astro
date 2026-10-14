@@ -126,8 +126,12 @@ const avecPhotos = resolus.some((e) => e.type === 'photo');
   .galerie-diapo :global(img) {
     width: 100%;
   }
+  /* Diapositives carrées : les photos du cadre ne sont jamais rognées */
+  .galerie {
+    --bureau-ratio: 1;
+  }
   .galerie-diapo :global(.galerie-photo) {
-    aspect-ratio: 4 / 3.4;
+    aspect-ratio: 1;
     height: 100%;
     object-fit: cover;
   }
@@ -139,7 +143,7 @@ const avecPhotos = resolus.some((e) => e.type === 'photo');
   .galerie-fond {
     display: grid;
     place-items: center;
-    aspect-ratio: 4 / 3.4;
+    aspect-ratio: 1;
     padding: 12%;
     background: radial-gradient(70% 60% at 50% 45%, #1d1a40, #0c0b1e);
   }

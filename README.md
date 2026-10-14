@@ -69,7 +69,7 @@ Aucune image fournisseur : tant que `assets/produits/[slug]/` est vide, les visu
 
 `assets/produits/cadre-pixel-art-led/` contient les visuels publiés : photos et vidéo du fournisseur retravaillées (texte marketing retiré, écrans remplacés par nos scènes originales, son supprimé). Les fichiers bruts sont dans `sources/fournisseur/`, qui n'est jamais servi par le site. La galerie précise que le contenu des écrans est simulé.
 
-Pour refaire un visuel : détecter les coins de l'écran, puis incruster une scène rendue en 1024 px (`src/lib/pixel/`) en perspective, avec un léger halo.
+Pour refaire les visuels : `node scripts/visuels/grilles.ts && python3 scripts/visuels/composer.py` (dépendances : `pip install opencv-python-headless numpy`). L'écran est simulé comme une vraie photo d'écran LED : diodes carrées aux coins arrondis, cœur lumineux, halo, noirs profonds, reflet sur le plateau.
 
 ## Brouillons et prévisualisation
 

@@ -15,3 +15,4 @@ node_modules/
 # divers
 .DS_Store
 npm-debug.log*
+scripts/visuels/grilles.json

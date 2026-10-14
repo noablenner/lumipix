@@ -25,11 +25,11 @@ photos:
   - src: "01-hero.jpg"
     alt: "Cadre pixel art LED 64x64 posé sur un bureau, écran allumé sur un coucher de soleil rétro"
   - src: "02-ambiance.jpg"
-    alt: "Trois cadres LED pixel accrochés au mur d'un salon : vagues néon, coucher de soleil et ciel étoilé"
+    alt: "Trois cadres LED pixel accrochés au mur d'un salon : vagues néon, coucher de soleil et chat"
   - src: "03-cadeau.jpg"
     alt: "Écran pixel art affichant un cœur, posé près d'un sapin et de cadeaux"
   - src: "04-dimensions.jpg"
-    alt: "Dimensions du cadre 64x64 : 260 x 260 mm pour 17 mm d'épaisseur"
+    alt: "Dimensions du cadre 64x64 en mode horloge : 260 x 260 mm pour 17 mm d'épaisseur"
 videos:
   - src: "05-demo.mp4"
     alt: "Démonstration : retrait du film de protection, connexion à l'application, dessin envoyé en direct au cadre puis sapin pixel art"
