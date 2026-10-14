@@ -59,6 +59,23 @@ const panierDisponible = routeExiste('/panier');
   </div>
 </header>
 
+<script>
+  import { nombreArticles, EVENEMENT_PANIER } from '../scripts/panier';
+
+  // Pastille du nombre d'articles, à jour après un ajout ou un changement dans un autre onglet.
+  function majCompte() {
+    const pastille = document.querySelector<HTMLElement>('[data-panier-compte]');
+    if (!pastille) return;
+    const n = nombreArticles();
+    pastille.textContent = String(n);
+    pastille.hidden = n === 0;
+    pastille.closest('a')?.setAttribute('aria-label', n ? `Panier, ${n} article${n > 1 ? 's' : ''}` : 'Panier');
+  }
+  majCompte();
+  window.addEventListener(EVENEMENT_PANIER, majCompte);
+  window.addEventListener('storage', majCompte);
+</script>
+
 <style>
   .entete {
     position: sticky;

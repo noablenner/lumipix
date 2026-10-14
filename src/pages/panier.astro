@@ -1,0 +1,361 @@
+---
+/*
+ * Panier (brief §5 et §9) : multi-produits, multi-variantes, stocké dans le
+ * navigateur. Récapitulatif clair, frais de port et délai visibles avant le
+ * paiement, informations précontractuelles et lien vers les CGV.
+ * Le paiement (Stripe Checkout) arrive en phase 4 : le bouton reste inactif
+ * tant que la fonction serveur n'existe pas.
+ */
+import { getImage } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Bouton from '../components/Bouton.astro';
+import Notice from '../components/Notice.astro';
+import PixelIcone from '../components/PixelIcone.astro';
+import Reassurance from '../components/Reassurance.astro';
+import { getProduitPhare, getProduitsPublies, lienProduit, variantesAvecPrix } from '../lib/catalogue';
+import { imageProduit } from '../lib/medias';
+import { lien } from '../lib/routes';
+import type { ArticleCatalogue } from '../lib/panier-calcul';
+import { BOUTIQUE } from '../config/boutique';
+
+const [produits, phare] = await Promise.all([getProduitsPublies(), getProduitPhare()]);
+
+// Données publiques uniquement (jamais le bloc fournisseur, déjà retiré par le catalogue).
+const catalogue: ArticleCatalogue[] = await Promise.all(
+  produits.map(async (p) => {
+    const photo = p.photos[0];
+    const image = photo
+      ? (await getImage({ src: await imageProduit(p.slug, photo.src), width: 192, height: 192, format: 'webp' })).src
+      : lien('/scenes/coucher-soleil-32.svg');
+    return {
+      slug: p.slug,
+      nom: p.nom,
+      lien: lienProduit(p),
+      image,
+      frais_de_port: p.frais_de_port,
+      delai: { min: p.delai_livraison.min_jours_ouvres, max: p.delai_livraison.max_jours_ouvres },
+      variantes: variantesAvecPrix(p).map((v) => ({ id: v.id, nom: v.nom, prix_ttc: v.prix_ttc, disponible: v.disponible })),
+    };
+  }),
+);
+const reglages = { seuil: BOUTIQUE.seuilLivraisonGratuite };
+---
+
+<BaseLayout title="Ton panier | Lumipix" description="Récapitulatif de ton panier Lumipix : articles, frais de port et délai de livraison." noindex>
+  <div class="conteneur panier">
+    <h1>Ton panier</h1>
+
+    <script type="application/json" id="catalogue-panier" set:html={JSON.stringify(catalogue)} />
+    <script type="application/json" id="reglages-panier" set:html={JSON.stringify(reglages)} />
+
+    <p class="panier-chargement texte-doux" data-etat="chargement">Chargement du panier…</p>
+
+    <div class="panier-vide" data-etat="vide" hidden>
+      <p>Ton panier est vide pour l’instant.</p>
+      {
+        phare && (
+          <Bouton href={lienProduit(phare)} taille="grand">
+            Découvrir le {phare.nom.toLowerCase()} <PixelIcone nom="fleche-droite" taille={20} />
+          </Bouton>
+        )
+      }
+    </div>
+
+    <p class="panier-retirees" data-retirees role="status" hidden></p>
+
+    <div class="panier-grille" data-etat="plein" hidden>
+      <ul class="panier-lignes" data-lignes aria-label="Articles du panier"></ul>
+
+      <aside class="panier-recap" aria-labelledby="titre-recap">
+        <h2 id="titre-recap">Récapitulatif</h2>
+        <dl>
+          <div><dt>Sous-total</dt><dd data-sous-total></dd></div>
+          <div><dt>Livraison (France métropolitaine)</dt><dd data-port></dd></div>
+          <div class="panier-total"><dt>Total TTC</dt><dd data-total></dd></div>
+        </dl>
+        <p class="texte-doux panier-delai" data-delai></p>
+
+        <Bouton taille="grand" pleineLargeur disabled data-payer aria-describedby="paiement-bientot">
+          <PixelIcone nom="cadenas" taille={20} /> Paiement sécurisé
+        </Bouton>
+        <p id="paiement-bientot" class="panier-bientot">Le paiement en ligne ouvre très bientôt.</p>
+
+        <ul class="panier-precontrat">
+          <li>Prix en euros, toutes taxes comprises (TVA 20 % incluse).</li>
+          <li>Livraison en France métropolitaine uniquement.</li>
+          <li>
+            {BOUTIQUE.delaiRetractationJours} jours pour te rétracter après la réception, voir
+            <a href={lien('/retours')}>retours et rétractation</a>.
+          </li>
+          <li>
+            Le paiement vaut acceptation des <a href={lien('/cgv')}>conditions générales de vente</a>, que tu confirmeras sur
+            la page de paiement.
+          </li>
+        </ul>
+      </aside>
+    </div>
+
+    <noscript>
+      <Notice ton="alerte" titre="JavaScript désactivé">
+        <p>Le panier est conservé dans ton navigateur et a besoin de JavaScript pour s’afficher.</p>
+      </Notice>
+    </noscript>
+
+    <div class="panier-reassurance">
+      <Reassurance compact />
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import { calculerPanier, QUANTITE_MAX, type ArticleCatalogue } from '../lib/panier-calcul';
+  import { changerQuantite, ecrirePanier, lirePanier, EVENEMENT_PANIER } from '../scripts/panier';
+  import { formatDelai, formatPrix } from '../lib/format';
+
+  const catalogue: ArticleCatalogue[] = JSON.parse(document.getElementById('catalogue-panier')!.textContent!);
+  const { seuil } = JSON.parse(document.getElementById('reglages-panier')!.textContent!) as { seuil: number | null };
+  const $ = <T extends HTMLElement>(s: string) => document.querySelector<T>(s)!;
+  const liste = $<HTMLUListElement>('[data-lignes]');
+
+  function etat(nom: 'vide' | 'plein') {
+    document.querySelectorAll<HTMLElement>('[data-etat]').forEach((el) => (el.hidden = el.dataset.etat !== nom));
+  }
+
+  function el<K extends keyof HTMLElementTagNameMap>(tag: K, attrs: Record<string, string> = {}, texte?: string) {
+    const n = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs)) n.setAttribute(k, v);
+    if (texte !== undefined) n.textContent = texte;
+    return n;
+  }
+
+  function afficher() {
+    const recap = calculerPanier(lirePanier(), catalogue, seuil);
+
+    // Un produit retiré du catalogue ou une variante épuisée sort du panier, et on le dit.
+    if (recap.retirees.length || recap.lignes.length !== lirePanier().length) {
+      ecrirePanier(recap.lignes.map((l) => ({ produit: l.produit.slug, variante: l.variante.id, quantite: l.quantite })));
+    }
+    if (recap.retirees.length) {
+      const info = $('[data-retirees]');
+      info.textContent = `${recap.retirees.length > 1 ? 'Des articles ont été retirés' : 'Un article a été retiré'} de ton panier car ${recap.retirees.length > 1 ? 'ils ne sont' : 'il n’est'} plus disponible${recap.retirees.length > 1 ? 's' : ''}.`;
+      info.hidden = false;
+    }
+
+    if (!recap.lignes.length) return etat('vide');
+    etat('plein');
+
+    liste.replaceChildren(
+      ...recap.lignes.map((l) => {
+        const li = el('li', { class: 'ligne' });
+        const img = el('img', { src: l.produit.image, alt: '', width: '96', height: '96', loading: 'lazy', decoding: 'async' });
+        const infos = el('div', { class: 'ligne-infos' });
+        const nom = el('a', { href: l.produit.lien, class: 'ligne-nom' }, l.produit.nom);
+        infos.append(nom, el('p', { class: 'ligne-variante' }, l.variante.nom), el('p', { class: 'ligne-prix-u texte-doux' }, `${formatPrix(l.variante.prix_ttc)} l’unité`));
+
+        const libelle = `${l.produit.nom}, ${l.variante.nom}`;
+        const qte = el('div', { class: 'ligne-qte', role: 'group', 'aria-label': `Quantité pour ${libelle}` });
+        const moins = el('button', { type: 'button', 'aria-label': l.quantite === 1 ? `Retirer ${libelle}` : 'Diminuer la quantité' }, '−');
+        const valeur = el('output', { 'aria-live': 'polite' }, String(l.quantite));
+        const plus = el('button', { type: 'button', 'aria-label': 'Augmenter la quantité' }, '+');
+        if (l.quantite >= QUANTITE_MAX) plus.setAttribute('disabled', '');
+        moins.addEventListener('click', () => changerQuantite(l.produit.slug, l.variante.id, l.quantite - 1));
+        plus.addEventListener('click', () => changerQuantite(l.produit.slug, l.variante.id, l.quantite + 1));
+        qte.append(moins, valeur, plus);
+
+        const retirer = el('button', { type: 'button', class: 'ligne-retirer' }, 'Retirer');
+        retirer.setAttribute('aria-label', `Retirer ${libelle} du panier`);
+        retirer.addEventListener('click', () => changerQuantite(l.produit.slug, l.variante.id, 0));
+
+        const total = el('p', { class: 'ligne-total' }, formatPrix(l.total));
+        const actions = el('div', { class: 'ligne-actions' });
+        actions.append(qte, retirer);
+        infos.append(actions);
+        li.append(img, infos, total);
+        return li;
+      }),
+    );
+
+    $('[data-sous-total]').textContent = formatPrix(recap.sousTotal);
+    $('[data-port]').textContent = recap.port === 0 ? 'Offerte' : formatPrix(recap.port);
+    $('[data-total]').textContent = formatPrix(recap.total);
+    $('[data-delai]').textContent = recap.delai ? `Livraison estimée en ${formatDelai(recap.delai.min, recap.delai.max)} après la commande.` : '';
+  }
+
+  afficher();
+  window.addEventListener(EVENEMENT_PANIER, afficher);
+  // Panier modifié dans un autre onglet
+  window.addEventListener('storage', (e) => e.key === 'lumipix:panier' && afficher());
+</script>
+
+<style>
+  .panier {
+    padding-block: var(--e-5) var(--e-8);
+  }
+  .panier h1 {
+    font-size: var(--t-2xl);
+  }
+  .panier-vide {
+    display: grid;
+    justify-items: start;
+    gap: var(--e-4);
+    margin-top: var(--e-5);
+  }
+  .panier-retirees {
+    margin-top: var(--e-4);
+    color: var(--c-jaune);
+  }
+  .panier-grille {
+    display: grid;
+    gap: var(--e-6);
+    margin-top: var(--e-5);
+  }
+  .panier-grille[hidden],
+  .panier-vide[hidden] {
+    display: none;
+  }
+  .panier-lignes {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: var(--e-3);
+  }
+  .panier-lignes :global(.ligne) {
+    display: grid;
+    grid-template-columns: 72px 1fr auto;
+    gap: var(--e-3);
+    align-items: start;
+    padding: var(--e-3);
+    background: var(--c-surface);
+    border: var(--b-pixel) solid var(--c-bordure);
+  }
+  .panier-lignes :global(img) {
+    width: 72px;
+    height: 72px;
+    object-fit: cover;
+    image-rendering: auto;
+    background: var(--c-fond-2);
+  }
+  .panier-lignes :global(.ligne-nom) {
+    color: var(--c-texte);
+    font-weight: 700;
+    text-decoration: none;
+  }
+  .panier-lignes :global(.ligne-nom:hover) {
+    color: var(--c-cyan);
+  }
+  .panier-lignes :global(p) {
+    margin: 0;
+  }
+  .panier-lignes :global(.ligne-prix-u) {
+    font-size: var(--t-s);
+  }
+  .panier-lignes :global(.ligne-total) {
+    font-family: var(--f-pixel);
+    font-size: var(--t-l);
+  }
+  .panier-lignes :global(.ligne-actions) {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--e-3);
+    margin-top: var(--e-2);
+  }
+  .panier-lignes :global(.ligne-qte) {
+    display: inline-flex;
+    align-items: center;
+    border: var(--b-pixel) solid var(--c-bordure-ui);
+  }
+  .panier-lignes :global(.ligne-qte button) {
+    width: var(--cible);
+    height: var(--cible);
+    background: none;
+    border: 0;
+    color: var(--c-texte);
+    font-size: var(--t-l);
+    cursor: pointer;
+  }
+  .panier-lignes :global(.ligne-qte button:disabled) {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .panier-lignes :global(.ligne-qte output) {
+    min-width: 2ch;
+    text-align: center;
+    font-family: var(--f-pixel);
+    font-size: var(--t-l);
+  }
+  .panier-lignes :global(.ligne-retirer) {
+    min-height: var(--cible);
+    padding-inline: var(--e-2);
+    background: none;
+    border: 0;
+    color: var(--c-texte-doux);
+    text-decoration: underline;
+    cursor: pointer;
+  }
+  .panier-lignes :global(.ligne-retirer:hover) {
+    color: var(--c-rose);
+  }
+  .panier-recap {
+    align-self: start;
+    padding: var(--e-4);
+    background: var(--c-surface);
+    border: var(--b-pixel) solid var(--c-bordure-ui);
+  }
+  .panier-recap h2 {
+    font-size: var(--t-xl);
+    margin: 0 0 var(--e-3);
+  }
+  .panier-recap dl {
+    display: grid;
+    gap: var(--e-2);
+    margin: 0;
+  }
+  .panier-recap dl div {
+    display: flex;
+    justify-content: space-between;
+    gap: var(--e-3);
+  }
+  .panier-recap dd {
+    margin: 0;
+    font-weight: 700;
+  }
+  .panier-total {
+    padding-top: var(--e-2);
+    border-top: var(--b-pixel) solid var(--c-bordure);
+    font-size: var(--t-l);
+  }
+  .panier-delai {
+    margin: var(--e-3) 0 var(--e-4);
+    font-size: var(--t-s);
+  }
+  .panier-bientot {
+    margin: var(--e-2) 0 0;
+    font-size: var(--t-s);
+    color: var(--c-jaune);
+    text-align: center;
+  }
+  .panier-precontrat {
+    margin: var(--e-4) 0 0;
+    padding-left: var(--e-4);
+    font-size: var(--t-s);
+    color: var(--c-texte-doux);
+    display: grid;
+    gap: var(--e-1);
+  }
+  .panier-reassurance {
+    margin-top: var(--e-7);
+  }
+
+  @media (min-width: 56rem) {
+    .panier-grille {
+      grid-template-columns: 1fr 22rem;
+      align-items: start;
+    }
+    .panier-recap {
+      position: sticky;
+      top: calc(64px + var(--e-4));
+    }
+  }
+</style>

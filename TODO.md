@@ -41,7 +41,9 @@ Tous dans `src/config/societe.ts` (source unique), sauf mention contraire.
 - [x] Éditeur pixel art (phase 3)
 - [ ] Tester le lien de partage `/dessin/<code>` et son aperçu sur un vrai déploiement Cloudflare Pages (impossible sur GitHub Pages)
 - [ ] Vérifier sur un vrai cadre que l'import d'un PNG 32x32 / 64x64 exporté par l'éditeur fonctionne dans l'application iDotMatrix
-- [ ] Page /panier et paiement : phase 4 (le bouton d'ajout enregistre déjà le panier dans le navigateur)
+- [x] Page /panier : quantités, retrait, frais de port, délai, informations précontractuelles, lien CGV
+- [ ] Paiement Stripe : phase 4 (le bouton « Paiement sécurisé » du panier est inactif d'ici là)
+- [ ] Quantité maximale par ligne : 10 aujourd'hui, alors que la fiche fournisseur limite à 3 pièces par acheteur. À trancher avant le lancement
 - [ ] Politique de retour : qui paie les frais de retour ? (à préciser pour les CGV et les données structurées)
 - [ ] Choix DNS : passer les serveurs de noms chez Cloudflare (recommandé, voir README) ou rester sur Hostinger avec `www`
 
@@ -50,7 +52,7 @@ Tous dans `src/config/societe.ts` (source unique), sauf mention contraire.
 - [x] Worker Cloudflare de préproduction vérifié (7 vérifications sur 8, lien /dessin corrigé par run_worker_first)
 - [x] Prévisualisation GitHub Pages supprimée
 - [x] Base D1 « lumipix » créée (Western Europe) : Database ID à reporter dans wrangler.jsonc en phase 4
-- [ ] Passer le dépôt GitHub en privé
-- [ ] Pages légales (CGV, mentions légales, confidentialité, livraison, retours et formulaire de rétractation) : Stripe demande l'URL des CGV pour la case de consentement, et la loi impose les informations précontractuelles avant le paiement. Placeholders à fournir : directeur de la publication, médiateur, adresse de retour, qui paie le retour
-- [ ] Créer une base Cloudflare D1 (commandes, avis, inscriptions)
+- [x] Dépôt GitHub : reste public (décision du 14/10/2026). Conséquence : le bloc fournisseur des fiches et `sources/fournisseur/` sont lisibles par tous sur GitHub
+- [x] Pages légales créées (structure complète, passages « À compléter » visibles)
+- [ ] Pages légales à compléter avant la vente : Stripe demande l'URL des CGV pour la case de consentement, et la loi impose les informations précontractuelles avant le paiement. Placeholders à fournir : directeur de la publication, médiateur, adresse de retour, qui paie le retour
 - [ ] Créer un compte Stripe (mode test suffit pour développer), activer les factures et la TVA
