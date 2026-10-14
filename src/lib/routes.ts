@@ -23,8 +23,11 @@ export function lien(chemin: string): string {
   return chemin === '/' ? `${BASE}/` : `${BASE}${chemin}`;
 }
 
-/** Vrai sur un déploiement de prévisualisation (tout est alors en noindex). */
-export const estPrevisualisation = BASE !== '';
+/** Vrai hors production (GitHub Pages ou préproduction Cloudflare) : brouillons visibles, tout en noindex. */
+export const estPrevisualisation = import.meta.env.PUBLIC_PREVISUALISATION === '1';
+
+/** Vrai quand les routes serveur du Worker existent (partage avec aperçu, paiement…). */
+export const fonctionsServeur = import.meta.env.PUBLIC_FONCTIONS_SERVEUR === '1';
 
 export function routeExiste(chemin: string): boolean {
   return routesStatiques.has(chemin);

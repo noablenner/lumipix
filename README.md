@@ -80,10 +80,8 @@ Sur la page du cadre, section `#editeur` (`src/components/editeur/Editeur.astro`
 
 Le dessin entier est encodé dans l'URL (`src/lib/pixel/dessin.ts` : compression par plages + base64url, 80 à 450 caractères pour un dessin courant).
 
-- En production : lien `https://lumipix.shop/dessin/<code>`, servi par la fonction `functions/dessin/[code].ts` (balises Open Graph, puis redirection vers l'éditeur avec le dessin chargé). L'aperçu est généré par `functions/api/dessin/[code].ts` (PNG 600 x 315, encodeur maison sans dépendance, mis en cache sur le réseau Cloudflare).
+- Sur Cloudflare : lien `/dessin/<code>`, servi par le Worker (`src/serveur/partage.ts`) : balises Open Graph, puis redirection vers l'éditeur avec le dessin chargé. L'aperçu `/api/dessin/<code>.png` est un PNG 600 x 315 (encodeur maison sans dépendance), mis en cache sur le réseau Cloudflare.
 - Sur la prévisualisation GitHub Pages (pas de fonctions serveur) : lien direct vers la page produit `?dessin=<code>`, sans image d'aperçu.
-
-Cloudflare Pages détecte automatiquement le dossier `functions/` à la racine du dépôt : aucune configuration supplémentaire.
 
 ## Photos et vidéo produit
 
@@ -101,7 +99,7 @@ Voir [docs/AJOUTER-UN-PRODUIT.md](docs/AJOUTER-UN-PRODUIT.md).
 
 ## Variables d'environnement
 
-Voir `.env.example`. En production, elles se renseignent dans Cloudflare Pages, sous *Settings > Environment variables*. Aucun secret ne doit être commité. Les variables `PUBLIC_*` finissent dans le HTML.
+Voir `.env.example`. En production, elles se renseignent dans le projet Cloudflare, sous *Settings > Variables and Secrets*. Aucun secret ne doit être commité. Les variables `PUBLIC_*` finissent dans le HTML.
 
 | Variable | Phase | Rôle |
 | --- | --- | --- |
@@ -110,11 +108,22 @@ Voir `.env.example`. En production, elles se renseignent dans Cloudflare Pages, 
 | `RESEND_API_KEY`, `EMAIL_ADMIN` | 5 | Emails transactionnels |
 | `PUBLIC_TURNSTILE_SITE_KEY`, `TURNSTILE_SECRET_KEY` | 5 | Anti-spam du formulaire de contact |
 
-## Déploiement (Cloudflare Pages)
+## Déploiement (Cloudflare Workers)
 
-1. Cloudflare > *Workers & Pages* > *Create* > *Pages* > *Connect to Git*, puis choisir le dépôt `lumipix`.
-2. Réglages de build : preset **Astro**, commande `npm run build`, dossier de sortie `dist`, variable `NODE_VERSION=22`.
-3. Branche de production : `main`. Chaque push sur `main` déploie la production, et chaque autre branche obtient une URL de prévisualisation.
+Le site est déployé comme un **Worker Cloudflare avec fichiers statiques** (`wrangler.jsonc`) : Cloudflare sert `dist/`, et `src/worker.ts` ne reçoit que les routes serveur (partage de dessin aujourd'hui, Stripe et admin ensuite).
+
+Réglages du projet dans Cloudflare (*Workers & Pages* > *Create* > *Import a repository* > `noablenner/lumipix`) :
+
+| Champ | Valeur |
+| --- | --- |
+| Nom du projet | `lumipix` (doit correspondre à `name` dans `wrangler.jsonc`) |
+| Build command | `npm run build` |
+| Deploy command | `npx wrangler deploy` |
+| Variables de build | `NODE_VERSION=22`, `CIBLE_DEPLOIEMENT=preprod`, puis `URL_SITE=https://<adresse>.workers.dev` |
+
+`CIBLE_DEPLOIEMENT` : `preprod` avant le lancement (brouillons visibles, tout en noindex), `production` au lancement (produits actifs uniquement, pages indexables).
+
+Tester le Worker en local : `npm run build && npx wrangler dev`.
 
 ## Prévisualisation GitHub Pages
 
@@ -123,13 +132,13 @@ Chaque push sur `main` publie aussi le site sur **https://noablenner.github.io/l
 - Prérequis (une seule fois) : *Settings > Pages > Build and deployment > Source : GitHub Actions*.
 - Le build est lancé avec `CIBLE_DEPLOIEMENT=github-pages`, qui sert le site sous `/lumipix` et passe **toutes les pages en noindex**. Le canonique pointe toujours vers `lumipix.shop`.
 - Dans le code, tout lien interne passe par `lien('/chemin')` (`src/lib/routes.ts`) pour rester compatible avec ce préfixe.
-- Limite : GitHub Pages ne sert que des fichiers statiques. Le panier, Stripe, D1 et les emails (phases 4 et 5) ne fonctionneront que sur Cloudflare Pages.
+- Limite : GitHub Pages ne sert que des fichiers statiques. Le panier, Stripe, D1 et les emails (phases 4 et 5) ne fonctionneront que sur Cloudflare.
 
-## DNS : domaine chez Hostinger, site chez Cloudflare Pages
+## DNS : domaine chez Hostinger, site chez Cloudflare
 
 > À finaliser en phase 7. Ne rien modifier tant que le site n'est pas prêt.
 
-**Point important** : Cloudflare Pages n'accepte un domaine racine (`lumipix.shop` sans `www`) que si les DNS du domaine sont gérés par Cloudflare. Il y a deux options.
+**Point important** : Cloudflare n'accepte un domaine personnalisé sur un Worker (`lumipix.shop` sans `www`) que si les DNS du domaine sont gérés par Cloudflare. Il y a deux options.
 
 ### Option A (recommandée) : DNS chez Cloudflare, domaine et boîtes mail restent chez Hostinger
 
@@ -137,12 +146,12 @@ Chaque push sur `main` publie aussi le site sur **https://noablenner.github.io/l
 2. Cloudflare > *Add a site* > `lumipix.shop` > offre Free. Cloudflare importe les enregistrements : **les comparer un par un** avec la liste de l'étape 1 et recréer ceux qui manquent, à l'identique.
 3. Les enregistrements mail (`MX`, SPF, DKIM, DMARC) doivent être en **DNS only (nuage gris)**, jamais proxifiés.
 4. Dans Hostinger, remplacer les serveurs de noms par les deux fournis par Cloudflare. La propagation prend de quelques minutes à 24 h, et les mails continuent de fonctionner si l'étape 2 est exacte.
-5. Cloudflare Pages > projet > *Custom domains* : ajouter `lumipix.shop` puis `www.lumipix.shop`, et rediriger `www` vers le domaine racine (règle de redirection Cloudflare).
+5. Cloudflare > Worker lumipix > *Settings > Domains & Routes* : ajouter `lumipix.shop` puis `www.lumipix.shop`, et rediriger `www` vers le domaine racine (règle de redirection Cloudflare).
 6. Tester l'envoi et la réception d'un mail sur `contact@lumipix.shop`.
 
 ### Option B : DNS restent chez Hostinger
 
-Possible uniquement pour `www.lumipix.shop` : un `CNAME www` vers `lumipix.pages.dev`, puis une redirection du domaine racine vers `www` côté Hostinger. Les mails ne sont pas touchés, mais l'URL canonique devient `www.lumipix.shop`, ce qui demande une adaptation du code (`site` dans `astro.config.mjs` et `SOCIETE.urlSite`).
+Possible uniquement pour `www.lumipix.shop` : un `CNAME www` vers l'adresse du Worker, puis une redirection du domaine racine vers `www` côté Hostinger. Les mails ne sont pas touchés, mais l'URL canonique devient `www.lumipix.shop`, ce qui demande une adaptation du code (`site` dans `astro.config.mjs` et `SOCIETE.urlSite`).
 
 ### Resend (phase 5)
 

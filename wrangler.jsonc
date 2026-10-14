@@ -1,0 +1,15 @@
+{
+  // Configuration du Worker Cloudflare (site statique + routes serveur).
+  // Le nom doit correspondre au projet créé dans le tableau de bord Cloudflare.
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "lumipix",
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-10-01",
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "html_handling": "auto-trailing-slash"
+  },
+  "observability": { "enabled": true }
+}

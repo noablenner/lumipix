@@ -10,7 +10,7 @@ import CadreLed from '../produit/CadreLed.astro';
 import SceneBureau from '../produit/SceneBureau.astro';
 import { NOMS_COULEURS, PALETTE } from '../../lib/pixel/dessin';
 import { MODELES } from '../../lib/pixel/modeles';
-import { estPrevisualisation, lien } from '../../lib/routes';
+import { fonctionsServeur, lien } from '../../lib/routes';
 
 interface Props {
   slug: string;
@@ -34,7 +34,7 @@ const outils = [
   data-produit={slug}
   data-taille={taille}
   data-lien-produit={lien(`/produits/${slug}`)}
-  data-partage-serveur={estPrevisualisation ? undefined : ''}
+  data-partage-serveur={fonctionsServeur ? '' : undefined}
 >
   <div class="editeur-entete">
     <h2 id="t-editeur">Dessine ton pixel art</h2>
