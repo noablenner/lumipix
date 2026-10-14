@@ -1,0 +1,31 @@
+---
+/*
+ * Accueil provisoire (phase 1). Remplacé en phase 2 par l'accueil complet.
+ * noindex tant que la boutique n'est pas prête.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Bouton from '../components/Bouton.astro';
+---
+
+<BaseLayout
+  title="Lumipix, déco pixel art"
+  description="Lumipix, la boutique de déco pixel art et rétro arcade. Ouverture prochaine."
+  noindex
+>
+  <section class="conteneur bientot">
+    <p class="pixel texte-doux">INSERT COIN</p>
+    <h1>Lumipix arrive bientôt</h1>
+    <p class="texte-doux">La boutique est en construction. Le design system est visible ci-dessous.</p>
+    <Bouton href="/design-system">Voir le design system</Bouton>
+  </section>
+</BaseLayout>
+
+<style>
+  .bientot {
+    padding-block: var(--e-9);
+    text-align: center;
+  }
+  .bientot p:first-child {
+    letter-spacing: 0.2em;
+  }
+</style>

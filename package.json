@@ -1,0 +1,25 @@
+{
+  "name": "lumipix",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "engines": {
+    "node": ">=22.18.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "check": "astro check",
+    "build": "astro check && astro build && npm run verifier",
+    "verifier": "node scripts/verifier-build.ts",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "astro": "7.3.8"
+  },
+  "devDependencies": {
+    "@astrojs/check": "0.9.10",
+    "@types/node": "22.20.5",
+    "typescript": "6.0.3",
+    "yaml": "2.9.1"
+  }
+}

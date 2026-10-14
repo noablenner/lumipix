@@ -1,0 +1,48 @@
+---
+interface Props {
+  as?: 'div' | 'article' | 'section' | 'li';
+  accent?: 'cyan' | 'rose' | 'jaune' | 'aucun';
+  interactive?: boolean;
+}
+const { as: Balise = 'div', accent = 'aucun', interactive = false } = Astro.props;
+---
+
+<Balise class:list={['carte', `carte--${accent}`, interactive && 'carte--interactive']}>
+  <slot />
+</Balise>
+
+<style>
+  .carte {
+    --accent: var(--c-bordure);
+    position: relative;
+    padding: var(--e-5);
+    background: var(--c-surface);
+    border: var(--b-pixel) solid var(--accent);
+  }
+  .carte--cyan { --accent: var(--c-cyan); }
+  .carte--rose { --accent: var(--c-rose); }
+  .carte--jaune { --accent: var(--c-jaune); }
+  .carte > :global(:last-child) {
+    margin-bottom: 0;
+  }
+
+  /* Survol en pixels : l'ombre se construit par paliers */
+  .carte--interactive {
+    transition:
+      transform var(--d-moyen) var(--pas),
+      box-shadow var(--d-moyen) var(--pas);
+  }
+  .carte--interactive:hover,
+  .carte--interactive:focus-within {
+    transform: translate(-4px, -4px);
+    box-shadow:
+      4px 4px 0 0 var(--accent),
+      8px 8px 0 0 rgb(0 0 0 / 0.4);
+  }
+  /* Lien étiré : toute la carte est cliquable via son lien principal */
+  .carte--interactive :global(a.lien-carte)::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+</style>

@@ -1,0 +1,78 @@
+---
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import { SOCIETE } from '../config/societe';
+import { cheminPublic } from '../lib/routes';
+
+interface Props {
+  /** Title unique de la page (le nom de marque est ajouté s'il manque). */
+  title: string;
+  description: string;
+  /** Exclut la page des moteurs (admin, commande, démo). */
+  noindex?: boolean;
+  /** Chemin absolu de l'image de partage. Image par défaut en phase 2. */
+  imageOg?: string;
+  typeOg?: 'website' | 'product' | 'article';
+  /** Données structurées JSON-LD de la page. */
+  jsonLd?: Record<string, unknown> | Record<string, unknown>[];
+}
+
+const { title, description, noindex = false, imageOg, typeOg = 'website', jsonLd } = Astro.props;
+const titreComplet = title.includes(SOCIETE.marque) ? title : `${title} | ${SOCIETE.marque}`;
+const canonique = new URL(cheminPublic(Astro.url.pathname), Astro.site).href;
+const urlImageOg = imageOg ? new URL(imageOg, Astro.site).href : undefined;
+const jetonAnalytics = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
+---
+
+<!doctype html>
+<html lang="fr-FR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{titreComplet}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonique} />
+    {noindex && <meta name="robots" content="noindex, nofollow" />}
+    <meta name="theme-color" content="#0a0a18" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="preload" href="/fonts/pixelify-sans-latin-700-normal.woff2" as="font" type="font/woff2" crossorigin />
+
+    <meta property="og:locale" content="fr_FR" />
+    <meta property="og:site_name" content={SOCIETE.marque} />
+    <meta property="og:type" content={typeOg} />
+    <meta property="og:title" content={titreComplet} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonique} />
+    {urlImageOg && <meta property="og:image" content={urlImageOg} />}
+    <meta name="twitter:card" content={urlImageOg ? 'summary_large_image' : 'summary'} />
+    <meta name="twitter:title" content={titreComplet} />
+    <meta name="twitter:description" content={description} />
+    {urlImageOg && <meta name="twitter:image" content={urlImageOg} />}
+
+    {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
+
+    <!--
+      Emplacement réservé au bandeau de consentement (brief §9).
+      Inactif : aucun cookie ni traceur non essentiel au lancement.
+    -->
+  </head>
+  <body>
+    <a class="lien-evitement" href="#contenu">Aller au contenu</a>
+    <Header />
+    <main id="contenu">
+      <slot />
+    </main>
+    <Footer />
+    {
+      jetonAnalytics && (
+        <script
+          is:inline
+          defer
+          src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon={JSON.stringify({ token: jetonAnalytics })}
+        />
+      )
+    }
+  </body>
+</html>

@@ -1,0 +1,475 @@
+---
+/*
+ * Livrable de la phase 1 : démonstration du design system.
+ * Page technique, exclue des moteurs de recherche.
+ */
+import tokensCss from '../styles/tokens.css?raw';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Bouton from '../components/Bouton.astro';
+import Badge from '../components/Badge.astro';
+import Carte from '../components/Carte.astro';
+import Prix from '../components/Prix.astro';
+import Champ from '../components/Champ.astro';
+import Accordeon from '../components/Accordeon.astro';
+import Notice from '../components/Notice.astro';
+import PixelIcone from '../components/PixelIcone.astro';
+import Logo from '../components/Logo.astro';
+import BoutonSon from '../components/BoutonSon.astro';
+import { ICONES, type NomIcone } from '../components/icones';
+import { lireCouleurs, ratioContraste } from '../lib/contraste';
+import { PAIRES_CONTRASTE } from '../styles/contrastes';
+import { getProduitsPourDemo, getCollectionsVisibles, variantesAvecPrix, prixAPartirDe } from '../lib/catalogue';
+import { formatDelai } from '../lib/format';
+import { getCollection } from 'astro:content';
+
+const couleurs = lireCouleurs(tokensCss);
+const contrastes = PAIRES_CONTRASTE.map((p) => {
+  const ratio = ratioContraste(couleurs[p.texte]!, couleurs[p.fond]!);
+  return { ...p, ratio, ok: ratio >= p.min };
+});
+
+const produits = await getProduitsPourDemo();
+const toutesCollections = await getCollection('collections');
+const collectionsVisibles = await getCollectionsVisibles();
+const icones = Object.keys(ICONES) as NomIcone[];
+
+const faqDemo = [
+  { question: 'Exemple de question', reponse: 'Réponse en texte secondaire. Composant natif <details>, sans JavaScript.' },
+  { question: 'Deuxième question', reponse: 'Le signe + devient − à l’ouverture.' },
+];
+---
+
+<BaseLayout
+  title="Design system"
+  description="Démonstration du design system Lumipix : couleurs, typographies et composants de base."
+  noindex
+>
+  <div class="conteneur ds">
+    <header class="ds-intro">
+      <Badge ton="rose">Phase 1</Badge>
+      <h1>Design system</h1>
+      <p class="texte-doux">
+        Écran d’arcade sombre, néons, grille de 4 px, bordures pixel et ombres portées dures. Tous les contrastes ci-dessous
+        sont calculés au build à partir de <code>src/styles/tokens.css</code>.
+      </p>
+    </header>
+
+    <section aria-labelledby="t-couleurs">
+      <h2 id="t-couleurs">Couleurs</h2>
+      <ul class="ds-nuancier">
+        {
+          Object.entries(couleurs).map(([nom, hex]) => (
+            <li>
+              <span class="ds-pastille" style={`background:${hex}`} />
+              <code>--{nom}</code>
+              <span class="texte-doux">{hex}</span>
+            </li>
+          ))
+        }
+      </ul>
+
+      <h3>Contrastes WCAG AA</h3>
+      <div class="ds-tableau">
+        <table>
+          <thead>
+            <tr>
+              <th scope="col">Exemple</th>
+              <th scope="col">Usage</th>
+              <th scope="col">Ratio</th>
+              <th scope="col">AA</th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              contrastes.map((c) => (
+                <tr>
+                  <td>
+                    <span class="ds-exemple" style={`color:var(--${c.texte});background:var(--${c.fond})`}>
+                      Aa
+                    </span>
+                  </td>
+                  <td>
+                    {c.usage}
+                    <br />
+                    <code class="texte-doux">
+                      {c.texte} / {c.fond}
+                    </code>
+                  </td>
+                  <td class="ds-nowrap">{c.ratio.toFixed(2).replace('.', ',')}:1</td>
+                  <td>
+                    <Badge ton={c.ok ? 'vert' : 'rose'}>{c.ok ? 'OK' : 'ÉCHEC'}</Badge>
+                    <br />
+                    <span class="texte-doux">min {String(c.min).replace('.', ',')}:1</span>
+                  </td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section aria-labelledby="t-typo">
+      <h2 id="t-typo">Typographies</h2>
+      <Carte>
+        <p class="texte-doux">Titres : Pixelify Sans (licence SIL OFL, auto-hébergée, 2 graisses, 15 Ko au total).</p>
+        <p class="ds-h1">Titre H1 pixel</p>
+        <p class="ds-h2">Titre H2 : déco pixel art</p>
+        <p class="ds-h3">Titre H3 : écran LED 64x64</p>
+        <p class="ds-h4">Titre H4 : accents éèàçùœ €</p>
+        <hr />
+        <p class="texte-doux">Texte : police système (aucun fichier à charger, lisibilité maximale sur mobile).</p>
+        <p>
+          Texte courant. Ton pixel art, en vrai, sur ton bureau. Les prix sont TTC et la livraison est offerte en France
+          métropolitaine. <a href="#t-typo">Exemple de lien</a>.
+        </p>
+        <p class="texte-doux">Texte secondaire, pour les précisions et les aides.</p>
+      </Carte>
+    </section>
+
+    <section aria-labelledby="t-boutons">
+      <h2 id="t-boutons">Boutons</h2>
+      <div class="ds-ligne">
+        <Bouton data-son="ajout">Ajouter au panier</Bouton>
+        <Bouton variante="secondaire" data-son="clic">Ouvrir l’éditeur</Bouton>
+        <Bouton variante="fantome">Lien discret</Bouton>
+        <Bouton disabled>Indisponible</Bouton>
+      </div>
+      <div class="ds-ligne">
+        <Bouton taille="grand" data-son="ajout">
+          Ajouter au panier <PixelIcone nom="fleche-droite" taille={20} />
+        </Bouton>
+      </div>
+      <div class="ds-mobile">
+        <Bouton pleineLargeur data-son="ajout">Pleine largeur (mobile)</Bouton>
+      </div>
+      <p class="texte-doux">Hauteur minimale 48 px. Au survol, l’ombre grandit ; au clic, le bouton s’enfonce.</p>
+    </section>
+
+    <section aria-labelledby="t-badges">
+      <h2 id="t-badges">Badges et prix</h2>
+      <div class="ds-ligne">
+        <Badge>Nouveau</Badge>
+        <Badge ton="rose">Produit phare</Badge>
+        <Badge ton="jaune">Livraison offerte</Badge>
+        <Badge ton="vert">En stock</Badge>
+        <Badge ton="neutre">32 x 32</Badge>
+      </div>
+      <div class="ds-ligne">
+        <Prix montant={79} />
+        <Prix montant={79} aPartirDe />
+        <Prix montant={149} taille="grand" />
+      </div>
+      <p class="texte-doux">Montants d’exemple tirés de la fiche du cadre. Le prix barré n’apparaît que s’il est renseigné dans une fiche.</p>
+    </section>
+
+    <section aria-labelledby="t-cartes">
+      <h2 id="t-cartes">Cartes</h2>
+      <ul class="ds-grille">
+        <Carte as="li" accent="cyan" interactive>
+          <h3><a class="lien-carte" href="#t-cartes">Carte interactive</a></h3>
+          <p class="texte-doux">Survol en pixels : la carte se soulève par paliers. Toute la carte est cliquable.</p>
+        </Carte>
+        <Carte as="li" accent="rose">
+          <h3>Accent rose</h3>
+          <p class="texte-doux">Pour les mises en avant.</p>
+        </Carte>
+        <Carte as="li">
+          <h3>Neutre</h3>
+          <p class="texte-doux">Bordure décorative par défaut.</p>
+        </Carte>
+      </ul>
+    </section>
+
+    <section aria-labelledby="t-form">
+      <h2 id="t-form">Formulaires</h2>
+      <Carte>
+        <form class="ds-form" onsubmit="return false">
+          <Champ label="Email" nom="email-demo" type="email" autocomplete="email" placeholder="toi@exemple.fr" required />
+          <Champ label="Numéro de commande" nom="commande-demo" aide="Il figure dans l’email de confirmation." />
+          <Champ label="Champ en erreur" nom="erreur-demo" value="abc" erreur="Ce format n’est pas valide." />
+          <Champ label="Message" nom="message-demo" multiligne />
+          <Bouton type="submit" variante="secondaire">Envoyer (démo)</Bouton>
+        </form>
+      </Carte>
+    </section>
+
+    <section aria-labelledby="t-faq">
+      <h2 id="t-faq">Accordéon (FAQ)</h2>
+      <Accordeon elements={faqDemo} />
+    </section>
+
+    <section aria-labelledby="t-notices">
+      <h2 id="t-notices">Notices</h2>
+      <div class="ds-pile">
+        <Notice titre="Information"><p>Livraison estimée affichée avant le paiement.</p></Notice>
+        <Notice ton="succes" titre="Succès"><p>Ton dessin a été exporté.</p></Notice>
+        <Notice ton="alerte" titre="Attention"><p>Un pixel noir est un pixel éteint sur un écran LED.</p></Notice>
+        <Notice ton="erreur" titre="Erreur"><p>Le paiement n’a pas abouti.</p></Notice>
+      </div>
+    </section>
+
+    <section aria-labelledby="t-icones">
+      <h2 id="t-icones">Icônes pixel</h2>
+      <ul class="ds-icones">
+        {
+          icones.map((nom) => (
+            <li>
+              <PixelIcone nom={nom} taille={36} />
+              <code>{nom}</code>
+            </li>
+          ))
+        }
+      </ul>
+      <div class="ds-ligne">
+        <Logo taille={48} />
+        <Logo taille={32} avecTexte={false} />
+      </div>
+    </section>
+
+    <section aria-labelledby="t-effets">
+      <h2 id="t-effets">Effets</h2>
+      <div class="ds-grille">
+        <Carte>
+          <h3>Construction en blocs</h3>
+          <div class="ds-blocs" aria-hidden="true">
+            {Array.from({ length: 64 }, (_, i) => <span style={`--i:${(i * 37) % 64}`} />)}
+          </div>
+          <p class="texte-doux">Base des futures transitions de page. Rejoue en survolant la zone.</p>
+        </Carte>
+        <Carte>
+          <h3>Halo LED</h3>
+          <p class="ds-glow pixel">GAME ON</p>
+          <p class="texte-doux">Halo léger réservé aux éléments lumineux (prix, écran du cadre).</p>
+        </Carte>
+        <Carte>
+          <h3>Sons 8 bits</h3>
+          <div class="ds-ligne">
+            <BoutonSon />
+            <Bouton variante="secondaire" data-son="clic">Clic</Bouton>
+            <Bouton variante="secondaire" data-son="ajout">Ajout</Bouton>
+          </div>
+          <p class="texte-doux">Désactivés par défaut. Le choix est mémorisé dans le navigateur, aucun fichier audio n’est chargé.</p>
+        </Carte>
+      </div>
+      <Notice titre="Mouvement réduit">
+        <p>Avec « réduire les animations » activé sur l’appareil, toutes les animations et transitions sont coupées.</p>
+      </Notice>
+    </section>
+
+    <section aria-labelledby="t-catalogue">
+      <h2 id="t-catalogue">Catalogue (contrôle des schémas)</h2>
+      <p class="texte-doux">
+        Données lues depuis <code>src/content/</code> après validation Zod, bloc fournisseur retiré. Navigation :
+        {collectionsVisibles.length} collection(s) visible(s) sur {toutesCollections.length}, car une collection n’apparaît
+        qu’avec au moins un produit actif.
+      </p>
+      <ul class="ds-grille">
+        {
+          produits.map((p) => (
+            <Carte as="li" accent="cyan">
+              <div class="ds-ligne">
+                <Badge ton={p.statut === 'actif' ? 'vert' : 'neutre'}>{p.statut}</Badge>
+                <Badge ton="jaune">{p.frais_de_port === 0 ? 'Livraison offerte' : 'Port payant'}</Badge>
+              </div>
+              <h3>{p.nom}</h3>
+              {p.sous_titre && <p class="texte-doux">{p.sous_titre}</p>}
+              <Prix montant={prixAPartirDe(p)} aPartirDe={p.variantes.length > 1} />
+              <ul class="ds-variantes">
+                {variantesAvecPrix(p).map((v) => (
+                  <li>
+                    {v.nom} : <Prix montant={v.prix_ttc} /> {!v.disponible && <Badge ton="rose">indisponible</Badge>}
+                  </li>
+                ))}
+              </ul>
+              <p class="texte-doux">
+                <PixelIcone nom="camion" taille={16} class="ds-inline" /> Livraison estimée :{' '}
+                {formatDelai(p.delai_livraison.min_jours_ouvres, p.delai_livraison.max_jours_ouvres)}
+              </p>
+            </Carte>
+          ))
+        }
+      </ul>
+    </section>
+  </div>
+</BaseLayout>
+
+<style>
+  .ds {
+    padding-block: var(--e-7);
+  }
+  .ds section {
+    margin-top: var(--e-8);
+  }
+  .ds-intro {
+    max-width: var(--largeur-texte);
+  }
+  .ds-intro h1 {
+    margin-top: var(--e-3);
+  }
+  code {
+    font-size: 0.875em;
+  }
+
+  .ds-nuancier {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+    gap: var(--e-3);
+    margin: 0 0 var(--e-6);
+    padding: 0;
+    list-style: none;
+  }
+  .ds-nuancier li {
+    display: grid;
+    gap: var(--e-1);
+    font-size: var(--t-s);
+  }
+  .ds-pastille {
+    display: block;
+    height: 56px;
+    border: 2px solid var(--c-bordure-ui);
+  }
+
+  .ds-tableau {
+    overflow-x: auto;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: var(--t-s);
+  }
+  th,
+  td {
+    padding: var(--e-2) var(--e-3);
+    text-align: left;
+    border-bottom: 1px solid var(--c-bordure);
+    vertical-align: middle;
+  }
+  .ds-nowrap {
+    white-space: nowrap;
+  }
+  .ds-exemple {
+    display: inline-grid;
+    place-items: center;
+    width: 48px;
+    height: 36px;
+    font-weight: 700;
+    border: 1px solid var(--c-bordure);
+  }
+
+  .ds-h1 { font: 700 var(--t-3xl) / 1.1 var(--f-pixel); margin-bottom: var(--e-2); }
+  .ds-h2 { font: 700 var(--t-2xl) / 1.15 var(--f-pixel); margin-bottom: var(--e-2); }
+  .ds-h3 { font: 700 var(--t-xl) / 1.2 var(--f-pixel); margin-bottom: var(--e-2); }
+  .ds-h4 { font: 700 var(--t-l) / 1.2 var(--f-pixel); }
+  hr {
+    border: 0;
+    border-top: 2px dashed var(--c-bordure);
+    margin: var(--e-5) 0;
+  }
+
+  .ds-ligne {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--e-4);
+    margin-bottom: var(--e-4);
+  }
+  .ds-mobile {
+    max-width: 22rem;
+    margin-bottom: var(--e-4);
+  }
+  .ds-pile {
+    display: grid;
+    gap: var(--e-3);
+  }
+  .ds-grille {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+    gap: var(--e-5);
+    margin: 0 0 var(--e-5);
+    padding: 0;
+    list-style: none;
+  }
+  .ds-form {
+    max-width: 28rem;
+  }
+
+  .ds-icones {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(7rem, 1fr));
+    gap: var(--e-3);
+    margin: 0 0 var(--e-5);
+    padding: 0;
+    list-style: none;
+  }
+  .ds-icones li {
+    display: grid;
+    justify-items: center;
+    gap: var(--e-2);
+    padding: var(--e-4) var(--e-2);
+    background: var(--c-surface);
+    font-size: var(--t-xs);
+    color: var(--c-cyan);
+  }
+  .ds-icones code {
+    color: var(--c-texte-doux);
+  }
+
+  .ds-blocs {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 2px;
+    aspect-ratio: 1;
+    max-width: 12rem;
+    margin-bottom: var(--e-4);
+  }
+  .ds-blocs span {
+    background: var(--c-cyan);
+    animation: bloc 600ms steps(1, end) both;
+    animation-delay: calc(var(--i) * 12ms);
+  }
+  .ds-blocs span:nth-child(3n) {
+    background: var(--c-rose);
+  }
+  .ds-blocs span:nth-child(7n) {
+    background: var(--c-jaune);
+  }
+  .ds-blocs:hover span {
+    animation-name: bloc-bis;
+  }
+  @keyframes bloc {
+    from { opacity: 0; transform: scale(0.4); }
+    to { opacity: 1; transform: scale(1); }
+  }
+  @keyframes bloc-bis {
+    from { opacity: 0; transform: scale(0.4); }
+    to { opacity: 1; transform: scale(1); }
+  }
+
+  .ds-glow {
+    font-size: var(--t-2xl);
+    font-weight: 700;
+    color: var(--c-cyan);
+    text-shadow: var(--glow-cyan);
+  }
+
+  .ds-variantes {
+    margin: var(--e-3) 0;
+    padding: 0;
+    list-style: none;
+  }
+  .ds-variantes li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--e-2);
+  }
+  .ds-variantes :global(.prix-montant) {
+    font-size: var(--t-l);
+  }
+  :global(.ds-inline) {
+    display: inline-block;
+    vertical-align: -2px;
+    color: var(--c-cyan);
+  }
+</style>

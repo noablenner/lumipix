@@ -1,0 +1,78 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+type Props = {
+  label: string;
+  nom: string;
+  aide?: string;
+  erreur?: string;
+  multiligne?: boolean;
+} & HTMLAttributes<'input'>;
+
+const { label, nom, aide, erreur, multiligne = false, id = nom, type = 'text', ...attrs } = Astro.props;
+const idAide = aide ? `${id}-aide` : undefined;
+const idErreur = erreur ? `${id}-erreur` : undefined;
+const decrit = [idAide, idErreur].filter(Boolean).join(' ') || undefined;
+---
+
+<div class:list={['champ', erreur && 'champ--erreur']}>
+  <label for={id}>{label}{attrs.required && <span aria-hidden="true"> *</span>}</label>
+  {
+    multiligne ? (
+      <textarea id={id} name={nom} rows="5" aria-describedby={decrit} aria-invalid={erreur ? 'true' : undefined} required={attrs.required} placeholder={attrs.placeholder} />
+    ) : (
+      <input id={id} name={nom} type={type} aria-describedby={decrit} aria-invalid={erreur ? 'true' : undefined} {...attrs} />
+    )
+  }
+  {aide && <p id={idAide} class="champ-aide">{aide}</p>}
+  {erreur && <p id={idErreur} class="champ-erreur">{erreur}</p>}
+</div>
+
+<style>
+  .champ {
+    display: grid;
+    gap: var(--e-2);
+    margin-bottom: var(--e-4);
+  }
+  label {
+    font-weight: 600;
+  }
+  input,
+  textarea {
+    width: 100%;
+    min-height: var(--cible);
+    padding: var(--e-3);
+    background: var(--c-fond-2);
+    border: var(--b-pixel) solid var(--c-bordure-ui);
+    border-radius: 0;
+    /* 16 px minimum : évite le zoom automatique sur iOS */
+    font-size: 1rem;
+  }
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--c-texte-doux);
+    opacity: 0.8;
+  }
+  input:focus-visible,
+  textarea:focus-visible {
+    outline: none;
+    border-color: var(--c-cyan);
+    box-shadow: var(--glow-cyan);
+  }
+  .champ-aide,
+  .champ-erreur {
+    margin: 0;
+    font-size: var(--t-s);
+  }
+  .champ-aide {
+    color: var(--c-texte-doux);
+  }
+  .champ--erreur input,
+  .champ--erreur textarea {
+    border-color: var(--c-rouge);
+  }
+  .champ-erreur {
+    color: var(--c-rouge);
+    font-weight: 600;
+  }
+</style>

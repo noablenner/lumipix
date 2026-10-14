@@ -1,0 +1,17 @@
+# build
+dist/
+.astro/
+
+# dépendances
+node_modules/
+
+# environnement : jamais de secret dans le dépôt
+.env
+.env.*
+!.env.example
+.dev.vars
+.wrangler/
+
+# divers
+.DS_Store
+npm-debug.log*

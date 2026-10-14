@@ -1,0 +1,104 @@
+---
+/*
+ * Micro-sons 8 bits, désactivés par défaut (brief §5).
+ * Sons synthétisés en Web Audio (aucun fichier à télécharger).
+ * Tout élément portant data-son="clic" | "ajout" | "erreur" joue le son
+ * correspondant au clic, uniquement si l'utilisateur a activé le son.
+ */
+import PixelIcone from './PixelIcone.astro';
+---
+
+<button type="button" class="bouton-son" aria-pressed="false" data-bouton-son>
+  <span class="bouton-son-off"><PixelIcone nom="son-coupe" taille={24} /></span>
+  <span class="bouton-son-on"><PixelIcone nom="son-actif" taille={24} /></span>
+  <span class="sr-only">Sons 8 bits</span>
+</button>
+
+<script>
+  const CLE = 'lumipix:son';
+  let actif = false;
+  try {
+    actif = localStorage.getItem(CLE) === '1';
+  } catch {}
+
+  let ctx: AudioContext | undefined;
+  const SONS: Record<string, [number, number][]> = {
+    clic: [[660, 0.04]],
+    ajout: [[523, 0.06], [784, 0.08]],
+    erreur: [[220, 0.08], [165, 0.12]],
+  };
+
+  function jouer(nom: string) {
+    if (!actif) return;
+    const notes = SONS[nom];
+    if (!notes) return;
+    ctx ??= new AudioContext();
+    let t = ctx.currentTime;
+    for (const [freq, duree] of notes) {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'square';
+      osc.frequency.value = freq;
+      gain.gain.setValueAtTime(0.05, t);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + duree);
+      osc.connect(gain).connect(ctx.destination);
+      osc.start(t);
+      osc.stop(t + duree);
+      t += duree;
+    }
+  }
+
+  function majBoutons() {
+    document.querySelectorAll<HTMLButtonElement>('[data-bouton-son]').forEach((b) => {
+      b.setAttribute('aria-pressed', String(actif));
+      b.title = actif ? 'Couper les sons' : 'Activer les sons 8 bits';
+    });
+  }
+
+  document.addEventListener('click', (e) => {
+    const cible = e.target instanceof Element ? e.target : null;
+    if (cible?.closest('[data-bouton-son]')) {
+      actif = !actif;
+      try {
+        localStorage.setItem(CLE, actif ? '1' : '0');
+      } catch {}
+      majBoutons();
+      jouer('clic');
+      return;
+    }
+    const declencheur = cible?.closest<HTMLElement>('[data-son]');
+    if (declencheur?.dataset.son) jouer(declencheur.dataset.son);
+  });
+
+  majBoutons();
+  (window as unknown as { lumipixSon: { jouer: typeof jouer } }).lumipixSon = { jouer };
+</script>
+
+<style>
+  .bouton-son {
+    display: inline-grid;
+    place-items: center;
+    width: var(--cible);
+    height: var(--cible);
+    padding: 0;
+    background: transparent;
+    border: var(--b-pixel) solid var(--c-bordure-ui);
+    color: var(--c-texte-doux);
+    cursor: pointer;
+  }
+  .bouton-son:hover {
+    border-color: var(--c-cyan);
+    color: var(--c-cyan);
+  }
+  .bouton-son[aria-pressed='true'] {
+    color: var(--c-vert);
+    border-color: var(--c-vert);
+  }
+  .bouton-son-on,
+  .bouton-son[aria-pressed='true'] .bouton-son-off {
+    display: none;
+  }
+  .bouton-son[aria-pressed='true'] .bouton-son-on {
+    display: contents;
+  }
+</style>

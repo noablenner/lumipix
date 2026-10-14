@@ -1,0 +1,49 @@
+---
+import { ICONES, type NomIcone } from './icones';
+
+interface Props {
+  nom: NomIcone;
+  taille?: number;
+  /** Texte lu par les lecteurs d'écran. Sans titre, l'icône est décorative. */
+  titre?: string;
+  class?: string;
+}
+
+const { nom, taille = 24, titre, class: classe } = Astro.props;
+const grille = ICONES[nom];
+
+// Fusionne les pixels allumés consécutifs d'une ligne en un seul rectangle.
+const rects: { x: number; y: number; l: number }[] = [];
+grille.forEach((ligne, y) => {
+  if (ligne.length !== 12) throw new Error(`Icône "${nom}" : ligne ${y} de ${ligne.length} pixels au lieu de 12`);
+  let x = 0;
+  while (x < ligne.length) {
+    if (ligne[x] === '#') {
+      const debut = x;
+      while (ligne[x] === '#') x++;
+      rects.push({ x: debut, y, l: x - debut });
+    } else x++;
+  }
+});
+---
+
+<svg
+  class:list={['pixel-icone', classe]}
+  width={taille}
+  height={taille}
+  viewBox="0 0 12 12"
+  fill="currentColor"
+  shape-rendering="crispEdges"
+  role={titre ? 'img' : undefined}
+  aria-label={titre}
+  aria-hidden={titre ? undefined : 'true'}
+  focusable="false"
+>
+  {rects.map((r) => <rect x={r.x} y={r.y} width={r.l} height="1" />)}
+</svg>
+
+<style>
+  .pixel-icone {
+    flex-shrink: 0;
+  }
+</style>

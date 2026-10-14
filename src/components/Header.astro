@@ -1,0 +1,149 @@
+---
+import Logo from './Logo.astro';
+import BoutonSon from './BoutonSon.astro';
+import PixelIcone from './PixelIcone.astro';
+import { getCollectionsVisibles } from '../lib/catalogue';
+import { cheminPublic, routeExiste } from '../lib/routes';
+
+/*
+ * Navigation : uniquement les collections qui ont au moins un produit actif,
+ * puis les pages éditoriales déjà construites. Aucun lien vers une page vide.
+ */
+const collections = await getCollectionsVisibles();
+const liens = [
+  ...collections.map((c) => ({ href: `/collections/${c.data.slug}`, label: c.data.nom })),
+  { href: '/idees-cadeaux', label: 'Idées cadeaux' },
+  { href: '/faq', label: 'FAQ' },
+].filter((l) => routeExiste(l.href));
+
+const cheminCourant = cheminPublic(Astro.url.pathname);
+const panierDisponible = routeExiste('/panier');
+---
+
+<header class="entete">
+  <div class="conteneur entete-barre">
+    <a href="/" class="entete-logo" aria-label="Lumipix, accueil">
+      <Logo />
+    </a>
+
+    {
+      liens.length > 0 && (
+        <nav class="entete-nav" aria-label="Navigation principale">
+          <ul>
+            {liens.map((l) => (
+              <li>
+                <a href={l.href} aria-current={cheminCourant === l.href ? 'page' : undefined}>
+                  {l.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )
+    }
+
+    <div class="entete-actions">
+      <BoutonSon />
+      {
+        panierDisponible && (
+          <a href="/panier" class="entete-panier" aria-label="Panier">
+            <PixelIcone nom="panier" taille={24} />
+            <span class="entete-panier-compte" data-panier-compte hidden />
+          </a>
+        )
+      }
+    </div>
+  </div>
+</header>
+
+<style>
+  .entete {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgb(10 10 24 / 0.92);
+    border-bottom: var(--b-pixel) solid var(--c-bordure);
+    backdrop-filter: blur(6px);
+  }
+  .entete-barre {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: var(--e-2) var(--e-5);
+    min-height: 64px;
+    padding-block: var(--e-2);
+  }
+  .entete-logo {
+    display: inline-flex;
+    min-height: var(--cible);
+    align-items: center;
+    text-decoration: none;
+  }
+  .entete-nav {
+    order: 3;
+    width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .entete-nav ul {
+    display: flex;
+    gap: var(--e-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  .entete-nav a {
+    display: inline-flex;
+    align-items: center;
+    min-height: var(--cible);
+    padding-inline: var(--e-3);
+    font-family: var(--f-pixel);
+    font-size: var(--t-l);
+    color: var(--c-texte);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .entete-nav a:hover,
+  .entete-nav a[aria-current='page'] {
+    color: var(--c-cyan);
+    text-shadow: var(--glow-cyan);
+  }
+  .entete-actions {
+    display: flex;
+    gap: var(--e-2);
+    margin-left: auto;
+  }
+  .entete-panier {
+    position: relative;
+    display: inline-grid;
+    place-items: center;
+    width: var(--cible);
+    height: var(--cible);
+    color: var(--c-texte);
+    border: var(--b-pixel) solid var(--c-bordure-ui);
+  }
+  .entete-panier-compte {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    min-width: 20px;
+    padding: 0 4px;
+    background: var(--c-rose);
+    color: var(--c-sur-neon);
+    font-family: var(--f-pixel);
+    font-size: var(--t-xs);
+    font-weight: 700;
+    line-height: 20px;
+    text-align: center;
+  }
+
+  @media (min-width: 48rem) {
+    .entete-nav {
+      order: 0;
+      width: auto;
+    }
+    .entete-actions {
+      margin-left: auto;
+    }
+  }
+</style>

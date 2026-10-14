@@ -1,0 +1,53 @@
+---
+import { formatPrix } from '../lib/format';
+
+interface Props {
+  montant: number;
+  barre?: number;
+  aPartirDe?: boolean;
+  taille?: 'normal' | 'grand';
+}
+const { montant, barre, aPartirDe = false, taille = 'normal' } = Astro.props;
+---
+
+<p class:list={['prix', `prix--${taille}`]}>
+  {aPartirDe && <span class="prix-prefixe">à partir de</span>}
+  <span class="prix-montant">{formatPrix(montant)}</span>
+  {
+    barre !== undefined && barre > montant && (
+      <del class="prix-barre">
+        <span class="sr-only">au lieu de </span>
+        {formatPrix(barre)}
+      </del>
+    )
+  }
+  <span class="prix-ttc">TTC</span>
+</p>
+
+<style>
+  .prix {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: var(--e-1) var(--e-2);
+    margin: 0;
+  }
+  .prix-prefixe,
+  .prix-ttc {
+    font-size: var(--t-s);
+    color: var(--c-texte-doux);
+  }
+  .prix-montant {
+    font-family: var(--f-pixel);
+    font-weight: 700;
+    font-size: var(--t-xl);
+    color: var(--c-jaune);
+  }
+  .prix--grand .prix-montant {
+    font-size: var(--t-2xl);
+    text-shadow: var(--glow-jaune);
+  }
+  .prix-barre {
+    color: var(--c-texte-doux);
+  }
+</style>

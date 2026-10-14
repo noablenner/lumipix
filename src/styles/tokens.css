@@ -1,0 +1,73 @@
+/*
+ * Design tokens Lumipix : écran d'arcade sombre, néons, grille de 4 px.
+ * Les couleurs --c-* sont lues par la page /design-system et par
+ * scripts/verifier-build.ts pour contrôler les contrastes WCAG AA.
+ */
+:root {
+  /* Fonds */
+  --c-fond: #0a0a18;
+  --c-fond-2: #11112a;
+  --c-surface: #181836;
+  --c-surface-2: #222248;
+  /* Bordure décorative (cartes, séparateurs) */
+  --c-bordure: #3a3a72;
+  /* Bordure des contrôles (champs, boutons d'icône) : 3:1 minimum */
+  --c-bordure-ui: #6a6aae;
+
+  /* Texte */
+  --c-texte: #f4f3ff;
+  --c-texte-doux: #b9b8dc;
+  --c-sur-neon: #0a0a18;
+
+  /* Néons */
+  --c-cyan: #2ee6e6;
+  --c-rose: #ff4fa8;
+  --c-jaune: #ffd23f;
+  --c-vert: #46f28c;
+  --c-violet: #a98bff;
+  --c-rouge: #ff6b6b;
+
+  /* Halos (effet LED) */
+  --glow-cyan: 0 0 6px rgb(46 230 230 / 0.55), 0 0 18px rgb(46 230 230 / 0.25);
+  --glow-rose: 0 0 6px rgb(255 79 168 / 0.55), 0 0 18px rgb(255 79 168 / 0.25);
+  --glow-jaune: 0 0 6px rgb(255 210 63 / 0.55), 0 0 18px rgb(255 210 63 / 0.25);
+
+  /* Typographies : pixel pour les titres, système pour le texte (0 octet à charger) */
+  --f-pixel: 'Pixelify Sans', ui-monospace, 'Courier New', monospace;
+  --f-texte: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+
+  --t-xs: 0.8125rem;
+  --t-s: 0.9375rem;
+  --t-m: 1rem;
+  --t-l: clamp(1.125rem, 1.05rem + 0.4vw, 1.25rem);
+  --t-xl: clamp(1.375rem, 1.2rem + 0.9vw, 1.75rem);
+  --t-2xl: clamp(1.75rem, 1.4rem + 1.8vw, 2.5rem);
+  --t-3xl: clamp(2.25rem, 1.6rem + 3.2vw, 3.75rem);
+
+  /* Espacements : multiples de la grille de 4 px */
+  --u: 4px;
+  --e-1: 4px;
+  --e-2: 8px;
+  --e-3: 12px;
+  --e-4: 16px;
+  --e-5: 24px;
+  --e-6: 32px;
+  --e-7: 48px;
+  --e-8: 64px;
+  --e-9: 96px;
+
+  /* Bordures pixel, ombres portées dures */
+  --b-pixel: 3px;
+  --ombre-pixel: 4px 4px 0 0;
+
+  /* Zone tactile minimale confortable */
+  --cible: 48px;
+
+  --largeur-max: 72rem;
+  --largeur-texte: 42rem;
+
+  /* Mouvements */
+  --d-rapide: 120ms;
+  --d-moyen: 240ms;
+  --pas: steps(4, end);
+}

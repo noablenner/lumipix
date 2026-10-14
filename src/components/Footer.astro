@@ -1,0 +1,110 @@
+---
+import Logo from './Logo.astro';
+import { SOCIETE } from '../config/societe';
+import { routeExiste } from '../lib/routes';
+
+/* Seuls les liens vers des pages déjà construites sont affichés. */
+const groupes = [
+  {
+    titre: 'Aide',
+    liens: [
+      { href: '/faq', label: 'FAQ' },
+      { href: '/suivi', label: 'Suivre ma commande' },
+      { href: '/livraison', label: 'Livraison' },
+      { href: '/retours', label: 'Retours et rétractation' },
+      { href: '/contact', label: 'Contact' },
+    ],
+  },
+  {
+    titre: 'Informations légales',
+    liens: [
+      { href: '/cgv', label: 'Conditions générales de vente' },
+      { href: '/mentions-legales', label: 'Mentions légales' },
+      { href: '/confidentialite', label: 'Confidentialité' },
+    ],
+  },
+]
+  .map((g) => ({ ...g, liens: g.liens.filter((l) => routeExiste(l.href)) }))
+  .filter((g) => g.liens.length > 0);
+
+const annee = new Date().getFullYear();
+---
+
+<footer class="pied">
+  <div class="conteneur pied-grille">
+    <div class="pied-marque">
+      <Logo taille={28} />
+      <p class="texte-doux">Déco pixel art et rétro arcade pour ton setup.</p>
+      <p>
+        <a href={`mailto:${SOCIETE.emailContact}`}>{SOCIETE.emailContact}</a>
+      </p>
+    </div>
+    {
+      groupes.map((g) => (
+        <nav aria-label={g.titre}>
+          <p class="pied-titre">{g.titre}</p>
+          <ul>
+            {g.liens.map((l) => (
+              <li>
+                <a href={l.href}>{l.label}</a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      ))
+    }
+  </div>
+  <div class="conteneur pied-bas">
+    <p class="texte-doux">© {annee} {SOCIETE.marque}. Prix TTC, livraison en France métropolitaine.</p>
+  </div>
+</footer>
+
+<style>
+  .pied {
+    margin-top: var(--e-9);
+    padding-block: var(--e-7) var(--e-5);
+    background: var(--c-fond-2);
+    border-top: var(--b-pixel) solid var(--c-bordure);
+  }
+  .pied-grille {
+    display: grid;
+    gap: var(--e-6);
+  }
+  @media (min-width: 48rem) {
+    .pied-grille {
+      grid-template-columns: 2fr 1fr 1fr;
+    }
+  }
+  .pied-marque p {
+    margin: var(--e-3) 0 0;
+  }
+  .pied-titre {
+    font-family: var(--f-pixel);
+    font-weight: 700;
+    font-size: var(--t-l);
+    margin-bottom: var(--e-2);
+  }
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+  li a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 40px;
+    color: var(--c-texte-doux);
+  }
+  li a:hover {
+    color: var(--c-cyan);
+  }
+  .pied-bas {
+    margin-top: var(--e-6);
+    padding-top: var(--e-4);
+    border-top: 1px solid var(--c-bordure);
+    font-size: var(--t-s);
+  }
+  .pied-bas p {
+    margin: 0;
+  }
+</style>

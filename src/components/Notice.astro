@@ -1,0 +1,43 @@
+---
+import PixelIcone from './PixelIcone.astro';
+
+interface Props {
+  ton?: 'info' | 'succes' | 'alerte' | 'erreur';
+  titre?: string;
+}
+const { ton = 'info', titre } = Astro.props;
+const icone = ({ info: 'info', succes: 'valide', alerte: 'alerte', erreur: 'alerte' } as const)[ton];
+---
+
+<div class:list={['notice', `notice--${ton}`]} role={ton === 'erreur' ? 'alert' : undefined}>
+  <PixelIcone nom={icone} taille={24} />
+  <div>
+    {titre && <p class="notice-titre">{titre}</p>}
+    <slot />
+  </div>
+</div>
+
+<style>
+  .notice {
+    --ton: var(--c-cyan);
+    display: flex;
+    gap: var(--e-3);
+    padding: var(--e-4);
+    background: var(--c-surface);
+    border-left: 6px solid var(--ton);
+  }
+  .notice > :global(svg) {
+    color: var(--ton);
+    margin-top: 2px;
+  }
+  .notice--succes { --ton: var(--c-vert); }
+  .notice--alerte { --ton: var(--c-jaune); }
+  .notice--erreur { --ton: var(--c-rouge); }
+  .notice-titre {
+    font-weight: 700;
+    margin-bottom: var(--e-1);
+  }
+  .notice :global(p:last-child) {
+    margin-bottom: 0;
+  }
+</style>

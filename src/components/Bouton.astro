@@ -1,0 +1,116 @@
+---
+import type { HTMLAttributes } from 'astro/types';
+
+type Variante = 'primaire' | 'secondaire' | 'fantome';
+
+type Props = {
+  variante?: Variante;
+  taille?: 'normal' | 'grand';
+  pleineLargeur?: boolean;
+  href?: string;
+} & HTMLAttributes<'button'> & Omit<HTMLAttributes<'a'>, 'type'>;
+
+const {
+  variante = 'primaire',
+  taille = 'normal',
+  pleineLargeur = false,
+  href,
+  class: classe,
+  type = 'button',
+  ...attrs
+} = Astro.props;
+
+const classes = ['bouton', `bouton--${variante}`, `bouton--${taille}`, pleineLargeur && 'bouton--plein', classe];
+---
+
+{
+  href ? (
+    <a href={href} class:list={classes} {...attrs}>
+      <slot />
+    </a>
+  ) : (
+    <button type={type} class:list={classes} {...attrs}>
+      <slot />
+    </button>
+  )
+}
+
+<style>
+  .bouton {
+    --ombre: var(--c-rose);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--e-2);
+    min-height: var(--cible);
+    padding: var(--e-3) var(--e-5);
+    border: var(--b-pixel) solid currentColor;
+    border-radius: 0;
+    font-family: var(--f-pixel);
+    font-weight: 700;
+    font-size: var(--t-l);
+    line-height: 1;
+    text-decoration: none;
+    cursor: pointer;
+    box-shadow: var(--ombre-pixel) var(--ombre);
+    transition:
+      transform var(--d-rapide) var(--pas),
+      box-shadow var(--d-rapide) var(--pas);
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+  }
+  .bouton:hover {
+    transform: translate(-2px, -2px);
+    box-shadow: 6px 6px 0 0 var(--ombre);
+  }
+  .bouton:active {
+    transform: translate(4px, 4px);
+    box-shadow: 0 0 0 0 var(--ombre);
+  }
+  .bouton:disabled,
+  .bouton[aria-disabled='true'] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+    box-shadow: none;
+  }
+
+  .bouton--primaire {
+    background: var(--c-jaune);
+    border-color: var(--c-jaune);
+    color: var(--c-sur-neon);
+  }
+  .bouton--primaire:hover {
+    color: var(--c-sur-neon);
+  }
+  .bouton--secondaire {
+    --ombre: var(--c-cyan);
+    background: transparent;
+    color: var(--c-cyan);
+  }
+  .bouton--secondaire:hover {
+    color: var(--c-cyan);
+  }
+  .bouton--fantome {
+    background: transparent;
+    border-color: transparent;
+    color: var(--c-texte);
+    box-shadow: none;
+    text-decoration: underline;
+    text-underline-offset: 4px;
+  }
+  .bouton--fantome:hover {
+    box-shadow: none;
+    transform: none;
+    color: var(--c-jaune);
+  }
+
+  .bouton--grand {
+    min-height: 56px;
+    padding: var(--e-4) var(--e-6);
+    font-size: var(--t-xl);
+  }
+  .bouton--plein {
+    width: 100%;
+  }
+</style>

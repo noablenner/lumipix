@@ -1,0 +1,31 @@
+---
+interface Props {
+  ton?: 'cyan' | 'rose' | 'jaune' | 'vert' | 'neutre';
+}
+const { ton = 'cyan' } = Astro.props;
+---
+
+<span class:list={['badge', `badge--${ton}`]}><slot /></span>
+
+<style>
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--e-1);
+    padding: 2px var(--e-2);
+    font-family: var(--f-pixel);
+    font-size: var(--t-s);
+    font-weight: 700;
+    line-height: 1.4;
+    color: var(--c-sur-neon);
+  }
+  .badge--cyan { background: var(--c-cyan); }
+  .badge--rose { background: var(--c-rose); }
+  .badge--jaune { background: var(--c-jaune); }
+  .badge--vert { background: var(--c-vert); }
+  .badge--neutre {
+    background: var(--c-surface-2);
+    color: var(--c-texte);
+    box-shadow: inset 0 0 0 2px var(--c-bordure);
+  }
+</style>

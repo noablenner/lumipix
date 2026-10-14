@@ -1,0 +1,87 @@
+---
+/* Liste de questions / réponses en <details> natif : zéro JavaScript. */
+interface Props {
+  elements: { question: string; reponse: string }[];
+}
+const { elements } = Astro.props;
+---
+
+<div class="accordeon">
+  {
+    elements.map((e) => (
+      <details>
+        <summary>
+          <span>{e.question}</span>
+          <span class="accordeon-signe" aria-hidden="true" />
+        </summary>
+        <div class="accordeon-reponse">
+          <p>{e.reponse}</p>
+        </div>
+      </details>
+    ))
+  }
+</div>
+
+<style>
+  .accordeon {
+    display: grid;
+    gap: var(--e-2);
+  }
+  details {
+    background: var(--c-surface);
+    border: var(--b-pixel) solid var(--c-bordure-ui);
+  }
+  details[open] {
+    border-color: var(--c-cyan);
+  }
+  summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--e-4);
+    min-height: var(--cible);
+    padding: var(--e-3) var(--e-4);
+    font-weight: 700;
+    cursor: pointer;
+    list-style: none;
+  }
+  summary::-webkit-details-marker {
+    display: none;
+  }
+  /* Signe + / − dessiné en pixels */
+  .accordeon-signe {
+    position: relative;
+    width: 12px;
+    height: 12px;
+    flex-shrink: 0;
+  }
+  .accordeon-signe::before,
+  .accordeon-signe::after {
+    content: '';
+    position: absolute;
+    background: var(--c-cyan);
+  }
+  .accordeon-signe::before {
+    left: 0;
+    top: 4px;
+    width: 12px;
+    height: 4px;
+  }
+  .accordeon-signe::after {
+    left: 4px;
+    top: 0;
+    width: 4px;
+    height: 12px;
+    transition: transform var(--d-rapide) var(--pas);
+  }
+  details[open] .accordeon-signe::after {
+    transform: scaleY(0);
+  }
+  .accordeon-reponse {
+    padding: 0 var(--e-4) var(--e-4);
+    color: var(--c-texte-doux);
+  }
+  .accordeon-reponse p {
+    margin: 0;
+  }
+</style>
