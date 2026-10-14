@@ -14,5 +14,10 @@
     // navigation directe vers /dessin/<code> reçoit la page 404 sans appeler le Worker.
     "run_worker_first": ["/dessin/*", "/api/*"]
   },
+  // Base D1 (commandes, avis, inscriptions email). Les tables arrivent en phase 4.
+  // L'identifiant n'est pas un secret : sans les accès au compte Cloudflare, il ne permet rien.
+  "d1_databases": [
+    { "binding": "DB", "database_name": "lumipix", "database_id": "a1f9b975-53a6-443c-bac4-b473a044d405" }
+  ],
   "observability": { "enabled": true }
 }

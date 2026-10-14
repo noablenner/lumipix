@@ -7,8 +7,9 @@ Tous dans `src/config/societe.ts` (source unique), sauf mention contraire.
 - [ ] `[DIRECTEUR_PUBLICATION]` : nom du président (affiché uniquement dans les mentions légales)
 - [ ] `[ADRESSE_RETOURS]` : adresse de retour (jamais publiée, communiquée après validation d'un retour)
 - [ ] `[EMAIL_CONTACT]` : confirmer `contact@lumipix.shop` (boîte à créer chez Hostinger si besoin)
-- [ ] `[MEDIATEUR_CONSO]` : médiateur de la consommation (adhésion obligatoire avant la vente)
-- [ ] `[IDENTIFIANT_UNIQUE_REP]` : identifiant unique REP pour les équipements électriques et électroniques (cadre LED)
+- [ ] `[MEDIATEUR_CONSO]` : médiateur de la consommation (adhésion obligatoire avant la vente). Recommandé : CM2C (48 € pour 3 ans, 36 € par médiation). Vérifier sa présence pour « commerce électronique » sur economie.gouv.fr avant de signer. Exclure Médicys (agrément retiré en 2021)
+- [ ] `[IDENTIFIANT_UNIQUE_REP]` : identifiant unique REP pour les équipements électriques et électroniques (cadre LED). EROS est importateur donc producteur. Adhérer à Ecosystem ou Ecologic (devis aux deux, faire trancher la catégorie du 64x64 : écran de plus de 100 cm² ?)
+- [ ] Identifiant unique REP emballages (filière séparée, second identifiant)
 - [ ] `[SEUIL_LIVRAISON_GRATUITE]` : `src/config/boutique.ts`, pour les futurs produits (null = aucun seuil)
 - [ ] `[SOCIETE_ADRESSE_SIEGE]` : à mettre à jour en cas de domiciliation
 
@@ -51,7 +52,7 @@ Tous dans `src/config/societe.ts` (source unique), sauf mention contraire.
 
 - [x] Worker Cloudflare de préproduction vérifié (7 vérifications sur 8, lien /dessin corrigé par run_worker_first)
 - [x] Prévisualisation GitHub Pages supprimée
-- [x] Base D1 « lumipix » créée (Western Europe) : Database ID à reporter dans wrangler.jsonc en phase 4
+- [x] Base D1 « lumipix » créée (Western Europe) et reliée au Worker (`DB` dans wrangler.jsonc). Tables : phase 4
 - [x] Dépôt GitHub : reste public (décision du 14/10/2026). Conséquence : le bloc fournisseur des fiches et `sources/fournisseur/` sont lisibles par tous sur GitHub
 - [x] Pages légales créées (structure complète, passages « À compléter » visibles)
 - [ ] Pages légales à compléter avant la vente : Stripe demande l'URL des CGV pour la case de consentement, et la loi impose les informations précontractuelles avant le paiement. Placeholders à fournir : directeur de la publication, médiateur, adresse de retour, qui paie le retour
