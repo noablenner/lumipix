@@ -2,7 +2,7 @@
 
 Boutique e-commerce pixel art / rétro arcade ([lumipix.shop](https://lumipix.shop)). Le brief complet est dans `CLAUDE.md`.
 
-**État actuel : phase 3 terminée** (éditeur pixel art, export PNG, partage par URL avec image Open Graph). Démo du design system : `/design-system`.
+**État actuel : phase 3 terminée**, pages légales et panier prêts, paiement à venir (phase 4). Reprise du travail : [docs/REPRISE.md](docs/REPRISE.md). Démo du design system : `/design-system`.
 
 ## Installation
 
