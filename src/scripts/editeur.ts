@@ -76,36 +76,34 @@ export function demarrer(racine: HTMLElement) {
     });
   }
 
+  // Grille : une tuile par pixel, séparées par un fin joint (comme les LED du cadre)
   function peindreGrille() {
     const n = dessin.taille;
     const W = toile.width;
     const c = W / n;
-    ctx.fillStyle = '#08080c';
+    const joint = n === 32 ? 2 : 1;
+    ctx.fillStyle = '#040407';
     ctx.fillRect(0, 0, W, W);
     for (let y = 0; y < n; y++) {
       for (let x = 0; x < n; x++) {
         const i = dessin.pixels[y * n + x]!;
-        if (i) {
-          ctx.fillStyle = PALETTE[i]!;
-          ctx.fillRect(x * c, y * c, c, c);
-        }
+        ctx.fillStyle = i ? PALETTE[i]! : (x + y) % 2 ? '#14141c' : '#17171f';
+        const x0 = Math.round(x * c) + joint / 2;
+        const y0 = Math.round(y * c) + joint / 2;
+        ctx.fillRect(x0, y0, Math.round((x + 1) * c) - Math.round(x * c) - joint, Math.round((y + 1) * c) - Math.round(y * c) - joint);
       }
     }
-    ctx.lineWidth = 1;
-    for (let k = 0; k <= n; k++) {
-      ctx.strokeStyle = k % 8 === 0 ? 'rgba(255,255,255,0.16)' : 'rgba(255,255,255,0.06)';
-      const p = Math.round(k * c) + 0.5;
-      ctx.beginPath();
-      ctx.moveTo(p, 0);
-      ctx.lineTo(p, W);
-      ctx.moveTo(0, p);
-      ctx.lineTo(W, p);
-      ctx.stroke();
+    // repères tous les 8 pixels, très discrets
+    ctx.fillStyle = 'rgba(46, 230, 230, 0.22)';
+    for (let k = 8; k < n; k += 8) {
+      const p = Math.round(k * c) - 1;
+      ctx.fillRect(p, 0, 1, W);
+      ctx.fillRect(0, p, W, 1);
     }
     if (curseur.visible) {
       ctx.strokeStyle = '#ffd23f';
-      ctx.lineWidth = 2;
-      ctx.strokeRect(curseur.x * c + 1, curseur.y * c + 1, c - 2, c - 2);
+      ctx.lineWidth = 3;
+      ctx.strokeRect(curseur.x * c + 1.5, curseur.y * c + 1.5, c - 3, c - 3);
     }
   }
 

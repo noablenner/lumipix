@@ -33,8 +33,8 @@ function dansPolygone(u: number, v: number, pts: [number, number][]): boolean {
 }
 
 const coeurDedans = (u: number, v: number) => {
-  const x = (u - 0.5) * 2.7;
-  const y = (0.5 - v) * 2.7 + 0.12;
+  const x = (u - 0.5) * 3;
+  const y = (0.5 - v) * 3 + 0.12;
   return (x * x + y * y - 1) ** 3 - x * x * y ** 3 <= 0;
 };
 
@@ -52,8 +52,11 @@ const DESSINS: Record<NomModele, Peinture> = {
     return bord ? ROSE : ROUGE;
   },
   champignon(u, v) {
-    // herbe
-    if (v > 0.86 + 0.03 * Math.sin(u * 40)) return v > 0.93 ? VERT : VERT_CLAIR;
+    // touffe d'herbe au pied : brins irréguliers sur une base, sans toucher les bords
+    const d = Math.abs(u - 0.5);
+    if (v > 0.9 && v < 0.94 && d < 0.24) return VERT;
+    const brin = 0.9 - (0.035 + 0.03 * Math.abs(Math.sin(u * 47))) * (1 - d / 0.24);
+    if (v > brin && v <= 0.9 && d < 0.22 && Math.floor(u * 28) % 2 === 0) return VERT_CLAIR;
     // pied fin avec anneau
     if (Math.abs(u - 0.5) < 0.06 + (v > 0.78 ? 0.02 : 0) && v > 0.5 && v < 0.9) {
       if (v > 0.6 && v < 0.64) return BLANC;
@@ -130,13 +133,36 @@ const DESSINS: Record<NomModele, Peinture> = {
 };
 
 export function dessinerModele(nom: NomModele, taille: TailleDessin): Dessin {
-  const d = dessinVide(taille);
+  const brut = dessinVide(taille);
   const px = 1 / taille;
   for (let y = 0; y < taille; y++) {
     for (let x = 0; x < taille; x++) {
       const c = DESSINS[nom]((x + 0.5) / taille, (y + 0.5) / taille, px);
-      if (c !== undefined) d.pixels[y * taille + x] = c;
+      if (c !== undefined) brut.pixels[y * taille + x] = c;
     }
   }
-  return d;
+  return centrer(brut);
+}
+
+/** Recentre le dessin dans la grille (même marge à gauche et à droite, en haut et en bas). */
+function centrer(d: Dessin): Dessin {
+  const n = d.taille;
+  let x0: number = n, y0: number = n, x1 = -1, y1 = -1;
+  for (let y = 0; y < n; y++) {
+    for (let x = 0; x < n; x++) {
+      if (d.pixels[y * n + x]) {
+        x0 = Math.min(x0, x); x1 = Math.max(x1, x);
+        y0 = Math.min(y0, y); y1 = Math.max(y1, y);
+      }
+    }
+  }
+  if (x1 < 0) return d;
+  const dx = Math.floor((n - 1 - x1 - x0) / 2);
+  const dy = Math.floor((n - 1 - y1 - y0) / 2);
+  if (!dx && !dy) return d;
+  const sortie = dessinVide(n);
+  for (let y = y0; y <= y1; y++) {
+    for (let x = x0; x <= x1; x++) sortie.pixels[(y + dy) * n + x + dx] = d.pixels[y * n + x]!;
+  }
+  return sortie;
 }

@@ -279,9 +279,9 @@ const outils = [
     width: 100%;
     height: auto;
     aspect-ratio: 1;
-    background: #08080c;
-    border: var(--b-pixel) solid var(--c-bordure-ui);
-    image-rendering: pixelated;
+    background: #040407;
+    border: var(--b-pixel) solid #0c0c10;
+    box-shadow: 0 0 0 1px var(--c-bordure), 0 18px 40px -16px rgb(0 0 0 / 0.8);
     touch-action: none;
     cursor: crosshair;
   }
@@ -300,23 +300,40 @@ const outils = [
   .editeur-palette {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
-    gap: var(--e-2);
+    gap: 6px;
+    padding: var(--e-3);
+    background: #0b0b12;
+    border: 1px solid var(--c-bordure);
   }
   .editeur-couleur {
     aspect-ratio: 1;
-    min-height: 36px;
+    min-height: 34px;
     padding: 0;
     background: var(--c);
-    border: 3px solid #000;
-    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.15);
+    border: 0;
+    border-radius: 4px;
+    box-shadow:
+      inset 0 0 0 1px rgb(255 255 255 / 0.12),
+      inset 0 -3px 0 rgb(0 0 0 / 0.25);
     cursor: pointer;
+    transition: transform var(--d-rapide) var(--pas), box-shadow var(--d-rapide) var(--pas);
   }
+  .editeur-couleur:hover {
+    transform: translateY(-1px);
+  }
+  /* « Éteint » : LED noire barrée */
   .editeur-couleur[data-couleur='0'] {
-    background: repeating-conic-gradient(#000 0 25%, #2a2a33 0 50%) 0 0 / 12px 12px;
+    background:
+      linear-gradient(135deg, transparent 46%, #ff4f6d 46% 54%, transparent 54%),
+      #000;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 0.25);
   }
   .editeur-couleur[aria-pressed='true'] {
-    border-color: var(--c-jaune);
     transform: translateY(-2px);
+    box-shadow:
+      0 0 0 2px #0b0b12,
+      0 0 0 4px var(--c-jaune),
+      0 0 14px 2px var(--c);
   }
   .editeur-label {
     margin: 0 0 var(--e-2);
@@ -336,20 +353,32 @@ const outils = [
     display: grid;
     justify-items: center;
     gap: var(--e-1);
-    padding: var(--e-2);
+    min-width: 0;
+    padding: var(--e-2) 2px;
     background: var(--c-surface);
     border: 2px solid var(--c-bordure-ui);
     font-size: var(--t-s);
     cursor: pointer;
   }
+  .editeur-modele span {
+    max-width: 100%;
+    font-size: 0.8125rem;
+    overflow-wrap: anywhere;
+    line-height: 1.2;
+  }
   .editeur-modele:hover {
     border-color: var(--c-rose);
   }
   .editeur-modele canvas {
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     image-rendering: pixelated;
     background: #000;
+    border-radius: 3px;
+    box-shadow: 0 0 0 1px rgb(255 255 255 / 0.08);
+  }
+  .editeur-modele:hover canvas {
+    box-shadow: 0 0 0 1px var(--c-rose), 0 0 12px rgb(255 79 168 / 0.35);
   }
   .editeur-rendu {
     display: grid;

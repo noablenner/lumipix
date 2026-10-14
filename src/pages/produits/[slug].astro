@@ -72,7 +72,7 @@ const rendus: ElementGalerie[] = [
       { type: 'rendu', scene: 'fusee', vue: 'trois-quarts', alt: `${produit.nom} affichant une fusée en pixel art`, basculable: true },
     ];
 const galerie: ElementGalerie[] = produit.photos.length
-  ? [...produit.photos.map((p) => ({ type: 'photo' as const, ...p })), ...rendus.slice(1, 3)]
+  ? produit.photos.map((p) => ({ type: 'photo' as const, ...p }))
   : rendus;
 // Texte alternatif de l'image principale : contient le mot-clé principal.
 if (galerie[0] && !galerie[0].alt.toLowerCase().includes(motCle.toLowerCase())) {
@@ -119,7 +119,7 @@ const brouillon = produit.statut !== 'actif';
         slug={produit.slug}
         elements={galerie}
         taille={tailleDe(parDefaut.id)}
-        legende={estCadre ? 'Photos : version 64x64, contenu des écrans simulé avec nos scènes originales.' : undefined}
+        legende={estCadre ? 'Visuels : version 64x64. Rendus de studio et photos retouchées, contenu des écrans simulé avec nos scènes originales.' : undefined}
       />
 
       <div class="fiche-achat">

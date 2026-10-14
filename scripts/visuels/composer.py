@@ -13,9 +13,7 @@ ICI = os.path.dirname(os.path.abspath(__file__))
 R = os.path.join(ICI, '../../sources/fournisseur/cadre-pixel-art-led/')
 O = os.path.join(ICI, '../../assets/produits/cadre-pixel-art-led/')
 Q = [cv2.IMWRITE_JPEG_QUALITY, 93]
-img = cv2.imread(R + '4.jpeg')
-img = incruster(img, [[674,454],[1297,450],[1301,1067],[685,1071]], 'coucher-soleil-64', halo=0.25, reflet=(660, 1094, 1320, 1190, 0.10), marge=0.008)
-cv2.imwrite(O + '01-hero.jpg', img[397:1127, 620:1350], Q)
+# 01 : remplacé par un rendu de studio (studio.py)
 img = cv2.imread(R + '3.jpeg')
 img = remplir_vertical(img, 0, 36, 1160, 318)
 for i, (quad, sc) in enumerate([([[463,545],[752,547],[751,837],[461,835]], 'vague-neon-64'), ([[893,365],[1183,365],[1183,656],[893,656]], 'coucher-soleil-64'), ([[1253,103],[1543,103],[1543,393],[1253,393]], 'chat-64')]):

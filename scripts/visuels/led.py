@@ -32,6 +32,18 @@ def couleurs(nom):
     return cv2.cvtColor(hsv, cv2.COLOR_HSV2RGB)
 
 
+def flou(img, sigma):
+    """Flou gaussien rapide : les grands rayons sont calculés sur une image réduite."""
+    if sigma < 12:
+        return cv2.GaussianBlur(img, (0, 0), sigma)
+    f = max(2, int(sigma / 6))
+    h, w = img.shape[:2]
+    petit = cv2.resize(img, (max(1, w // f), max(1, h // f)), interpolation=cv2.INTER_AREA)
+    petit = cv2.GaussianBlur(petit, (0, 0), sigma / f)
+    grand = cv2.resize(petit, (w, h), interpolation=cv2.INTER_LINEAR)
+    return grand if grand.ndim == img.ndim else grand[..., None]
+
+
 def noyau(cell):
     """Diode carrée aux coins arrondis, plus chaude au centre."""
     t = (np.arange(cell) + 0.5) / cell - 0.5
@@ -45,12 +57,12 @@ def noyau(cell):
 def texture(nom, cell=24, gain=1.6):
     c = _lin(couleurs(nom))
     n = c.shape[0]
-    emission = np.kron(c, np.ones((cell, cell, 1), np.float32)) * np.tile(noyau(cell), (n, n, 1))
+    emission = np.repeat(np.repeat(c, cell, 0), cell, 1) * np.tile(noyau(cell), (n, n, 1)).astype(np.float32)
     bloom = (
         emission
-        + 0.30 * cv2.GaussianBlur(emission, (0, 0), cell * 0.35)
-        + 0.22 * cv2.GaussianBlur(emission, (0, 0), cell * 1.5)
-        + 0.12 * cv2.GaussianBlur(emission, (0, 0), cell * 5)
+        + 0.30 * flou(emission, cell * 0.35)
+        + 0.22 * flou(emission, cell * 1.5)
+        + 0.12 * flou(emission, cell * 5)
     )
     ton = 1 - np.exp(-gain * bloom)  # les LED très lumineuses tirent vers le blanc, comme sur une photo
     return _srgb(ton)  # RGB 0..1
