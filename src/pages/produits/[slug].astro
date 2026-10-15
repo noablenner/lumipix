@@ -119,7 +119,8 @@ const brouillon = produit.statut !== 'actif';
         slug={produit.slug}
         elements={galerie}
         taille={tailleDe(parDefaut.id)}
-        legende={estCadre ? 'Visuels : version 64x64. Rendus de studio et photos retouchées, contenu des écrans simulé avec nos scènes originales.' : undefined}
+        variante={parDefaut.id}
+        legende={estCadre ? 'Photos retouchées et rendus de studio, écrans simulés avec nos scènes originales. La densité de pixels suit la variante choisie ; cadre photographié : modèle 64x64 (le 32x32 est plus petit).' : undefined}
       />
 
       <div class="fiche-achat">
@@ -292,6 +293,8 @@ const brouillon = produit.statut !== 'actif';
         const src = c.getAttribute(`data-src-${taille}`);
         if (img && src && img.getAttribute('src') !== src) img.setAttribute('src', src);
       });
+      // Galerie : photos propres à la variante
+      document.dispatchEvent(new CustomEvent('lumipix:variante', { detail: r.value }));
       if (majUrl) {
         const url = new URL(location.href);
         url.searchParams.set('variante', r.value);

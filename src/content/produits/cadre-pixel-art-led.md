@@ -20,20 +20,28 @@ variantes:
     disponible: true
 frais_de_port: 0
 
-# Visuels : version 64x64. Rendus de studio (01, 05, 06) et photos retouchées, écrans affichant les scènes originales Lumipix.
+# Visuels : photos retouchées (01 à 04) et rendus de studio (05, 06), écrans affichant les scènes originales Lumipix.
+# Chaque visuel existe en version 64x64 (fichier de base) et 32x32 (suffixe -32), montrée quand la variante 32x32 est choisie.
+# Le cadre photographié est le modèle 64x64 : seule la densité de pixels change.
 photos:
   - src: "01-hero.jpg"
-    alt: "Cadre pixel art LED 64x64 allumé sur un coucher de soleil rétro, posé dans un studio sombre"
+    alt: "Cadre pixel art LED allumé sur un coucher de soleil rétro, posé sur un bureau"
+    par_variante: { "32x32": "01-hero-32.jpg" }
   - src: "02-ambiance.jpg"
     alt: "Trois cadres LED pixel accrochés au mur d'un salon : vagues néon, coucher de soleil et chat"
+    par_variante: { "32x32": "02-ambiance-32.jpg" }
   - src: "03-cadeau.jpg"
     alt: "Écran pixel art affichant un cœur, posé près d'un sapin et de cadeaux"
+    par_variante: { "32x32": "03-cadeau-32.jpg" }
   - src: "04-dimensions.jpg"
     alt: "Dimensions du cadre 64x64 en mode horloge : 260 x 260 mm pour 17 mm d'épaisseur"
+    variantes: ["64x64"]
   - src: "05-studio-neon.jpg"
     alt: "Cadre LED pixel affichant des vagues néon, sa lumière se reflète sur le plateau"
+    par_variante: { "32x32": "05-studio-neon-32.jpg" }
   - src: "06-studio-chat.jpg"
     alt: "Écran pixel art du cadre affichant un chat roux sous un ciel étoilé"
+    par_variante: { "32x32": "06-studio-chat-32.jpg" }
 videos:
   - src: "05-demo.mp4"
     alt: "Démonstration du cadre : retrait du film, connexion à l'application, dessin envoyé en direct, dégradé arc-en-ciel, texte défilant, horloges et animations"

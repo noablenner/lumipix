@@ -58,6 +58,8 @@ delai_livraison:
 photos:                                  # fichiers de assets/produits/mon-produit/
   - src: "01-hero.jpg"
     alt: "Description précise de l'image, avec le mot-clé principal pour la première"
+#   par_variante: { "petit": "01-hero-petit.jpg" }  # facultatif : autre fichier quand cette variante est choisie
+#   variantes: ["grand"]                           # facultatif : photo montrée seulement pour ces variantes
 videos: []
 #  - src: "demo.mp4"
 #    alt: "Ce que montre la vidéo"

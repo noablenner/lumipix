@@ -27,6 +27,10 @@ const media = z.strictObject({
   /** Nom du fichier dans assets/produits/[slug]/ (ex. "01-hero.jpg"). */
   src: z.string().min(1),
   alt: z.string().trim().min(1, 'texte alternatif obligatoire'),
+  /** Fichier à afficher à la place de src quand cette variante est choisie (ex. { "32x32": "01-hero-32.jpg" }). */
+  par_variante: z.record(z.string(), z.string().min(1)).optional(),
+  /** Variantes pour lesquelles la photo est montrée (par défaut : toutes). */
+  variantes: z.array(z.string()).min(1).optional(),
 });
 
 const video = z.strictObject({
@@ -169,6 +173,17 @@ const produits = defineCollection({
         }
       }
 
+      // Photos par variante : identifiants de variante existants
+      p.photos.forEach((m, i) => {
+        for (const [champ, cles] of [['par_variante', Object.keys(m.par_variante ?? {})], ['variantes', m.variantes ?? []]] as const) {
+          for (const cle of cles) {
+            if (!ids.includes(cle)) {
+              ctx.addIssue({ code: 'custom', path: ['photos', i, champ], message: `variante "${cle}" inconnue` });
+            }
+          }
+        }
+      });
+
       if (p.delai_livraison.min_jours_ouvres > p.delai_livraison.max_jours_ouvres) {
         ctx.addIssue({ code: 'custom', path: ['delai_livraison'], message: 'min supérieur à max' });
       }
@@ -182,7 +197,10 @@ const produits = defineCollection({
 
       // Les médias doivent exister dans assets/produits/[slug]/
       const fichiers = [
-        ...p.photos.map((m, i) => ({ f: m.src, path: ['photos', i, 'src'] })),
+        ...p.photos.flatMap((m, i) => [
+          { f: m.src, path: ['photos', i, 'src'] },
+          ...Object.entries(m.par_variante ?? {}).map(([v, f]) => ({ f, path: ['photos', i, 'par_variante', v] })),
+        ]),
         ...p.videos.flatMap((m, i) => [
           { f: m.src, path: ['videos', i, 'src'] },
           ...(m.poster ? [{ f: m.poster, path: ['videos', i, 'poster'] }] : []),

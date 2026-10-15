@@ -16,3 +16,4 @@ node_modules/
 .DS_Store
 npm-debug.log*
 scripts/visuels/grilles.json
+__pycache__/

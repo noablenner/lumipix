@@ -12,7 +12,7 @@ import { lien } from '../../lib/routes';
 import { imageProduit } from '../../lib/medias';
 
 export type ElementGalerie =
-  | { type: 'photo'; src: string; alt: string }
+  | { type: 'photo'; src: string; alt: string; par_variante?: Record<string, string>; variantes?: string[] }
   | {
       type: 'rendu';
       scene: NomScene;
@@ -27,33 +27,66 @@ interface Props {
   slug: string;
   elements: ElementGalerie[];
   taille: 32 | 64;
+  /** Variante choisie au chargement : sélectionne les photos propres à cette variante. */
+  variante?: string;
   /** Mention sous la galerie, par exemple la variante photographiée. */
   legende?: string;
 }
-const { slug, elements, taille, legende } = Astro.props;
+const { slug, elements, taille, variante, legende } = Astro.props;
 
+// Chaque photo a une version par défaut (« * ») et, au besoin, une version par variante.
+// Le script de la page produit bascule entre elles via l'événement « lumipix:variante ».
 const resolus = await Promise.all(
-  elements.map(async (e) => (e.type === 'photo' ? { ...e, image: await imageProduit(slug, e.src) } : e)),
+  elements.map(async (e) =>
+    e.type === 'photo'
+      ? {
+          ...e,
+          versions: await Promise.all(
+            [['*', e.src] as const, ...Object.entries(e.par_variante ?? {})].map(async ([cle, f]) => ({
+              cle,
+              image: await imageProduit(slug, f),
+            })),
+          ),
+        }
+      : e,
+  ),
 );
 const avecPhotos = resolus.some((e) => e.type === 'photo');
+const visibleDe = (e: (typeof resolus)[number]) => !(e.type === 'photo' && e.variantes && variante && !e.variantes.includes(variante));
+const versionDe = (e: (typeof resolus)[number]) =>
+  e.type === 'photo' && variante && e.par_variante?.[variante] ? variante : '*';
+// Première diapositive visible au chargement : seule image chargée en priorité.
+const premiere = resolus.findIndex(visibleDe);
 ---
 
 <div class="galerie">
   <ul class="galerie-piste" aria-label="Galerie du produit">
     {
       resolus.map((e, i) => (
-        <li class="galerie-diapo" id={`vue-${i + 1}`}>
+        <li
+          class="galerie-diapo"
+          id={`vue-${i + 1}`}
+          data-pour={e.type === 'photo' && e.variantes ? e.variantes.join(' ') : undefined}
+          hidden={!visibleDe(e)}
+        >
           {e.type === 'photo' ? (
-            <Picture
-              src={e.image}
-              alt={e.alt}
-              class="galerie-photo"
-              formats={['avif', 'webp']}
-              widths={[480, 800, 1100]}
-              sizes="(min-width: 64rem) 36rem, 100vw"
-              loading={i === 0 ? 'eager' : 'lazy'}
-              fetchpriority={i === 0 ? 'high' : undefined}
-            />
+            e.versions.map((v) => {
+              const active = v.cle === versionDe(e);
+              return (
+                <div class="galerie-version" data-version={v.cle} hidden={!active}>
+                  <Picture
+                    src={v.image}
+                    alt={e.alt}
+                    class="galerie-photo"
+                    formats={['avif', 'webp']}
+                    widths={[480, 800, 1100]}
+                    sizes="(min-width: 64rem) 36rem, 100vw"
+                    loading={i === premiere && active ? 'eager' : 'lazy'}
+                    fetchpriority={i === premiere && active ? 'high' : undefined}
+                  />
+                </div>
+              );
+            })
           ) : e.bureau ? (
             <SceneBureau ambiance={e.ambiance}>
               <CadreLed scene={e.scene} taille={taille} vue={e.vue} alt={e.alt} prioritaire={i === 0} pied basculable={e.basculable} />
@@ -70,9 +103,18 @@ const avecPhotos = resolus.some((e) => e.type === 'photo');
   <nav class="galerie-vignettes" aria-label="Choisir une vue">
     {
       resolus.map((e, i) => (
-        <a href={`#vue-${i + 1}`} aria-label={`Vue ${i + 1} : ${e.alt}`}>
+        <a
+          href={`#vue-${i + 1}`}
+          aria-label={`Vue ${i + 1} : ${e.alt}`}
+          data-pour={e.type === 'photo' && e.variantes ? e.variantes.join(' ') : undefined}
+          hidden={!visibleDe(e)}
+        >
           {e.type === 'photo' ? (
-            <Picture src={e.image} alt="" formats={['avif', 'webp']} widths={[120]} sizes="60px" loading="lazy" />
+            e.versions.map((v) => (
+              <span class="galerie-version" data-version={v.cle} hidden={v.cle !== versionDe(e)}>
+                <Picture src={v.image} alt="" formats={['avif', 'webp']} widths={[120]} sizes="60px" loading="lazy" />
+              </span>
+            ))
           ) : (
             <img src={lien(`/scenes/${e.scene}-32.svg`)} alt="" width="60" height="60" loading="lazy" decoding="async" />
           )}
@@ -96,6 +138,22 @@ const avecPhotos = resolus.some((e) => e.type === 'photo');
       });
     });
   });
+
+  // Photos propres à la variante choisie (ex. écran 32x32 ou 64x64).
+  const appliquerVariante = (id: string) => {
+    document.querySelectorAll<HTMLElement>('.galerie [data-pour]').forEach((el) => {
+      el.hidden = !el.dataset.pour!.split(' ').includes(id);
+    });
+    document.querySelectorAll<HTMLElement>('.galerie-diapo, .galerie-vignettes a').forEach((el) => {
+      const versions = [...el.querySelectorAll<HTMLElement>(':scope > .galerie-version')];
+      if (!versions.length) return;
+      const cle = versions.some((v) => v.dataset.version === id) ? id : '*';
+      versions.forEach((v) => (v.hidden = v.dataset.version !== cle));
+    });
+  };
+  document.addEventListener('lumipix:variante', (ev) => appliquerVariante((ev as CustomEvent<string>).detail));
+  const cochee = document.querySelector<HTMLInputElement>('input[name="variante"]:checked');
+  if (cochee) appliquerVariante(cochee.value);
 </script>
 
 <style>
@@ -125,6 +183,14 @@ const avecPhotos = resolus.some((e) => e.type === 'photo');
   }
   .galerie-diapo :global(img) {
     width: 100%;
+  }
+  .galerie-diapo[hidden],
+  .galerie-vignettes a[hidden],
+  .galerie-version[hidden] {
+    display: none;
+  }
+  .galerie-vignettes .galerie-version:not([hidden]) {
+    display: contents;
   }
   /* Diapositives carrées : les photos du cadre ne sont jamais rognées */
   .galerie {

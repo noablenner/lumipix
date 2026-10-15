@@ -87,7 +87,7 @@ Le dessin entier est encodé dans l'URL (`src/lib/pixel/dessin.ts` : compression
 
 `assets/produits/cadre-pixel-art-led/` contient les visuels publiés : photos et vidéo du fournisseur retravaillées (texte marketing retiré, écrans remplacés par nos scènes originales, son supprimé). Les fichiers bruts sont dans `sources/fournisseur/`, qui n'est jamais servi par le site. La galerie précise que le contenu des écrans est simulé.
 
-Visuels de studio (01, 05, 06) : rendus 100 % synthétiques, `python3 scripts/visuels/studio.py <scene> <sortie.jpg> 1600 1600 <angle>`. Photos retouchées (02 à 04) : `node scripts/visuels/grilles.ts && python3 scripts/visuels/composer.py` (dépendances : `pip install opencv-python-headless numpy`). L'écran est simulé comme une vraie photo d'écran LED : diodes carrées aux coins arrondis, cœur lumineux, halo, noirs profonds, reflet sur le plateau.
+Tous les visuels du cadre sont produits par `node scripts/visuels/grilles.ts && python3 scripts/visuels/composer.py` (dépendances : `pip install opencv-python-headless numpy`) : photos fournisseur retouchées (01 à 04) et rendus de studio 100 % synthétiques (05, 06, via `scripts/visuels/studio.py`), chacun en version 64x64 et 32x32 (suffixe `-32`, affichée sur la page produit quand la variante 32x32 est choisie, champ `par_variante` de la fiche). L'écran est simulé comme une vraie photo d'écran LED : diodes carrées aux coins arrondis, cœur lumineux, halo, noirs profonds, reflet sur le plateau.
 
 ## Brouillons et prévisualisation
 
