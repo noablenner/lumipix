@@ -1,6 +1,6 @@
 # Reprise du travail (note pour la prochaine conversation)
 
-Dernière mise à jour : 14/10/2026. À lire en premier, avant d'écrire du code.
+Dernière mise à jour : 16/10/2026. À lire en premier, avant d'écrire du code.
 
 ## Où trouver les infos
 
@@ -13,21 +13,18 @@ Dernière mise à jour : 14/10/2026. À lire en premier, avant d'écrire du code
 ## État
 
 - Phases 1, 2, 3 terminées (design system, rendu du cadre, accueil, page produit, collection, 404, éditeur pixel art, export PNG, partage par URL avec image OG).
-- Fait en avance : pages légales (avec passages « À compléter »), page `/panier` (paiement inactif), calcul du panier partagé `src/lib/panier-calcul.ts`.
-- Hébergement : Worker Cloudflare avec fichiers statiques (`wrangler.jsonc`, `src/worker.ts`), redéployé à chaque push sur `main`, cible `CIBLE_DEPLOIEMENT=preprod` (brouillons visibles, tout en noindex).
-- Base D1 `lumipix` reliée (binding `DB`), aucune table.
-- Le cadre est encore `statut: brouillon` : il n'existe pas en production.
+- Phase 4 codée et testée (Stripe simulé + D1 simulée, puis workerd local) : `src/serveur/commandes.ts`, `stripe.ts`, `schema.ts`, catalogue serveur généré au build, `/commande/merci`, capture UTM. Pas encore testée contre le vrai Stripe (réseau bloqué depuis l'environnement de Claude).
+- Fait en avance : pages légales (avec passages « À compléter »), page `/panier`.
+- Hébergement : Worker Cloudflare avec fichiers statiques (`wrangler.jsonc`, `src/worker.ts`), redéployé à chaque push sur `main`, cible `CIBLE_DEPLOIEMENT=preprod` (brouillons visibles et achetables, tout en noindex).
+- Base D1 `lumipix` reliée (binding `DB`) ; les tables se créent seules au premier appel.
+- Le cadre est encore `statut: brouillon` : achetable en préprod seulement, absent en production.
 - Dépôt public : décision définitive de Noa, ne plus en parler.
 - Noa ne veut pas de détails administratifs : aller droit au but, listes courtes.
 
-## Prochaine étape : phase 4 (Stripe)
+## Prochaine étape
 
-1. Schéma D1 (migrations `migrations/`) : commandes, lignes, commandes fournisseur, avis, inscriptions.
-2. Route Worker `POST /api/checkout` : recalcule les prix depuis les fiches produit (réutiliser `calculerPanier`), crée la session Stripe Checkout (adresse FR, email, téléphone obligatoires, codes promo, consentement CGV, facture auto, métadonnées UTM).
-3. Capture UTM et référent de première visite côté client.
-4. Route `POST /api/stripe/webhook` : signature vérifiée, idempotent, enregistre la commande dans D1.
-5. Page `/commande/merci`, activer le bouton du panier.
-6. Noa doit créer un compte Stripe (mode test) et mettre `STRIPE_SECRET_KEY` et `STRIPE_WEBHOOK_SECRET` dans Cloudflare (via un prompt pour Claude Cowork, qui pilote son ordinateur).
+1. Noa : clés Stripe live + webhook (README, « Brancher Stripe »), puis une vraie commande de test sur la préprod, remboursée ensuite.
+2. Phase 5 : admin (Cloudflare Access), emails Resend (confirmation, expédition, alerte webhook), page /suivi, contact.
 
 ## En attente de Noa (bloquant pour vendre, pas pour coder)
 

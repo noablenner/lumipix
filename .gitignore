@@ -17,3 +17,4 @@ node_modules/
 npm-debug.log*
 scripts/visuels/grilles.json
 __pycache__/
+src/serveur/catalogue.genere.ts

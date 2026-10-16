@@ -1,0 +1,121 @@
+---
+/*
+ * Retour de Stripe Checkout après paiement (brief §4) : noindex.
+ * Le statut vient du Worker (/api/commande/statut), qui lit la commande
+ * enregistrée par le webhook. Le panier est vidé dès l'arrivée sur la page.
+ */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Bouton from '../../components/Bouton.astro';
+import { SOCIETE } from '../../config/societe';
+import { getProduitPhare, lienProduit } from '../../lib/catalogue';
+import { lien } from '../../lib/routes';
+
+const phare = await getProduitPhare();
+---
+
+<BaseLayout title="Merci pour ta commande | Lumipix" description="Confirmation de ta commande Lumipix." noindex>
+  <div class="conteneur merci">
+    <p class="pixel merci-sur-titre">GAME SAVED</p>
+    <h1>Merci pour ta commande</h1>
+
+    <div data-etat="attente" aria-live="polite">
+      <p>Paiement reçu, on enregistre ta commande…</p>
+    </div>
+
+    <div data-etat="ok" hidden>
+      <p>Ta commande est confirmée.</p>
+      <p class="merci-numero">Numéro de commande : <strong class="pixel" data-numero></strong></p>
+      <p>
+        Total payé : <strong data-total></strong>. Garde bien ton numéro de commande : il te sera demandé pour suivre ta
+        livraison. Les informations de commande sont rattachées à l’adresse <span data-email></span>.
+      </p>
+    </div>
+
+    <div data-etat="lent" hidden>
+      <p>
+        Ton paiement est en cours de confirmation. Si ton compte a été débité, ta commande est bien prise en compte : il
+        n’est pas nécessaire de recommencer.
+      </p>
+      <p>
+        Une question ? Écris-nous à <a href={`mailto:${SOCIETE.emailContact}`}>{SOCIETE.emailContact}</a> en indiquant
+        l’adresse email utilisée pour le paiement.
+      </p>
+    </div>
+
+    <div data-etat="inconnu" hidden>
+      <p>Aucune commande à afficher ici.</p>
+    </div>
+
+    <div class="merci-actions">
+      {phare && <Bouton href={lienProduit(phare)} variante="secondaire">Ouvrir l’éditeur pixel art</Bouton>}
+      <Bouton href={lien('/')} variante="fantome">Retour à l’accueil</Bouton>
+    </div>
+  </div>
+</BaseLayout>
+
+<script>
+  import { ecrirePanier } from '../../scripts/panier';
+  import { formatPrix } from '../../lib/format';
+
+  const session = new URLSearchParams(location.search).get('session_id');
+  const montrer = (etat: string) =>
+    document.querySelectorAll<HTMLElement>('[data-etat]').forEach((el) => (el.hidden = el.dataset.etat !== etat));
+  const remplir = (sel: string, valeur: string) => {
+    const el = document.querySelector(sel);
+    if (el) el.textContent = valeur;
+  };
+
+  if (!session || !/^cs_(test|live)_/.test(session)) {
+    montrer('inconnu');
+  } else {
+    ecrirePanier([]);
+    let essais = 0;
+    const interroger = async () => {
+      essais++;
+      try {
+        const r = await fetch(`/api/commande/statut?session=${encodeURIComponent(session)}`);
+        const c = (await r.json()) as { etat?: string; numero?: string; total?: number; email?: string };
+        if (c.numero) {
+          remplir('[data-numero]', c.numero);
+          remplir('[data-total]', formatPrix(c.total ?? 0));
+          remplir('[data-email]', c.email ?? '');
+          return montrer('ok');
+        }
+      } catch {
+        // réseau : nouvel essai
+      }
+      // Le webhook Stripe arrive en général en quelques secondes
+      if (essais < 12) setTimeout(interroger, 1500 + essais * 250);
+      else montrer('lent');
+    };
+    interroger();
+  }
+</script>
+
+<style>
+  .merci {
+    padding-block: var(--e-6) var(--e-8);
+    max-width: 44rem;
+  }
+  .merci-sur-titre {
+    color: var(--c-rose);
+    letter-spacing: 0.2em;
+    margin: 0;
+  }
+  .merci h1 {
+    margin-top: var(--e-2);
+  }
+  .merci-numero strong {
+    font-size: var(--t-xl);
+    color: var(--c-jaune);
+  }
+  .merci [hidden] {
+    display: none;
+  }
+  .merci-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e-3);
+    margin-top: var(--e-6);
+  }
+</style>

@@ -14,7 +14,7 @@ import PixelIcone from '../components/PixelIcone.astro';
 import Reassurance from '../components/Reassurance.astro';
 import { getProduitPhare, getProduitsPublies, lienProduit, variantesAvecPrix } from '../lib/catalogue';
 import { imageProduit } from '../lib/medias';
-import { lien } from '../lib/routes';
+import { fonctionsServeur, lien } from '../lib/routes';
 import type { ArticleCatalogue } from '../lib/panier-calcul';
 import { BOUTIQUE } from '../config/boutique';
 
@@ -75,10 +75,12 @@ const reglages = { seuil: BOUTIQUE.seuilLivraisonGratuite };
         </dl>
         <p class="texte-doux panier-delai" data-delai></p>
 
-        <Bouton taille="grand" pleineLargeur disabled data-payer aria-describedby="paiement-bientot">
-          <PixelIcone nom="cadenas" taille={20} /> Paiement sécurisé
+        <Bouton taille="grand" pleineLargeur disabled={!fonctionsServeur} data-payer aria-describedby="paiement-info">
+          <PixelIcone nom="cadenas" taille={20} /> <span data-payer-texte>Paiement sécurisé</span>
         </Bouton>
-        <p id="paiement-bientot" class="panier-bientot">Le paiement en ligne ouvre très bientôt.</p>
+        <p id="paiement-info" class="panier-info" role="status" aria-live="polite" data-payer-info>
+          {fonctionsServeur ? 'Paiement par carte sur la page sécurisée de Stripe.' : 'Paiement indisponible sur cette prévisualisation.'}
+        </p>
 
         <ul class="panier-precontrat">
           <li>Prix en euros, toutes taxes comprises (TVA 20 % incluse).</li>
@@ -110,6 +112,7 @@ const reglages = { seuil: BOUTIQUE.seuilLivraisonGratuite };
 <script>
   import { calculerPanier, QUANTITE_MAX, type ArticleCatalogue } from '../lib/panier-calcul';
   import { changerQuantite, ecrirePanier, lirePanier, EVENEMENT_PANIER } from '../scripts/panier';
+  import { lireOrigine } from '../scripts/origine';
   import { formatDelai, formatPrix } from '../lib/format';
 
   const catalogue: ArticleCatalogue[] = JSON.parse(document.getElementById('catalogue-panier')!.textContent!);
@@ -183,6 +186,45 @@ const reglages = { seuil: BOUTIQUE.seuilLivraisonGratuite };
 
   afficher();
   window.addEventListener(EVENEMENT_PANIER, afficher);
+
+  // Paiement : le serveur recalcule tout à partir des identifiants et crée la session Stripe Checkout.
+  const payer = $<HTMLButtonElement>('[data-payer]');
+  const payerTexte = $('[data-payer-texte]');
+  const payerInfo = $('[data-payer-info]');
+  payer.addEventListener('click', async () => {
+    if (payer.disabled) return;
+    payer.disabled = true;
+    payerTexte.textContent = 'Redirection vers le paiement…';
+    payerInfo.classList.remove('panier-info--erreur');
+    let message = 'Le paiement n’a pas pu démarrer. Vérifie ta connexion et réessaie.';
+    try {
+      const reponse = await fetch('/api/checkout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ lignes: lirePanier(), origine: lireOrigine() }),
+      });
+      const corps = (await reponse.json().catch(() => ({}))) as { url?: string; erreur?: string };
+      if (reponse.ok && corps.url) {
+        location.assign(corps.url);
+        return;
+      }
+      if (corps.erreur) message = corps.erreur;
+      if (reponse.status === 409) afficher();
+    } catch {
+      // réseau indisponible : message par défaut
+    }
+    payer.disabled = false;
+    payerTexte.textContent = 'Paiement sécurisé';
+    payerInfo.textContent = message;
+    payerInfo.classList.add('panier-info--erreur');
+  });
+  // Retour arrière depuis Stripe (cache de page) : bouton réactivé
+  window.addEventListener('pageshow', (e) => {
+    if (e.persisted) {
+      payer.disabled = false;
+      payerTexte.textContent = 'Paiement sécurisé';
+    }
+  });
   // Panier modifié dans un autre onglet
   window.addEventListener('storage', (e) => e.key === 'lumipix:panier' && afficher());
 </script>
@@ -330,11 +372,14 @@ const reglages = { seuil: BOUTIQUE.seuilLivraisonGratuite };
     margin: var(--e-3) 0 var(--e-4);
     font-size: var(--t-s);
   }
-  .panier-bientot {
+  .panier-info {
     margin: var(--e-2) 0 0;
     font-size: var(--t-s);
-    color: var(--c-jaune);
+    color: var(--c-texte-doux);
     text-align: center;
+  }
+  .panier-info--erreur {
+    color: var(--c-jaune);
   }
   .panier-precontrat {
     margin: var(--e-4) 0 0;

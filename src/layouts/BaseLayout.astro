@@ -70,6 +70,10 @@ const jetonAnalytics = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
       <slot />
     </main>
     <Footer />
+    <script>
+      import { memoriserOrigine } from '../scripts/origine';
+      memoriserOrigine();
+    </script>
     {
       jetonAnalytics && (
         <script

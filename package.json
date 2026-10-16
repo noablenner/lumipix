@@ -9,10 +9,11 @@
   "scripts": {
     "dev": "astro dev",
     "check": "astro check",
-    "build": "astro check && npm test && astro build && npm run verifier",
+    "build": "node scripts/catalogue-serveur.ts && astro check && npm test && astro build && npm run verifier",
     "verifier": "node scripts/verifier-build.ts",
     "preview": "astro preview",
-    "test": "node scripts/tester-dessin.ts"
+    "test": "node scripts/catalogue-serveur.ts && node scripts/tester-dessin.ts && node --no-warnings scripts/tester-paiement.ts",
+    "catalogue": "node scripts/catalogue-serveur.ts"
   },
   "dependencies": {
     "astro": "7.3.8",

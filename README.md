@@ -2,7 +2,7 @@
 
 Boutique e-commerce pixel art / rétro arcade ([lumipix.shop](https://lumipix.shop)). Le brief complet est dans `CLAUDE.md`.
 
-**État actuel : phase 3 terminée**, pages légales et panier prêts, paiement à venir (phase 4). Reprise du travail : [docs/REPRISE.md](docs/REPRISE.md). Démo du design system : `/design-system`.
+**État actuel : phase 4 codée** (paiement Stripe, commandes dans D1), en attente des clés Stripe. Phases 1 à 3 terminées. Reprise du travail : [docs/REPRISE.md](docs/REPRISE.md). Démo du design system : `/design-system`.
 
 ## Installation
 
@@ -18,7 +18,8 @@ npm run dev              # http://localhost:4321
 | --- | --- |
 | `npm run dev` | Serveur de développement |
 | `npm run build` | Vérification TypeScript, build statique dans `dist/`, puis garde-fous |
-| `npm test` | Tests du format de dessin, des modèles et des fonctions de partage |
+| `npm test` | Tests du dessin, du partage, du panier et du paiement (Stripe simulé, D1 simulée par SQLite) |
+| `npm run catalogue` | Régénère le catalogue serveur (`src/serveur/catalogue.genere.ts`, fait automatiquement au build) |
 | `npm run verifier` | Garde-fous seuls (sur un `dist/` existant) |
 | `npm run preview` | Sert `dist/` en local |
 
@@ -88,6 +89,32 @@ Le dessin entier est encodé dans l'URL (`src/lib/pixel/dessin.ts` : compression
 `assets/produits/cadre-pixel-art-led/` contient les visuels publiés : photos et vidéo du fournisseur retravaillées (texte marketing retiré, écrans remplacés par nos scènes originales, son supprimé). Les fichiers bruts sont dans `sources/fournisseur/`, qui n'est jamais servi par le site. La galerie précise que le contenu des écrans est simulé.
 
 Tous les visuels du cadre sont produits par `node scripts/visuels/grilles.ts && python3 scripts/visuels/composer.py` (dépendances : `pip install opencv-python-headless numpy`) : photos fournisseur retouchées (01 à 04) et rendus de studio 100 % synthétiques (05, 06, via `scripts/visuels/studio.py`), chacun en version 64x64 et 32x32 (suffixe `-32`, affichée sur la page produit quand la variante 32x32 est choisie, champ `par_variante` de la fiche). L'écran est simulé comme une vraie photo d'écran LED : diodes carrées aux coins arrondis, cœur lumineux, halo, noirs profonds, reflet sur le plateau.
+
+## Paiement et commandes (phase 4)
+
+Tout passe par le Worker (`src/serveur/`), sans SDK ni dépendance :
+
+| Route | Rôle |
+| --- | --- |
+| `POST /api/checkout` | Reçoit uniquement produit / variante / quantité, recalcule prix, port et délai depuis le catalogue serveur, crée la session Stripe Checkout |
+| `POST /api/stripe/webhook` | Signature vérifiée (HMAC, 5 min max), idempotent, enregistre commande, lignes et commandes fournisseur dans D1 |
+| `GET /api/commande/statut` | Numéro et total pour `/commande/merci` (email masqué, rien d'autre) |
+
+- **Catalogue serveur** : `scripts/catalogue-serveur.ts` lit les fiches (prix ET bloc fournisseur) et écrit `src/serveur/catalogue.genere.ts`, embarqué dans le code du Worker, jamais dans `dist/`. Un produit est vendable s'il est `actif`, ou `brouillon` hors production.
+- **Session Stripe** : livraison France uniquement, email et téléphone obligatoires, codes promo, case CGV obligatoire, TVA 20 % incluse (taux créé automatiquement dans le compte Stripe au premier paiement), facture générée par Stripe avec le numéro de TVA et les mentions société, numéro de commande `LPX-XXXXXXXX`, UTM en métadonnées.
+- **UTM** : `src/scripts/origine.ts` garde 30 jours, dans le navigateur, la première visite qui a une source (UTM ou site référent).
+- **D1** : schéma dans `src/serveur/schema.ts`, créé automatiquement au premier appel (aucune migration à lancer). Montants en centimes.
+- **Événements webhook à cocher** : `checkout.session.completed`, `checkout.session.async_payment_succeeded`, `checkout.session.async_payment_failed`, `invoice.paid`, `charge.refunded`.
+
+### Brancher Stripe (à faire une fois)
+
+1. Stripe > *Paramètres > Informations publiques* : renseigner l'URL des CGV (`https://<site>/cgv`), **sinon la création de session échoue** (la case CGV l'exige). Libellé de relevé : `LUMIPIX`.
+2. Stripe > *Paramètres > E-mails clients* : activer les reçus de paiement et de remboursement.
+3. Stripe > *Développeurs > Webhooks* : endpoint `https://<site>/api/stripe/webhook` avec les 5 événements ci-dessus, puis copier le secret de signature (`whsec_…`).
+4. Cloudflare > Worker `lumipix` > *Settings > Variables and Secrets* : `STRIPE_SECRET_KEY` et `STRIPE_WEBHOOK_SECRET`, type **Secret**.
+5. Test : une commande réelle de bout en bout, vérifier la ligne dans D1 (`npx wrangler d1 execute lumipix --remote --command "SELECT numero, total, statut FROM commandes"`), puis la rembourser depuis Stripe.
+
+Tester en local : `npm run build && npx wrangler dev` avec un fichier `.dev.vars` (voir `.env.example`), et `stripe listen --forward-to localhost:8787/api/stripe/webhook` pour recevoir les webhooks.
 
 ## Brouillons et prévisualisation
 
