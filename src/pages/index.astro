@@ -4,7 +4,7 @@
  * secondaires : « déco gaming pixel » et « Lumipix ». Tout est centré sur le
  * cadre pixel art LED, produit phare.
  */
-import { Picture, getImage } from 'astro:assets';
+import { Picture } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Accordeon from '../components/Accordeon.astro';
 import Badge from '../components/Badge.astro';
@@ -19,22 +19,21 @@ import SceneBureau from '../components/produit/SceneBureau.astro';
 import { getCollectionsVisibles, getProduitPhare, lienProduit, prixAPartirDe, variantesAvecPrix } from '../lib/catalogue';
 import { formatDelai, formatPrix } from '../lib/format';
 import { lien } from '../lib/routes';
-import { imageProduit, urlVideoProduit } from '../lib/medias';
+import { imageProduit } from '../lib/medias';
+import VideoProduit from '../components/produit/VideoProduit.astro';
 import { jsonLdOrganisation, jsonLdSiteWeb } from '../lib/seo';
 import { BOUTIQUE } from '../config/boutique';
 import type { NomScene } from '../lib/pixel/scenes';
 
 const phare = await getProduitPhare();
-const collections = await getCollectionsVisibles();
+// Section « Collections » masquée tant que BOUTIQUE.collectionsEnAvant est à false (un seul produit)
+const collections = BOUTIQUE.collectionsEnAvant ? await getCollectionsVisibles() : [];
 const variantes = phare ? variantesAvecPrix(phare) : [];
 const delai = phare ? formatDelai(phare.delai_livraison.min_jours_ouvres, phare.delai_livraison.max_jours_ouvres) : undefined;
 // Photo principale et vidéo du cadre en fonctionnement, dès qu'elles sont déclarées dans la fiche.
 const photoHero = phare?.photos[0];
 const imageHero = photoHero && phare ? await imageProduit(phare.slug, photoHero.src) : undefined;
 const video = phare?.videos[0];
-const srcVideo = video && phare ? urlVideoProduit(phare.slug, video.src) : undefined;
-const poster =
-  video?.poster && phare ? await getImage({ src: await imageProduit(phare.slug, video.poster), format: 'webp', width: 1280 }) : undefined;
 
 const demo: NomScene[] = ['coeur', 'vague-neon', 'chat', 'horloge'];
 
@@ -141,20 +140,8 @@ const faq = [
     <div class="action revele">
       <div class="action-media">
         {
-          video && srcVideo ? (
-            <video
-              src={srcVideo}
-              poster={poster?.src}
-              width="1280"
-              height="720"
-              controls
-              muted
-              loop
-              playsinline
-              preload="none"
-              aria-label={video.alt}
-              data-video-auto
-            />
+          video && phare ? (
+            <VideoProduit slug={phare.slug} video={video} />
           ) : (
             <div class="action-boucle" aria-label="Le cadre change d’image : cœur, vagues néon, chat, horloge" role="img">
               {demo.map((s, i) => (
@@ -274,17 +261,6 @@ const faq = [
   </section>
 </BaseLayout>
 
-<script>
-  // Lecture automatique (muette) quand la vidéo est visible, sauf en mouvement réduit.
-  const video = document.querySelector<HTMLVideoElement>('[data-video-auto]');
-  if (video && !matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
-    new IntersectionObserver(([e]) => {
-      if (e?.isIntersecting) video.play().catch(() => {});
-      else video.pause();
-    }, { threshold: 0.5 }).observe(video);
-  }
-</script>
-
 <style>
   .section {
     margin-top: var(--e-9);
@@ -389,11 +365,6 @@ const faq = [
     padding: var(--e-6);
     background: radial-gradient(70% 60% at 50% 45%, #1d1a40, #0c0b1e);
     border: var(--b-pixel) solid var(--c-bordure);
-  }
-  .action-media video {
-    display: block;
-    height: auto;
-    width: 100%;
   }
   .action-boucle {
     display: grid;

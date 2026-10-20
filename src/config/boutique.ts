@@ -20,6 +20,13 @@ export const BOUTIQUE = {
    * du visiteur dans le bandeau de consentement. null = désactivé.
    */
   googleAnalytics: 'G-946R13FWHX' as string | null,
+  /**
+   * Collections dans le menu et la section « Collections » de l'accueil.
+   * false tant qu'il n'y a qu'un produit : passer à true quand le catalogue
+   * s'étoffe, tout réapparaît sans autre modification. Les pages
+   * /collections/[slug] restent en ligne dans tous les cas.
+   */
+  collectionsEnAvant: false,
   /** Délai légal de rétractation, en jours. */
   delaiRetractationJours: 14,
 } as const;

@@ -19,6 +19,7 @@ import CadreLed from '../../components/produit/CadreLed.astro';
 import Galerie, { type ElementGalerie } from '../../components/produit/Galerie.astro';
 import ProduitCarte from '../../components/produit/ProduitCarte.astro';
 import Editeur from '../../components/editeur/Editeur.astro';
+import VideoProduit from '../../components/produit/VideoProduit.astro';
 import {
   getProduitsPublies,
   specsPubliques,
@@ -182,6 +183,17 @@ const brouillon = produit.statut !== 'actif';
         <Content />
       </section>
 
+      {
+        produit.videos[0] && (
+          <section class="fiche-video" aria-labelledby="t-video">
+            <h2 id="t-video">Le cadre en action</h2>
+            <div class="fiche-video-cadre">
+              <VideoProduit slug={produit.slug} video={produit.videos[0]} />
+            </div>
+          </section>
+        )
+      }
+
       {estCadre && <Editeur slug={produit.slug} taille={tailleDe(parDefaut.id)} />}
 
       {
@@ -325,6 +337,11 @@ const brouillon = produit.statut !== 'actif';
 </script>
 
 <style>
+  .fiche-video-cadre {
+    padding: var(--e-4);
+    background: radial-gradient(70% 60% at 50% 45%, #1d1a40, #0c0b1e);
+    border: var(--b-pixel) solid var(--c-bordure);
+  }
   .fiche {
     padding-block: var(--e-4) var(--e-7);
     display: grid;

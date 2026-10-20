@@ -37,6 +37,9 @@ Tous dans `src/config/societe.ts` (source unique), sauf mention contraire.
 
 ## Technique (phases suivantes)
 
+- [ ] Collections masquées (menu et accueil) tant qu'il n'y a qu'un produit : repasser `collectionsEnAvant: true` dans `src/config/boutique.ts` au deuxième produit
+- [x] Bouton son retiré du menu (20/10/2026, inutile). Les sons restent codés (`BoutonSon.astro`, visible sur /design-system) si on veut le remettre
+
 - [ ] Curseur pixel optionnel (non fait : effet facultatif du brief, à décider)
 - [ ] Inscription email en double opt-in sur l'accueil : phase 5 (nécessite Resend et D1)
 - [x] Éditeur pixel art (phase 3)

@@ -1,15 +1,18 @@
 ---
 import Logo from './Logo.astro';
-import BoutonSon from './BoutonSon.astro';
 import PixelIcone from './PixelIcone.astro';
 import { getCollectionsVisibles, getProduitPhare } from '../lib/catalogue';
 import { cheminPublic, lien, routeExiste } from '../lib/routes';
+import { BOUTIQUE } from '../config/boutique';
 
 /*
  * Navigation : uniquement les collections qui ont au moins un produit actif,
  * puis les pages éditoriales déjà construites. Aucun lien vers une page vide.
  */
-const [collections, phare] = await Promise.all([getCollectionsVisibles(), getProduitPhare()]);
+const [collections, phare] = await Promise.all([
+  BOUTIQUE.collectionsEnAvant ? getCollectionsVisibles() : Promise.resolve([]),
+  getProduitPhare(),
+]);
 const liens = [
   ...(phare ? [{ href: `/produits/${phare.slug}`, label: 'Cadre LED' }] : []),
   ...collections.map((c) => ({ href: `/collections/${c.data.slug}`, label: c.data.nom })),
@@ -46,7 +49,6 @@ const panierDisponible = routeExiste('/panier');
     }
 
     <div class="entete-actions">
-      <BoutonSon />
       {
         panierDisponible && (
           <a href={lien('/panier')} class="entete-panier" aria-label="Panier">

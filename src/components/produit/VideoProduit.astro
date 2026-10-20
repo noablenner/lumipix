@@ -1,0 +1,56 @@
+---
+/*
+ * Vidéo du produit en fonctionnement (accueil et page produit) : muette,
+ * lue automatiquement quand elle est visible, en pause sinon, jamais en
+ * mouvement réduit. preload="none" : rien n'est téléchargé avant l'affichage.
+ */
+import { getImage } from 'astro:assets';
+import { imageProduit, urlVideoProduit } from '../../lib/medias';
+
+interface Props {
+  slug: string;
+  video: { src: string; alt: string; poster?: string };
+}
+const { slug, video } = Astro.props;
+const src = urlVideoProduit(slug, video.src);
+const poster = video.poster ? await getImage({ src: await imageProduit(slug, video.poster), format: 'webp', width: 1280 }) : undefined;
+---
+
+<video
+  class="video-produit"
+  src={src}
+  poster={poster?.src}
+  width="1280"
+  height="720"
+  controls
+  muted
+  loop
+  playsinline
+  preload="none"
+  aria-label={video.alt}
+  data-video-auto
+></video>
+
+<script>
+  if (!matchMedia('(prefers-reduced-motion: reduce)').matches && 'IntersectionObserver' in window) {
+    const observateur = new IntersectionObserver(
+      (entrees) => {
+        for (const e of entrees) {
+          const v = e.target as HTMLVideoElement;
+          if (e.isIntersecting) v.play().catch(() => {});
+          else v.pause();
+        }
+      },
+      { threshold: 0.5 },
+    );
+    document.querySelectorAll<HTMLVideoElement>('[data-video-auto]').forEach((v) => observateur.observe(v));
+  }
+</script>
+
+<style>
+  .video-produit {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+</style>
