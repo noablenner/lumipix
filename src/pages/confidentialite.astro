@@ -1,7 +1,7 @@
 ---
 /*
  * Politique de confidentialité (brief §9). Les faits techniques (prestataires,
- * absence de cookies) viennent de l'architecture réelle du site ; les durées de
+ * cookies soumis à consentement) viennent de l'architecture réelle du site ; les durées de
  * conservation et bases légales sont à valider.
  */
 import PageLegale from '../components/legal/PageLegale.astro';
@@ -39,6 +39,7 @@ import { SOCIETE } from '../config/societe';
   <ul>
     <li><strong>Cloudflare</strong> : hébergement du site et de la base de données, statistiques de fréquentation anonymes sans cookie.</li>
     <li><strong>Stripe</strong> : paiement et facturation.</li>
+    <li><strong>Google (Google Analytics)</strong> : mesure d'audience, uniquement si tu l'acceptes dans le bandeau cookies.</li>
     <li><strong>Resend</strong> : envoi des emails liés à ta commande.</li>
     <li><strong>Fournisseur et transporteur</strong> : nom, adresse et téléphone de livraison, uniquement pour expédier ta commande.</li>
   </ul>
@@ -46,9 +47,15 @@ import { SOCIETE } from '../config/societe';
 
   <h2>Cookies et stockage dans ton navigateur</h2>
   <p>
-    Le site n'utilise <strong>aucun cookie publicitaire ni traceur</strong>. Les statistiques de fréquentation fonctionnent
-    sans cookie. Ton navigateur conserve localement ton panier, ton brouillon de dessin, ta préférence de son et l'origine de
-    ta visite : ces informations restent sur ton appareil tant qu'aucune commande n'est passée.
+    Le site n'utilise <strong>aucun cookie publicitaire</strong>. Avec ton accord seulement, Google Analytics dépose des
+    cookies de mesure d'audience (<code>_ga</code> et <code>_ga_…</code>, 13 mois maximum) pour compter les visites et
+    comprendre comment le site est utilisé. Si tu refuses, rien n'est chargé. Ton choix est gardé 6 mois et tu peux le
+    changer à tout moment avec le lien « Gestion des cookies » en bas de chaque page.
+  </p>
+  <p>
+    Les statistiques de Cloudflare fonctionnent sans cookie. Ton navigateur conserve aussi localement ton panier, ton
+    brouillon de dessin, ta préférence de son, ton choix de cookies et l'origine de ta visite : ces informations restent sur
+    ton appareil tant qu'aucune commande n'est passée.
   </p>
 
   <h2>Tes droits</h2>

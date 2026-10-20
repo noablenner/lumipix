@@ -2,6 +2,7 @@
 import Logo from './Logo.astro';
 import { SOCIETE } from '../config/societe';
 import { lien, routeExiste } from '../lib/routes';
+import { BOUTIQUE } from '../config/boutique';
 
 /* Seuls les liens vers des pages déjà construites sont affichés. */
 const groupes = [
@@ -56,6 +57,7 @@ const annee = new Date().getFullYear();
   </div>
   <div class="conteneur pied-bas">
     <p class="texte-doux">© {annee} {SOCIETE.marque}. Prix TTC, livraison en France métropolitaine.</p>
+    {BOUTIQUE.googleAnalytics && <p><a href="#" data-consentement-ouvrir>Gestion des cookies</a></p>}
   </div>
 </footer>
 

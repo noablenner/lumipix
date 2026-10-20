@@ -1,0 +1,152 @@
+---
+/*
+ * Bandeau de consentement aux cookies (brief §9, recommandations CNIL) :
+ * Google Analytics n'est chargé qu'après « Accepter ». Refuser est aussi
+ * simple qu'accepter. Le choix est gardé 6 mois, puis redemandé.
+ * Le lien « Gestion des cookies » du pied de page rouvre le bandeau.
+ */
+import { BOUTIQUE } from '../config/boutique';
+import { lien } from '../lib/routes';
+
+const id = BOUTIQUE.googleAnalytics;
+---
+
+{
+  id && (
+    <div class="consentement" data-consentement data-ga={id} role="dialog" aria-labelledby="consentement-titre" hidden>
+      <p id="consentement-titre" class="consentement-titre pixel">Cookies</p>
+      <p class="consentement-texte">
+        On aimerait mesurer l’audience du site avec Google Analytics, qui dépose des cookies. Accepter ou refuser ne change
+        rien à ta navigation ni à tes achats. <a href={lien('/confidentialite')}>En savoir plus</a>
+      </p>
+      <div class="consentement-actions">
+        <button type="button" class="consentement-bouton" data-choix="non">Refuser</button>
+        <button type="button" class="consentement-bouton" data-choix="oui">Accepter</button>
+      </div>
+    </div>
+  )
+}
+
+<script>
+  const CLE = 'lumipix:consentement';
+  const DUREE_MS = 182 * 24 * 3600 * 1000; // 6 mois
+  const bandeau = document.querySelector<HTMLElement>('[data-consentement]');
+  const id = bandeau?.dataset.ga;
+
+  type Choix = { analytics: boolean; date: number };
+  const lire = (): Choix | null => {
+    try {
+      const c = JSON.parse(localStorage.getItem(CLE) ?? 'null') as Choix | null;
+      return c && typeof c.date === 'number' && Date.now() - c.date < DUREE_MS ? c : null;
+    } catch {
+      return null;
+    }
+  };
+
+  let charge = false;
+  const chargerAnalytics = () => {
+    if (!id || charge) return;
+    charge = true;
+    const w = window as unknown as { dataLayer: unknown[]; gtag: (...a: unknown[]) => void };
+    w.dataLayer = w.dataLayer || [];
+    w.gtag = function () {
+      // gtag attend l'objet arguments, pas un tableau
+      // eslint-disable-next-line prefer-rest-params
+      w.dataLayer.push(arguments);
+    };
+    w.gtag('js', new Date());
+    // durée des cookies limitée à 13 mois (recommandation CNIL)
+    w.gtag('config', id, { cookie_expires: 13 * 30 * 24 * 3600 });
+    const s = document.createElement('script');
+    s.async = true;
+    s.src = `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`;
+    document.head.append(s);
+  };
+
+  // Refus après un accord : on supprime les cookies Google Analytics déjà posés.
+  const effacerCookies = () => {
+    const domaines = ['', location.hostname, `.${location.hostname}`, `.${location.hostname.split('.').slice(-2).join('.')}`];
+    for (const nom of document.cookie.split(';').map((c) => c.split('=')[0]!.trim())) {
+      if (!/^_ga/.test(nom)) continue;
+      for (const d of domaines) document.cookie = `${nom}=; Max-Age=0; path=/${d ? `; domain=${d}` : ''}`;
+    }
+  };
+
+  const ouvrir = () => {
+    if (bandeau) bandeau.hidden = false;
+  };
+
+  if (bandeau && id) {
+    const choix = lire();
+    if (choix?.analytics) chargerAnalytics();
+    else if (!choix) ouvrir();
+
+    bandeau.querySelectorAll<HTMLButtonElement>('[data-choix]').forEach((b) =>
+      b.addEventListener('click', () => {
+        const oui = b.dataset.choix === 'oui';
+        try {
+          localStorage.setItem(CLE, JSON.stringify({ analytics: oui, date: Date.now() }));
+        } catch {
+          // stockage indisponible : le bandeau reviendra à la prochaine page
+        }
+        bandeau.hidden = true;
+        if (oui) chargerAnalytics();
+        else effacerCookies();
+      }),
+    );
+    document.querySelectorAll('[data-consentement-ouvrir]').forEach((l) =>
+      l.addEventListener('click', (e) => {
+        e.preventDefault();
+        ouvrir();
+        bandeau.querySelector<HTMLButtonElement>('[data-choix="non"]')?.focus();
+      }),
+    );
+  }
+</script>
+
+<style>
+  .consentement {
+    position: fixed;
+    inset: auto var(--e-3) var(--e-3) var(--e-3);
+    z-index: 100;
+    max-width: 34rem;
+    margin-inline: auto;
+    padding: var(--e-4);
+    background: var(--c-surface);
+    border: var(--b-pixel) solid var(--c-bordure-ui);
+    box-shadow: 6px 6px 0 var(--c-fond);
+  }
+  .consentement[hidden] {
+    display: none;
+  }
+  .consentement-titre {
+    margin: 0 0 var(--e-2);
+    font-size: var(--t-l);
+    color: var(--c-cyan);
+  }
+  .consentement-texte {
+    margin: 0;
+    font-size: var(--t-s);
+  }
+  .consentement-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--e-3);
+    margin-top: var(--e-3);
+  }
+  /* Les deux choix ont exactement le même poids visuel */
+  .consentement-bouton {
+    min-height: var(--cible);
+    padding-inline: var(--e-3);
+    background: var(--c-fond-2);
+    color: var(--c-texte);
+    border: var(--b-pixel) solid var(--c-bordure-ui);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+  }
+  .consentement-bouton:hover,
+  .consentement-bouton:focus-visible {
+    border-color: var(--c-cyan);
+  }
+</style>

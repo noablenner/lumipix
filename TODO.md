@@ -46,7 +46,10 @@ Tous dans `src/config/societe.ts` (source unique), sauf mention contraire.
 - [x] Paiement Stripe codé (phase 4) : checkout, webhook, D1, page merci, UTM. Reste : brancher les clés (README, « Brancher Stripe »)
 - [ ] Frais de port payants (futurs produits) : la TVA sur le port n'est pas ventilée sur la facture Stripe (taux de TVA manuel). À traiter avant le premier produit avec port payant
 - [ ] Alerte email admin en cas d'erreur webhook et notification de commande : phase 5 (Resend). D'ici là, erreurs visibles dans les logs du Worker et dans Stripe > Webhooks
-- [ ] Utilisation de localStorage pour la source de la visite (UTM, 30 jours) : à mentionner dans la politique de confidentialité
+- [x] Source de la visite (UTM, 30 jours) mentionnée dans la politique de confidentialité
+- [x] Google Analytics 4 (G-946R13FWHX) : chargé seulement après accord dans le bandeau cookies (choix gardé 6 mois, cookies 13 mois max)
+- [ ] Google Analytics : dans l'interface GA, régler la conservation des données à 14 mois maximum et désactiver Google Signals (recommandations CNIL)
+- [ ] Google Analytics : suivi des achats (événement purchase) non branché
 - [ ] Quantité maximale par ligne : 10 aujourd'hui, alors que la fiche fournisseur limite à 3 pièces par acheteur. À trancher avant le lancement
 - [ ] Politique de retour : qui paie les frais de retour ? (à préciser pour les CGV et les données structurées)
 - [ ] Choix DNS : passer les serveurs de noms chez Cloudflare (recommandé, voir README) ou rester sur Hostinger avec `www`

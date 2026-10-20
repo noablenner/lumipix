@@ -15,6 +15,11 @@ export const BOUTIQUE = {
    * Le cadre est déjà livré gratuitement (frais_de_port: 0 dans sa fiche).
    */
   seuilLivraisonGratuite: null as number | null,
+  /**
+   * Google Analytics 4 (dépose des cookies) : chargé UNIQUEMENT après accord
+   * du visiteur dans le bandeau de consentement. null = désactivé.
+   */
+  googleAnalytics: 'G-946R13FWHX' as string | null,
   /** Délai légal de rétractation, en jours. */
   delaiRetractationJours: 14,
 } as const;

@@ -2,6 +2,7 @@
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import Consentement from '../components/Consentement.astro';
 import { SOCIETE } from '../config/societe';
 import { cheminPublic, estPrevisualisation, lien } from '../lib/routes';
 import policeTitres from '../styles/fonts/jersey-10-latin-400-normal.woff2?url';
@@ -58,10 +59,6 @@ const jetonAnalytics = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
 
     {jsonLd && <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />}
 
-    <!--
-      Emplacement réservé au bandeau de consentement (brief §9).
-      Inactif : aucun cookie ni traceur non essentiel au lancement.
-    -->
   </head>
   <body>
     <a class="lien-evitement" href="#contenu">Aller au contenu</a>
@@ -70,6 +67,8 @@ const jetonAnalytics = import.meta.env.PUBLIC_CF_WEB_ANALYTICS_TOKEN;
       <slot />
     </main>
     <Footer />
+    <!-- Bandeau de consentement : Google Analytics ne se charge qu'après accord (brief §9) -->
+    <Consentement />
     <script>
       import { memoriserOrigine } from '../scripts/origine';
       memoriserOrigine();
