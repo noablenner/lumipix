@@ -6,7 +6,6 @@
  */
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Bouton from '../../components/Bouton.astro';
-import { SOCIETE } from '../../config/societe';
 import { getProduitPhare, lienProduit } from '../../lib/catalogue';
 import { lien } from '../../lib/routes';
 
@@ -37,7 +36,7 @@ const phare = await getProduitPhare();
         n’est pas nécessaire de recommencer.
       </p>
       <p>
-        Une question ? Écris-nous à <a href={`mailto:${SOCIETE.emailContact}`}>{SOCIETE.emailContact}</a> en indiquant
+        Une question ? Nos coordonnées sont dans les <a href={lien('/mentions-legales')}>mentions légales</a> : indique
         l’adresse email utilisée pour le paiement.
       </p>
     </div>

@@ -16,7 +16,6 @@ export function jsonLdOrganisation() {
     name: SOCIETE.marque,
     url: url('/'),
     logo: url('/favicon.svg'),
-    email: SOCIETE.emailContact,
   };
 }
 

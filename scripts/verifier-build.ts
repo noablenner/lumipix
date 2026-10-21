@@ -96,6 +96,8 @@ const restreindre = (valeur: string, pagesAutorisees: string[], libelle: string)
 restreindre(SOCIETE.directeurPublication, ['mentions-legales.html'], 'Nom du directeur de la publication');
 restreindre(SOCIETE.adresseSiege, ['mentions-legales.html', 'cgv.html'], 'Adresse du siège');
 restreindre(SOCIETE.adresseRetours, [], 'Adresse de retour');
+// Email de contact : uniquement là où la loi l'impose (éditeur, vendeur, rétractation, droits RGPD)
+restreindre(SOCIETE.emailContact, ['mentions-legales.html', 'cgv.html', 'retours.html', 'confidentialite.html'], 'Email de contact');
 
 // 4. Contrastes
 const couleurs = lireCouleurs(readFileSync(join(RACINE, 'src/styles/tokens.css'), 'utf8'));
