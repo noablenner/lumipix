@@ -5,6 +5,7 @@
  */
 import PageLegale from '../components/legal/PageLegale.astro';
 import AFaire from '../components/legal/AFaire.astro';
+import ContactEmail from '../components/legal/ContactEmail.astro';
 import { SOCIETE } from '../config/societe';
 import { BOUTIQUE } from '../config/boutique';
 const j = BOUTIQUE.delaiRetractationJours;
@@ -25,7 +26,7 @@ const j = BOUTIQUE.delaiRetractationJours;
   <h2>Comment faire</h2>
   <ol>
     <li>
-      Préviens-nous dans ce délai par email à <a href={`mailto:${SOCIETE.emailContact}`}>{SOCIETE.emailContact}</a>, avec ton
+      Préviens-nous dans ce délai par email à <ContactEmail />, avec ton
       numéro de commande. Tu peux utiliser le formulaire type ci-dessous ou nous écrire librement.
     </li>
     <li>Nous te confirmons la prise en compte de ta demande et t'indiquons l'adresse de retour.</li>
@@ -45,7 +46,7 @@ const j = BOUTIQUE.delaiRetractationJours;
   <p class="texte-doux">À compléter et nous renvoyer par email si tu souhaites te rétracter.</p>
   <div class="formulaire-type">
     <p>
-      À l'attention de {SOCIETE.raisonSociale} ({SOCIETE.marque}), {SOCIETE.emailContact} :
+      À l'attention de {SOCIETE.raisonSociale} ({SOCIETE.marque}), <ContactEmail /> :
     </p>
     <p>
       Je/Nous (*) vous notifie/notifions (*) par la présente ma/notre (*) rétractation du contrat portant sur la vente du bien

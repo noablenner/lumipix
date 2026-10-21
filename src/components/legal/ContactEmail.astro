@@ -1,0 +1,12 @@
+---
+/*
+ * Email de contact (pages légales uniquement). Tant que SOCIETE.emailContact
+ * est un placeholder, un « À compléter » visible le remplace.
+ */
+import AFaire from './AFaire.astro';
+import { SOCIETE, estPlaceholder } from '../../config/societe';
+
+const email = SOCIETE.emailContact;
+---
+
+{estPlaceholder(email) ? <AFaire quoi="adresse email de contact" /> : <a href={`mailto:${email}`}>{email}</a>}

@@ -6,6 +6,7 @@
  */
 import PageLegale from '../components/legal/PageLegale.astro';
 import AFaire from '../components/legal/AFaire.astro';
+import ContactEmail from '../components/legal/ContactEmail.astro';
 import { SOCIETE, estPlaceholder } from '../config/societe';
 import { BOUTIQUE } from '../config/boutique';
 import { lien } from '../lib/routes';
@@ -22,7 +23,7 @@ const s = SOCIETE;
   <p>
     Les présentes conditions s'appliquent aux ventes conclues sur le site {s.domaine} entre le client et {s.raisonSociale},
     {s.formeJuridique} au capital de {s.capital}, dont le siège est situé {s.adresseSiege}, immatriculée sous le numéro
-    {s.rcs}, TVA intracommunautaire {s.tvaIntracom}. Contact : <a href={`mailto:${s.emailContact}`}>{s.emailContact}</a>.
+    {s.rcs}, TVA intracommunautaire {s.tvaIntracom}. Contact : <ContactEmail />.
   </p>
 
   <h2>2. Champ d'application</h2>

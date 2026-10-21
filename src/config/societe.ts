@@ -30,8 +30,11 @@ export const SOCIETE = {
 
   /** [DIRECTEUR_PUBLICATION] : nom du président, mentions légales uniquement. */
   directeurPublication: '[DIRECTEUR_PUBLICATION]',
-  /** [EMAIL_CONTACT] : seul canal de contact client avec le formulaire. */
-  emailContact: 'contact@lumipix.shop',
+  /**
+   * Email de contact (obligatoire légalement), affiché UNIQUEMENT sur les pages
+   * légales : mentions légales, CGV, retours, confidentialité (garde-fou du build).
+   */
+  emailContact: 'clumipix@gmail.com',
   /** [ADRESSE_RETOURS] : jamais affichée publiquement. */
   adresseRetours: '[ADRESSE_RETOURS]',
   /** [MEDIATEUR_CONSO] : nom, adresse et site du médiateur de la consommation. */

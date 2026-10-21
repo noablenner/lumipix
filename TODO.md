@@ -6,7 +6,7 @@ Tous dans `src/config/societe.ts` (source unique), sauf mention contraire.
 
 - [ ] `[DIRECTEUR_PUBLICATION]` : nom du président (affiché uniquement dans les mentions légales)
 - [ ] `[ADRESSE_RETOURS]` : adresse de retour (jamais publiée, communiquée après validation d'un retour)
-- [ ] `[EMAIL_CONTACT]` : confirmer `contact@lumipix.shop` (boîte à créer chez Hostinger si besoin)
+- [x] Email de contact : clumipix@gmail.com (21/10/2026), affiché uniquement sur les pages légales
 - [ ] `[MEDIATEUR_CONSO]` : médiateur de la consommation (adhésion obligatoire avant la vente). Recommandé : CM2C (48 € pour 3 ans, 36 € par médiation). Vérifier sa présence pour « commerce électronique » sur economie.gouv.fr avant de signer. Exclure Médicys (agrément retiré en 2021)
 - [ ] `[IDENTIFIANT_UNIQUE_REP]` : identifiant unique REP pour les équipements électriques et électroniques (cadre LED). EROS est importateur donc producteur. Adhérer à Ecosystem ou Ecologic (devis aux deux, faire trancher la catégorie du 64x64 : écran de plus de 100 cm² ?)
 - [ ] Identifiant unique REP emballages (filière séparée, second identifiant)

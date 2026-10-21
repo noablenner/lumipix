@@ -6,6 +6,7 @@
  */
 import PageLegale from '../components/legal/PageLegale.astro';
 import AFaire from '../components/legal/AFaire.astro';
+import ContactEmail from '../components/legal/ContactEmail.astro';
 import { SOCIETE } from '../config/societe';
 ---
 
@@ -18,7 +19,7 @@ import { SOCIETE } from '../config/societe';
   <h2>Responsable du traitement</h2>
   <p>
     {SOCIETE.raisonSociale}, {SOCIETE.formeJuridique}, éditeur de la boutique {SOCIETE.marque}. Contact :
-    <a href={`mailto:${SOCIETE.emailContact}`}>{SOCIETE.emailContact}</a>.
+    <ContactEmail />.
   </p>
 
   <h2>Données collectées et finalités</h2>
@@ -62,7 +63,7 @@ import { SOCIETE } from '../config/societe';
   <p>
     Tu disposes d'un droit d'accès, de rectification, d'effacement, de limitation, d'opposition et de portabilité de tes
     données, ainsi que du droit de définir des directives sur leur sort après ton décès. Pour les exercer, écris-nous à
-    <a href={`mailto:${SOCIETE.emailContact}`}>{SOCIETE.emailContact}</a>. Tu peux aussi introduire une réclamation auprès de la
+    <ContactEmail />. Tu peux aussi introduire une réclamation auprès de la
     CNIL (cnil.fr).
   </p>
 </PageLegale>

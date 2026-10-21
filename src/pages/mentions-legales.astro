@@ -5,6 +5,7 @@
  */
 import PageLegale from '../components/legal/PageLegale.astro';
 import AFaire from '../components/legal/AFaire.astro';
+import ContactEmail from '../components/legal/ContactEmail.astro';
 import { SOCIETE, estPlaceholder } from '../config/societe';
 import { lien } from '../lib/routes';
 const s = SOCIETE;
@@ -33,7 +34,7 @@ const s = SOCIETE;
     <dt>Code APE</dt>
     <dd>{s.codeApe}</dd>
     <dt>Contact</dt>
-    <dd><a href={`mailto:${s.emailContact}`}>{s.emailContact}</a></dd>
+    <dd><ContactEmail /></dd>
     <dt>Directeur de la publication</dt>
     <dd>{estPlaceholder(s.directeurPublication) ? <AFaire quoi="nom et prénom du président" /> : s.directeurPublication}</dd>
   </dl>
