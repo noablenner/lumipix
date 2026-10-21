@@ -235,5 +235,33 @@ const collectionsBoutique = defineCollection({
   }),
 });
 
+/*
+ * Guides (blog et tutoriels SEO, brief §8) : /guides/[slug].
+ * Un mot-clé principal par guide, jamais partagé avec une autre page.
+ */
+const guides = defineCollection({
+  loader: glob({ pattern: '**/[^_]*.md', base: './src/content/guides' }),
+  schema: z.strictObject({
+    slug,
+    /** Titre affiché (H1), contient le mot-clé principal. */
+    titre: z.string().min(1),
+    /** Chapeau sous le titre : premier paragraphe, contient le mot-clé principal. */
+    chapo: z.string().min(1),
+    publie_le: z.iso.date(),
+    mis_a_jour_le: z.iso.date().optional(),
+    /** Ordre d'affichage dans les listes (1 = en premier). */
+    ordre: z.number().int().default(0),
+    /** Scène pixel art de l'image de partage et de la vignette. */
+    scene: z.enum(['coucher-soleil', 'ciel-etoile', 'horloge', 'coeur', 'chat', 'fusee', 'vague-neon']),
+    /** Texte de l'image de partage (majuscules sans accent, 4 lignes max). */
+    og_lignes: z.array(z.string().regex(/^[A-Z0-9 :!-]+$/)).min(1).max(4),
+    /** Image principale (« slug-produit/fichier.jpg » dans assets/produits/), alt avec le mot-clé principal. */
+    visuel: media.optional(),
+    /** Affiche la galerie des modèles téléchargeables de l'éditeur. */
+    modeles: z.boolean().default(false),
+    seo,
+  }),
+});
+
 /** Le corps Markdown d'une collection sert de texte SEO de la page. */
-export const collections = { produits, collections: collectionsBoutique };
+export const collections = { produits, collections: collectionsBoutique, guides };

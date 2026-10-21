@@ -30,6 +30,7 @@ import { formatDelai, formatPrix } from '../../lib/format';
 import { SCENES, SCENES_VITRINE } from '../../lib/pixel/scenes';
 import { jsonLdFaq, jsonLdFilAriane, jsonLdProduit } from '../../lib/seo';
 import { BOUTIQUE } from '../../config/boutique';
+import { lien } from '../../lib/routes';
 
 export const getStaticPaths = (async () => {
   const produits = await getProduitsPublies();
@@ -241,6 +242,11 @@ const brouillon = produit.statut !== 'actif';
                 ))}
               </ul>
               {estCadre && <p class="texte-doux">À brancher sur un adaptateur USB 5 V / 2 A minimum.</p>}
+              {estCadre && (
+                <p>
+                  Prise en main pas à pas : <a href={lien('/guides/idotmatrix-tuto')}>notre tuto de l’application iDotMatrix</a>.
+                </p>
+              )}
             </section>
           )
         }

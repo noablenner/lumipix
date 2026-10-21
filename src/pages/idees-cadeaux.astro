@@ -1,0 +1,205 @@
+---
+/*
+ * Page saisonnière idées cadeaux (brief §1 et §8). Mot-clé principal :
+ * « idée cadeau gamer », secondaire « cadeau geek original ».
+ * « Cadeau gamer moins de 50 euros » (brief) n'est pas visé : aucun produit
+ * du catalogue n'est sous 50 €, la page ne tiendrait pas sa promesse.
+ * Prix et délais viennent de la fiche produit, jamais écrits en dur.
+ */
+import { Picture } from 'astro:assets';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { imageProduit } from '../lib/medias';
+import FilAriane from '../components/FilAriane.astro';
+import Accordeon from '../components/Accordeon.astro';
+import Bouton from '../components/Bouton.astro';
+import ProduitCarte from '../components/produit/ProduitCarte.astro';
+import { getProduitPhare, lienProduit, variantesAvecPrix } from '../lib/catalogue';
+import { formatDelai, formatPrix } from '../lib/format';
+import { lien } from '../lib/routes';
+import { jsonLdFaq, jsonLdFilAriane } from '../lib/seo';
+import { BOUTIQUE } from '../config/boutique';
+
+const phare = await getProduitPhare();
+const visuel = phare ? await imageProduit(phare.slug, '03-cadeau.jpg') : undefined;
+const variantes = phare ? variantesAvecPrix(phare) : [];
+const v32 = variantes.find((v) => v.id.startsWith('32'));
+const v64 = variantes.find((v) => v.id.startsWith('64'));
+const delai = phare ? formatDelai(phare.delai_livraison.min_jours_ouvres, phare.delai_livraison.max_jours_ouvres) : undefined;
+const ariane = [
+  { nom: 'Accueil', chemin: '/' },
+  { nom: 'Idées cadeaux', chemin: '/idees-cadeaux' },
+];
+
+const faq = [
+  ...(delai
+    ? [
+        {
+          question: 'Combien de temps faut-il pour recevoir le cadeau ?',
+          reponse: `Compte ${delai} après la commande, en France métropolitaine${phare?.frais_de_port === 0 ? ', livraison offerte' : ''}. Avant une fête, commande avec de la marge.`,
+        },
+      ]
+    : []),
+  {
+    question: 'Faut-il savoir dessiner pour en profiter ?',
+    reponse:
+      'Non. Le cadre affiche aussi des animations toutes prêtes, l’heure et du texte défilant. Et pour dessiner, il suffit de partir d’un modèle et de le modifier.',
+  },
+  {
+    question: 'Et si le cadeau ne convient pas ?',
+    reponse: `L’acheteur dispose de ${BOUTIQUE.delaiRetractationJours} jours après la réception pour exercer son droit de rétractation. Les conditions sont détaillées sur la page retours et rétractation.`,
+  },
+];
+---
+
+<BaseLayout
+  title="Idée cadeau gamer : un cadre pixel art LED à personnaliser | Lumipix"
+  description="Idée cadeau gamer et cadeau geek original : un cadre pixel art LED qui affiche ses propres dessins et animations. Conseils pour bien choisir et offrir à temps."
+  imageOg="/og/idees-cadeaux.png"
+  jsonLd={[jsonLdFilAriane(ariane), jsonLdFaq(faq)]}
+>
+  <article class="conteneur cadeaux">
+    <FilAriane elements={ariane} />
+    <h1>Une idée cadeau gamer qui sort de l’écran</h1>
+    <p class="cadeaux-chapo">
+      Tu cherches une idée cadeau gamer qui ne finira pas au fond d’un tiroir ? Un objet qu’on pose sur le bureau, qu’on
+      personnalise et qu’on remarque dès qu’on entre dans la pièce. C’est tout l’esprit du cadre pixel art LED : un cadeau
+      geek original, qui affiche les dessins, les animations et l’heure de celui ou celle qui le reçoit.
+    </p>
+
+    {
+      visuel && (
+        <Picture
+          class="cadeaux-visuel"
+          src={visuel}
+          alt="Idée cadeau gamer : cadre pixel art LED affichant un cœur, posé près d'un sapin et de cadeaux"
+          formats={['avif', 'webp']}
+          widths={[480, 800]}
+          sizes="(min-width: 50rem) 40rem, 100vw"
+          loading="eager"
+          fetchpriority="high"
+        />
+      )
+    }
+
+    <div class="cadeaux-texte">
+      <h2>Pourquoi ça plaît aux gamers</h2>
+      <ul>
+        <li>
+          <strong>Il s’intègre au setup.</strong> Posé à côté de l’écran ou accroché au mur, il apporte une lumière
+          d’ambiance et une touche rétro arcade sans encombrer le bureau.
+        </li>
+        <li>
+          <strong>Il change quand on veut.</strong> Un pixel art le matin, l’heure la journée, un pseudo qui défile pendant
+          un live : tout se pilote depuis le téléphone, en Bluetooth.
+        </li>
+        <li>
+          <strong>Il est vraiment personnel.</strong> On y affiche ses propres créations, pas seulement des images toutes
+          faites.
+        </li>
+      </ul>
+
+      <h2>32x32 ou 64x64 : lequel offrir ?</h2>
+      <ul>
+        {
+          v32 && (
+            <li>
+              <strong>32x32 ({formatPrix(v32.prix_ttc)})</strong> : 1 024 LED, idéal pour un bureau et pour débuter en pixel
+              art. Le bon choix pour un ado ou une première découverte.
+            </li>
+          )
+        }
+        {
+          v64 && (
+            <li>
+              <strong>64x64 ({formatPrix(v64.prix_ttc)})</strong> : 4 096 LED, des images plus détaillées et un format
+              26 x 26 cm qui fait office de tableau au mur. Pour un passionné de rétro ou un setup déjà bien équipé.
+            </li>
+          )
+        }
+      </ul>
+
+      <h2>L’astuce pour un cadeau encore plus personnel</h2>
+      <p>
+        Prépare un dessin avant d’offrir : un cœur, son animal, ses initiales ou le logo de son équipe imaginaire.
+        L’<a href={lien(`/produits/${BOUTIQUE.produitPhare}#editeur`)}>éditeur pixel art</a> fonctionne dans le navigateur, sans
+        rien installer. Exporte le dessin en PNG pour l’afficher sur le cadre le jour J, ou envoie le lien de partage pour une
+        surprise à distance. Besoin d’idées ? Notre guide <a href={lien('/guides/pixel-art-32x32')}>pixel art 32x32</a>
+        propose six modèles faciles à télécharger.
+      </p>
+
+      <h2>Offrir à temps</h2>
+      <p>
+        {delai && <>Le cadre est livré en {delai} en France métropolitaine. </>}
+        Pour un anniversaire ou les fêtes de fin d’année, commande avec quelques jours de marge en plus : les transporteurs
+        sont plus chargés en décembre.
+      </p>
+    </div>
+
+    {
+      phare && (
+        <section class="cadeaux-produit" aria-labelledby="t-produit">
+          <h2 id="t-produit">Le cadeau</h2>
+          <div class="cadeaux-produit-grille">
+            <ProduitCarte produit={phare} />
+            <div>
+              <p>Livré avec son câble USB et son pied support, prêt à être déballé et allumé.</p>
+              <Bouton href={lienProduit(phare)} taille="grand">
+                Choisir sa taille
+              </Bouton>
+            </div>
+          </div>
+        </section>
+      )
+    }
+
+    <section class="cadeaux-faq" aria-labelledby="t-faq">
+      <h2 id="t-faq">Questions avant d’offrir</h2>
+      <Accordeon elements={faq} />
+    </section>
+  </article>
+</BaseLayout>
+
+<style>
+  .cadeaux {
+    padding-block: var(--e-5) var(--e-8);
+  }
+  .cadeaux h1 {
+    font-size: var(--t-2xl);
+    max-width: var(--largeur-texte);
+  }
+  .cadeaux-chapo {
+    font-size: var(--t-l);
+    max-width: var(--largeur-texte);
+  }
+  .cadeaux-texte {
+    max-width: var(--largeur-texte);
+  }
+  .cadeaux :global(.cadeaux-visuel) {
+    display: block;
+    width: 100%;
+    max-width: 40rem;
+    height: auto;
+    border: var(--b-pixel) solid var(--c-bordure);
+  }
+  .cadeaux-texte h2 {
+    font-size: var(--t-xl);
+    margin-top: var(--e-7);
+  }
+  .cadeaux-texte li {
+    margin-bottom: var(--e-2);
+  }
+  .cadeaux-produit,
+  .cadeaux-faq {
+    margin-top: var(--e-8);
+  }
+  .cadeaux-produit-grille {
+    display: grid;
+    gap: var(--e-5);
+    align-items: center;
+  }
+  @media (min-width: 48rem) {
+    .cadeaux-produit-grille {
+      grid-template-columns: 22rem 1fr;
+    }
+  }
+</style>

@@ -96,3 +96,20 @@ export function jsonLdProduit(p: ProduitPublic, image: string) {
     // AggregateRating : uniquement quand de vrais avis vérifiés existeront (phase 5).
   };
 }
+
+/** Article (guides). Auteur : la marque, jamais une personne (brief §10). */
+export function jsonLdArticle(a: { titre: string; description: string; chemin: string; image: string; publie: string; modifie?: string }) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Article',
+    headline: a.titre,
+    description: a.description,
+    image: url(a.image),
+    datePublished: a.publie,
+    dateModified: a.modifie ?? a.publie,
+    inLanguage: 'fr-FR',
+    mainEntityOfPage: url(a.chemin),
+    author: { '@id': url('/#organisation') },
+    publisher: { '@id': url('/#organisation') },
+  };
+}

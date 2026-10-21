@@ -7,6 +7,15 @@ import { BOUTIQUE } from '../config/boutique';
 /* Seuls les liens vers des pages déjà construites sont affichés. */
 const groupes = [
   {
+    titre: 'Découvrir',
+    liens: [
+      { href: '/guides', label: 'Guides et tutos' },
+      { href: '/guides/idotmatrix-tuto', label: 'Tuto iDotMatrix' },
+      { href: '/guides/pixel-art-32x32', label: 'Pixel art 32x32' },
+      { href: '/idees-cadeaux', label: 'Idées cadeaux' },
+    ],
+  },
+  {
     titre: 'Aide',
     liens: [
       { href: '/faq', label: 'FAQ' },
@@ -25,7 +34,7 @@ const groupes = [
     ],
   },
 ]
-  .map((g) => ({ ...g, liens: g.liens.filter((l) => routeExiste(l.href)) }))
+  .map((g) => ({ ...g, liens: g.liens.filter((l) => routeExiste(l.href) || l.href.startsWith('/guides/')) }))
   .filter((g) => g.liens.length > 0);
 
 const annee = new Date().getFullYear();
@@ -71,7 +80,7 @@ const annee = new Date().getFullYear();
   }
   @media (min-width: 48rem) {
     .pied-grille {
-      grid-template-columns: 2fr 1fr 1fr;
+      grid-template-columns: 2fr 1fr 1fr 1fr;
     }
   }
   .pied-marque p {

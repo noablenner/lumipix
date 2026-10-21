@@ -18,6 +18,7 @@ const liens = [
   ...collections.map((c) => ({ href: `/collections/${c.data.slug}`, label: c.data.nom })),
   ...[
     { href: '/idees-cadeaux', label: 'Idées cadeaux' },
+    { href: '/guides', label: 'Guides' },
     { href: '/faq', label: 'FAQ' },
   ].filter((l) => routeExiste(l.href)),
 ];

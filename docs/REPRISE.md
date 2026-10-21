@@ -17,7 +17,7 @@ Dernière mise à jour : 16/10/2026. À lire en premier, avant d'écrire du code
 - Fait en avance : pages légales (avec passages « À compléter »), page `/panier`.
 - Hébergement : Worker Cloudflare avec fichiers statiques (`wrangler.jsonc`, `src/worker.ts`), redéployé à chaque push sur `main`, cible `CIBLE_DEPLOIEMENT=preprod` (brouillons visibles et achetables, tout en noindex).
 - Base D1 `lumipix` reliée (binding `DB`) ; les tables se créent seules au premier appel.
-- Le cadre est encore `statut: brouillon` : achetable en préprod seulement, absent en production.
+- Le cadre est `statut: actif` depuis le 21/10/2026. Guides, idées cadeaux et FAQ en ligne (phase 6 SEO faite en avance). Le site reste en noindex tant que le build Cloudflare est en `preprod`.
 - Dépôt public : décision définitive de Noa, ne plus en parler.
 - Noa ne veut pas de détails administratifs : aller droit au but, listes courtes.
 

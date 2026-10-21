@@ -1,0 +1,56 @@
+---
+import { lien } from '../lib/routes';
+import { lienGuide, type Guide } from '../lib/guides';
+
+interface Props {
+  guide: Guide;
+  niveauTitre?: 'h2' | 'h3';
+}
+const { guide, niveauTitre: Titre = 'h3' } = Astro.props;
+const { data } = guide;
+---
+
+<article class="carte-guide">
+  <img src={lien(`/scenes/${data.scene}-32.svg`)} alt="" width="64" height="64" loading="lazy" decoding="async" />
+  <div>
+    <Titre class="carte-guide-titre"><a class="lien-carte" href={lien(lienGuide(data))}>{data.titre}</a></Titre>
+    <p class="texte-doux">{data.seo.meta_description}</p>
+  </div>
+</article>
+
+<style>
+  .carte-guide {
+    position: relative;
+    display: grid;
+    grid-template-columns: 64px 1fr;
+    gap: var(--e-3);
+    align-items: start;
+    height: 100%;
+    padding: var(--e-4);
+    background: var(--c-surface);
+    border: var(--b-pixel) solid var(--c-bordure);
+    transition: border-color var(--d-moyen) var(--pas);
+  }
+  .carte-guide:hover,
+  .carte-guide:focus-within {
+    border-color: var(--c-cyan);
+  }
+  .carte-guide-titre {
+    margin: 0 0 var(--e-2);
+    font-size: var(--t-l);
+  }
+  .carte-guide-titre a {
+    color: var(--c-texte);
+    text-decoration: none;
+  }
+  /* toute la carte est cliquable */
+  .lien-carte::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+  }
+  .carte-guide p {
+    margin: 0;
+    font-size: var(--t-s);
+  }
+</style>

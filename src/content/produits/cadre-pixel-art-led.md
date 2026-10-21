@@ -1,7 +1,7 @@
 ---
 id: cadre-pixel-art-led
 slug: cadre-pixel-art-led
-statut: brouillon
+statut: actif
 nom: "Cadre Pixel Art LED"
 sous_titre: "Ton pixel art, en vrai, sur ton bureau"
 description_courte: "Le cadre pixel art LED connecté en Bluetooth qui affiche ton pixel art, tes animations et l'heure. En 32x32 ou 64x64, livraison offerte."

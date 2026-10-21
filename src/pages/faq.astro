@@ -1,0 +1,177 @@
+---
+/*
+ * FAQ générale (brief §4 et §8), données structurées FAQPage.
+ * Réponses factuelles uniquement : délais, prix et frais viennent du catalogue
+ * et de la configuration, les questions sur le cadre de sa fiche produit.
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import FilAriane from '../components/FilAriane.astro';
+import Accordeon from '../components/Accordeon.astro';
+import { getProduitPhare } from '../lib/catalogue';
+import { formatDelai, formatPrix } from '../lib/format';
+import { lien } from '../lib/routes';
+import { jsonLdFaq, jsonLdFilAriane } from '../lib/seo';
+import { BOUTIQUE } from '../config/boutique';
+
+const phare = await getProduitPhare();
+const delai = phare ? formatDelai(phare.delai_livraison.min_jours_ouvres, phare.delai_livraison.max_jours_ouvres) : undefined;
+
+type QR = { question: string; reponse: string };
+const rubriques: { titre: string; id: string; questions: QR[]; lien?: { href: string; texte: string } }[] = [
+  {
+    titre: 'Commande et paiement',
+    id: 'commande',
+    questions: [
+      {
+        question: 'Comment passer commande ?',
+        reponse:
+          'Choisis ta variante sur la page du produit et ajoute-la au panier. Depuis le panier, le bouton « Paiement sécurisé » t’emmène sur la page de paiement, où tu indiques ton adresse de livraison, ton email et ton téléphone, puis tu acceptes les conditions générales de vente.',
+      },
+      {
+        question: 'Comment se passe le paiement ?',
+        reponse:
+          'Le paiement se fait sur la page sécurisée de Stripe, notre prestataire de paiement, par carte bancaire. Tes données bancaires sont saisies chez Stripe : Lumipix ne les voit jamais et ne les conserve pas.',
+      },
+      {
+        question: 'Où saisir un code promo ?',
+        reponse: 'Sur la page de paiement, dans le récapitulatif de ta commande.',
+      },
+      {
+        question: 'Est-ce que je reçois une facture ?',
+        reponse: 'Oui, une facture est générée automatiquement pour chaque commande, avec le détail du prix hors taxes, de la TVA et du prix TTC.',
+      },
+      {
+        question: 'Les prix sont-ils TTC ?',
+        reponse: 'Oui, tous les prix sont affichés en euros, toutes taxes comprises (TVA 20 % incluse). Les frais de port éventuels sont indiqués avant le paiement.',
+      },
+    ],
+  },
+  {
+    titre: 'Livraison',
+    id: 'livraison',
+    lien: { href: '/livraison', texte: 'Tout savoir sur la livraison' },
+    questions: [
+      {
+        question: 'Où livrez-vous ?',
+        reponse: 'En France métropolitaine uniquement pour le moment.',
+      },
+      ...(phare && delai
+        ? [
+            {
+              question: 'Combien coûte la livraison et combien de temps prend-elle ?',
+              reponse: `Pour le ${phare.nom.toLowerCase()}, la livraison est ${phare.frais_de_port === 0 ? 'offerte' : `facturée ${formatPrix(phare.frais_de_port)}`} et prend ${delai} après la commande.`,
+            },
+          ]
+        : []),
+      {
+        question: 'Comment suivre ma commande ?',
+        reponse:
+          'Garde ton numéro de commande, affiché après le paiement. Dès l’expédition, tu reçois le numéro de suivi du colis par email. Une commande de plusieurs produits peut arriver en plusieurs colis, chacun avec son suivi.',
+      },
+    ],
+  },
+  {
+    titre: 'Retours et rétractation',
+    id: 'retours',
+    lien: { href: '/retours', texte: 'Voir la procédure de retour' },
+    questions: [
+      {
+        question: 'Puis-je changer d’avis après l’achat ?',
+        reponse: `Oui. Tu disposes de ${BOUTIQUE.delaiRetractationJours} jours après la réception de ta commande pour exercer ton droit de rétractation, sans avoir à te justifier.`,
+      },
+      {
+        question: 'Comment retourner un article ?',
+        reponse:
+          'Préviens-nous dans le délai de rétractation en suivant la procédure de la page retours et rétractation. L’adresse de retour t’est communiquée après validation de ta demande.',
+      },
+    ],
+  },
+  ...(phare
+    ? [
+        {
+          titre: `Le ${phare.nom.toLowerCase()}`,
+          id: 'cadre',
+          lien: { href: '/guides/idotmatrix-tuto', texte: 'Lire le tuto de l’application iDotMatrix' },
+          questions: phare.faq,
+        },
+        {
+          titre: 'L’éditeur pixel art',
+          id: 'editeur',
+          lien: { href: '/guides/pixel-art-32x32', texte: 'Méthode et modèles de pixel art 32x32' },
+          questions: [
+            {
+              question: 'Faut-il créer un compte pour utiliser l’éditeur ?',
+              reponse: 'Non. L’éditeur fonctionne directement dans le navigateur, sans inscription et sans rien installer.',
+            },
+            {
+              question: 'Mon dessin est-il sauvegardé ?',
+              reponse:
+                'Ton brouillon est conservé dans ton navigateur. Pour le garder ailleurs, exporte-le en PNG ou copie son lien de partage : le dessin est entièrement contenu dans le lien.',
+            },
+            {
+              question: 'Comment afficher mon dessin sur le cadre ?',
+              reponse:
+                'Exporte-le en PNG depuis l’éditeur, à la taille de ton cadre (32x32 ou 64x64), puis importe ce fichier dans l’application iDotMatrix.',
+            },
+          ],
+        },
+      ]
+    : []),
+];
+
+const ariane = [
+  { nom: 'Accueil', chemin: '/' },
+  { nom: 'FAQ', chemin: '/faq' },
+];
+---
+
+<BaseLayout
+  title="FAQ : commande, livraison, retours et cadre pixel art | Lumipix"
+  description="Les réponses aux questions fréquentes sur Lumipix : paiement sécurisé, livraison en France, retours sous 14 jours, utilisation du cadre pixel art et de l'éditeur."
+  jsonLd={[jsonLdFilAriane(ariane), jsonLdFaq(rubriques.flatMap((r) => r.questions))]}
+>
+  <div class="conteneur faq">
+    <FilAriane elements={ariane} />
+    <h1>Questions fréquentes</h1>
+    <nav class="faq-sommaire" aria-label="Rubriques">
+      {rubriques.map((r) => <a href={`#${r.id}`}>{r.titre}</a>)}
+    </nav>
+    {
+      rubriques.map((r) => (
+        <section id={r.id} aria-labelledby={`t-${r.id}`}>
+          <h2 id={`t-${r.id}`}>{r.titre}</h2>
+          <Accordeon elements={r.questions} />
+          {r.lien && (
+            <p>
+              <a href={lien(r.lien.href)}>{r.lien.texte}</a>
+            </p>
+          )}
+        </section>
+      ))
+    }
+  </div>
+</BaseLayout>
+
+<style>
+  .faq {
+    padding-block: var(--e-5) var(--e-8);
+    max-width: 52rem;
+  }
+  .faq-sommaire {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--e-2) var(--e-4);
+    margin-block: var(--e-4) var(--e-6);
+  }
+  .faq-sommaire a {
+    display: inline-block;
+    padding-block: var(--e-2);
+  }
+  .faq section {
+    margin-top: var(--e-7);
+    scroll-margin-top: 80px;
+  }
+  .faq h2 {
+    font-size: var(--t-xl);
+  }
+</style>

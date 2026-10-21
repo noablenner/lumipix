@@ -1,0 +1,268 @@
+---
+/*
+ * Guide (brief §8) : article SEO, un mot-clé principal par guide (title, H1,
+ * URL, chapeau). Maillage : lien vers le produit phare et vers les autres guides.
+ */
+import type { GetStaticPaths } from 'astro';
+import { render } from 'astro:content';
+import { Picture } from 'astro:assets';
+import { imageProduit } from '../../lib/medias';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FilAriane from '../../components/FilAriane.astro';
+import Bouton from '../../components/Bouton.astro';
+import GuideCarte from '../../components/GuideCarte.astro';
+import ProduitCarte from '../../components/produit/ProduitCarte.astro';
+import { getProduitPhare, lienProduit } from '../../lib/catalogue';
+import { getGuides, lienGuide, type Guide } from '../../lib/guides';
+import { MODELES, dessinerModele, type NomModele } from '../../lib/pixel/modeles';
+import { encoderDessin } from '../../lib/pixel/dessin';
+import { lien } from '../../lib/routes';
+import { jsonLdArticle, jsonLdFilAriane } from '../../lib/seo';
+
+export const getStaticPaths = (async () => {
+  const guides = await getGuides();
+  return guides.map((guide) => ({ params: { slug: guide.data.slug }, props: { guide } }));
+}) satisfies GetStaticPaths;
+
+interface Props {
+  guide: Guide;
+}
+const { guide } = Astro.props;
+const { data } = guide;
+const { Content } = await render(guide);
+const chemin = lienGuide(data);
+const og = `/og/guide-${data.slug}.png`;
+const ariane = [
+  { nom: 'Accueil', chemin: '/' },
+  { nom: 'Guides', chemin: '/guides' },
+  { nom: data.titre.split(' : ')[0]!, chemin },
+];
+const [dossierVisuel, fichierVisuel] = data.visuel?.src.split('/') ?? [];
+const visuel = dossierVisuel && fichierVisuel ? await imageProduit(dossierVisuel, fichierVisuel) : undefined;
+const autres = (await getGuides()).filter((g) => g.data.slug !== data.slug);
+const phare = await getProduitPhare();
+const date = (iso: string) => new Date(iso).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' });
+
+const modeles = data.modeles
+  ? (Object.keys(MODELES) as NomModele[]).map((nom) => ({
+      nom,
+      libelle: MODELES[nom],
+      editeur: phare ? `${lienProduit(phare)}?dessin=${encoderDessin(dessinerModele(nom, 32))}#editeur` : undefined,
+    }))
+  : [];
+---
+
+<BaseLayout
+  title={data.seo.title}
+  description={data.seo.meta_description}
+  imageOg={og}
+  typeOg="article"
+  jsonLd={[
+    jsonLdArticle({
+      titre: data.titre,
+      description: data.seo.meta_description,
+      chemin,
+      image: og,
+      publie: data.publie_le,
+      modifie: data.mis_a_jour_le,
+    }),
+    jsonLdFilAriane(ariane),
+  ]}
+>
+  <article class="conteneur guide">
+    <FilAriane elements={ariane} />
+    <header class="guide-entete">
+      <h1>{data.titre}</h1>
+      <p class="texte-doux guide-date">
+        Publié le <time datetime={data.publie_le}>{date(data.publie_le)}</time>
+        {data.mis_a_jour_le && <>, mis à jour le <time datetime={data.mis_a_jour_le}>{date(data.mis_a_jour_le)}</time></>}
+      </p>
+      <p class="guide-chapo">{data.chapo}</p>
+      {
+        visuel && data.visuel && (
+          <Picture
+            class="guide-visuel"
+            src={visuel}
+            alt={data.visuel.alt}
+            formats={['avif', 'webp']}
+            widths={[480, 800, 1100]}
+            sizes="(min-width: 50rem) 46rem, 100vw"
+            loading="eager"
+            fetchpriority="high"
+          />
+        )
+      }
+    </header>
+
+    <div class="guide-texte">
+      <Content />
+    </div>
+
+    {
+      modeles.length > 0 && (
+        <section class="guide-modeles" aria-labelledby="t-modeles">
+          <h2 id="t-modeles">Les 6 modèles à télécharger</h2>
+          <p class="texte-doux">
+            Modèles originaux Lumipix, libres pour un usage personnel. PNG en 32x32 ou 64x64, à importer tels quels dans
+            l’application de ton cadre.
+          </p>
+          <ul>
+            {modeles.map((m) => (
+              <li>
+                <img
+                  src={lien(`/guides/modeles/${m.nom}-32.png`)}
+                  alt={`Modèle de pixel art 32x32 : ${m.libelle.toLowerCase()}`}
+                  width="128"
+                  height="128"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <p class="guide-modele-nom">{m.libelle}</p>
+                <p class="guide-modele-liens">
+                  <a href={lien(`/guides/modeles/${m.nom}-32.png`)} download={`lumipix-${m.nom}-32x32.png`}>
+                    PNG 32x32
+                  </a>
+                  <a href={lien(`/guides/modeles/${m.nom}-64.png`)} download={`lumipix-${m.nom}-64x64.png`}>
+                    PNG 64x64
+                  </a>
+                  {m.editeur && <a href={m.editeur}>Modifier dans l’éditeur</a>}
+                </p>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+
+    {
+      phare && (
+        <aside class="guide-produit" aria-labelledby="t-produit">
+          <div>
+            <h2 id="t-produit">Affiche ton pixel art en vrai</h2>
+            <p>
+              Le {phare.nom.toLowerCase()} affiche tes dessins, tes animations et l’heure, en 32x32 ou 64x64. Tu peux tester
+              tes créations dans l’éditeur avant même de le recevoir.
+            </p>
+            <Bouton href={lienProduit(phare)}>Découvrir le cadre</Bouton>
+          </div>
+          <ProduitCarte produit={phare} scene={data.scene} />
+        </aside>
+      )
+    }
+
+    {
+      autres.length > 0 && (
+        <section class="guide-autres" aria-labelledby="t-autres">
+          <h2 id="t-autres">À lire aussi</h2>
+          <ul>
+            {autres.map((g) => (
+              <li>
+                <GuideCarte guide={g} />
+              </li>
+            ))}
+          </ul>
+        </section>
+      )
+    }
+  </article>
+</BaseLayout>
+
+<style>
+  .guide {
+    padding-block: var(--e-5) var(--e-8);
+  }
+  .guide-entete,
+  .guide-texte {
+    max-width: var(--largeur-texte);
+  }
+  .guide h1 {
+    font-size: var(--t-2xl);
+  }
+  .guide-entete :global(.guide-visuel) {
+    display: block;
+    width: 100%;
+    height: auto;
+    margin-top: var(--e-4);
+    border: var(--b-pixel) solid var(--c-bordure);
+  }
+  .guide-date {
+    margin: 0;
+    font-size: var(--t-s);
+  }
+  .guide-chapo {
+    font-size: var(--t-l);
+    margin-top: var(--e-4);
+  }
+  .guide-texte :global(h2) {
+    font-size: var(--t-xl);
+    margin-top: var(--e-7);
+  }
+  .guide-texte :global(h3) {
+    font-size: var(--t-l);
+    margin-top: var(--e-5);
+  }
+  .guide-texte :global(li) {
+    margin-bottom: var(--e-2);
+  }
+  .guide-modeles,
+  .guide-produit,
+  .guide-autres {
+    margin-top: var(--e-8);
+  }
+  .guide-modeles ul,
+  .guide-autres ul {
+    display: grid;
+    gap: var(--e-4);
+    margin: var(--e-4) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .guide-modeles ul {
+    grid-template-columns: repeat(auto-fill, minmax(10rem, 1fr));
+  }
+  .guide-modeles li {
+    padding: var(--e-3);
+    background: var(--c-surface);
+    border: var(--b-pixel) solid var(--c-bordure);
+    text-align: center;
+  }
+  .guide-modeles img {
+    width: 128px;
+    height: 128px;
+    image-rendering: pixelated;
+    background: #000;
+  }
+  .guide-modele-nom {
+    margin: var(--e-2) 0;
+    font-weight: 700;
+  }
+  .guide-modele-liens {
+    display: grid;
+    gap: var(--e-1);
+    margin: 0;
+    font-size: var(--t-s);
+  }
+  .guide-modele-liens a {
+    display: block;
+    padding-block: var(--e-1);
+  }
+  .guide-produit {
+    display: grid;
+    gap: var(--e-5);
+    align-items: center;
+    padding: var(--e-5);
+    background: var(--c-fond-2);
+    border: var(--b-pixel) solid var(--c-bordure-ui);
+  }
+  .guide-produit h2 {
+    margin-top: 0;
+  }
+  @media (min-width: 48rem) {
+    .guide-produit {
+      grid-template-columns: 3fr 2fr;
+    }
+    .guide-autres ul {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

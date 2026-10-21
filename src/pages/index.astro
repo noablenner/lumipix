@@ -21,11 +21,14 @@ import { formatDelai, formatPrix } from '../lib/format';
 import { lien } from '../lib/routes';
 import { imageProduit } from '../lib/medias';
 import VideoProduit from '../components/produit/VideoProduit.astro';
+import GuideCarte from '../components/GuideCarte.astro';
+import { getGuides } from '../lib/guides';
 import { jsonLdOrganisation, jsonLdSiteWeb } from '../lib/seo';
 import { BOUTIQUE } from '../config/boutique';
 import type { NomScene } from '../lib/pixel/scenes';
 
 const phare = await getProduitPhare();
+const guides = await getGuides();
 // Section « Collections » masquée tant que BOUTIQUE.collectionsEnAvant est à false (un seul produit)
 const collections = BOUTIQUE.collectionsEnAvant ? await getCollectionsVisibles() : [];
 const variantes = phare ? variantesAvecPrix(phare) : [];
@@ -255,6 +258,22 @@ const faq = [
 
   <SeparateurPixels />
 
+  {
+    guides.length > 0 && (
+      <section class="conteneur section" aria-labelledby="t-guides">
+        <h2 id="t-guides">Guides pixel art</h2>
+        <p class="texte-doux">Dessiner ton premier pixel art, l’afficher sur le cadre, l’intégrer à ton setup : nos tutos pas à pas.</p>
+        <ul class="liste-guides revele-groupe">
+          {guides.map((g) => (
+            <li>
+              <GuideCarte guide={g} />
+            </li>
+          ))}
+        </ul>
+      </section>
+    )
+  }
+
   <section class="conteneur section faq-courte revele" aria-labelledby="t-faq">
     <h2 id="t-faq">Questions fréquentes</h2>
     <Accordeon elements={faq} />
@@ -262,6 +281,18 @@ const faq = [
 </BaseLayout>
 
 <style>
+  .liste-guides {
+    display: grid;
+    gap: var(--e-4);
+    margin: var(--e-4) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 56rem) {
+    .liste-guides {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
   .section {
     margin-top: var(--e-9);
   }

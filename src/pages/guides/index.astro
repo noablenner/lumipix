@@ -1,0 +1,59 @@
+---
+/* Liste des guides : point d'entrée du maillage interne vers les articles. */
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import FilAriane from '../../components/FilAriane.astro';
+import GuideCarte from '../../components/GuideCarte.astro';
+import { getGuides } from '../../lib/guides';
+import { jsonLdFilAriane } from '../../lib/seo';
+
+const guides = await getGuides();
+const ariane = [
+  { nom: 'Accueil', chemin: '/' },
+  { nom: 'Guides', chemin: '/guides' },
+];
+---
+
+<BaseLayout
+  title="Guides pixel art, tutos et idées pour ton setup | Lumipix"
+  description="Les guides Lumipix : tutoriel de l'application iDotMatrix, méthode et modèles de pixel art, idées concrètes pour décorer ton setup gaming."
+  jsonLd={jsonLdFilAriane(ariane)}
+>
+  <div class="conteneur guides">
+    <FilAriane elements={ariane} />
+    <h1>Guides</h1>
+    <p class="texte-doux guides-intro">
+      Des tutos pas à pas et des idées concrètes pour dessiner ton pixel art, l’afficher sur ton cadre LED et soigner ton
+      setup.
+    </p>
+    <ul>
+      {
+        guides.map((g) => (
+          <li>
+            <GuideCarte guide={g} niveauTitre="h2" />
+          </li>
+        ))
+      }
+    </ul>
+  </div>
+</BaseLayout>
+
+<style>
+  .guides {
+    padding-block: var(--e-5) var(--e-8);
+  }
+  .guides-intro {
+    max-width: var(--largeur-texte);
+  }
+  .guides ul {
+    display: grid;
+    gap: var(--e-4);
+    margin: var(--e-5) 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  @media (min-width: 48rem) {
+    .guides ul {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+</style>

@@ -6,8 +6,9 @@ import type { APIRoute } from 'astro';
 import { SOCIETE } from '../config/societe';
 import { getCollectionsVisibles, getProduitsPublies } from '../lib/catalogue';
 import { estPrevisualisation, routeExiste } from '../lib/routes';
+import { getGuides, lienGuide } from '../lib/guides';
 
-const PAGES_EDITORIALES = ['/idees-cadeaux', '/faq', '/livraison', '/retours', '/cgv', '/mentions-legales', '/confidentialite', '/contact'];
+const PAGES_EDITORIALES = ['/guides', '/idees-cadeaux', '/faq', '/livraison', '/retours', '/cgv', '/mentions-legales', '/confidentialite', '/contact'];
 
 export const GET: APIRoute = async () => {
   const chemins: string[] = [];
@@ -16,6 +17,7 @@ export const GET: APIRoute = async () => {
     for (const p of await getProduitsPublies()) chemins.push(`/produits/${p.slug}`);
     for (const c of await getCollectionsVisibles()) chemins.push(`/collections/${c.data.slug}`);
     chemins.push(...PAGES_EDITORIALES.filter(routeExiste));
+    for (const g of await getGuides()) chemins.push(lienGuide(g.data));
   }
   const corps = chemins.map((c) => `  <url><loc>${new URL(c, SOCIETE.urlSite).href}</loc></url>`).join('\n');
   return new Response(
